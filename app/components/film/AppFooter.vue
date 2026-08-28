@@ -15,7 +15,7 @@ const currentYear = new Date().getFullYear()
         rel="noopener noreferrer"
         class="transition-colors hover:text-amber-700 focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-700"
       >
-        SOURCE
+        GitHub
       </a>
     </p>
   </footer>
