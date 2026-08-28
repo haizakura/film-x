@@ -1,0 +1,13 @@
+.nuxt
+.output
+node_modules
+.pnpm-store
+.data
+.DS_Store
+*.log
+.env
+.env.*
+!.env.example
+.codex/config.toml
+
+sample

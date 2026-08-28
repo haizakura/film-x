@@ -1,0 +1,9 @@
+{
+  "plugins": ["typescript", "vue"],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn",
+    "perf": "warn"
+  },
+  "ignorePatterns": [".codex/**", ".nuxt/**", ".output/**", "node_modules/**", "sample/**"]
+}

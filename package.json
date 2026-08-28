@@ -1,0 +1,42 @@
+{
+  "name": "film-x",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A local-first collection of tools for film photography",
+  "license": "GPL-3.0-only",
+  "author": "HAIZAKURA",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/haizakura/film-x.git"
+  },
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "typecheck": "nuxt typecheck",
+    "lint": "oxlint .",
+    "format": "oxfmt --write app nuxt.config.ts package.json tsconfig.json .oxlintrc.json .oxfmtrc.json pnpm-workspace.yaml README.md",
+    "format:check": "oxfmt --check app nuxt.config.ts package.json tsconfig.json .oxlintrc.json .oxfmtrc.json pnpm-workspace.yaml README.md",
+    "check": "pnpm format:check && pnpm lint && pnpm typecheck"
+  },
+  "dependencies": {
+    "@nuxt/ui": "latest",
+    "fflate": "^0.8.2",
+    "nuxt": "^4.0.0",
+    "utif": "^3.1.0",
+    "vue": "latest",
+    "vue-router": "latest"
+  },
+  "devDependencies": {
+    "@iconify-json/lucide": "latest",
+    "@types/utif": "^3.0.3",
+    "oxfmt": "latest",
+    "oxlint": "latest",
+    "typescript": "^5.9.3",
+    "vue-tsc": "latest"
+  },
+  "packageManager": "pnpm@11.0.0"
+}
