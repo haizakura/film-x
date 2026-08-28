@@ -46,7 +46,7 @@ const selectAdjacent = (direction: -1 | 1) => {
 
 <template>
   <aside
-    class="queue-panel border-b border-film-900/10 bg-film-50/45 lg:flex lg:min-h-0 lg:flex-col lg:overflow-hidden lg:border-r lg:border-b-0"
+    class="queue-panel border-b border-film-900/10 bg-film-50/45 lg:flex lg:h-full lg:min-h-0 lg:flex-col lg:overflow-hidden lg:border-r lg:border-b-0"
   >
     <div
       class="sticky top-0 z-10 flex shrink-0 items-center justify-between border-b border-film-900/10 bg-film-50/90 px-4 py-4 backdrop-blur"

@@ -10,27 +10,50 @@ interface PlacedImage {
 type Pattern = 'none' | 'grid' | 'dots'
 type FitMode = 'cover' | 'contain'
 type OutputFormat = 'jpeg' | 'png'
+type RatioMode = 'preset' | 'custom' | 'auto'
+type LayoutDirection = 'horizontal' | 'vertical'
+
+interface FrameRect {
+  x: number
+  y: number
+  width: number
+  height: number
+}
 
 const CANVAS_WIDTH = 2400
+const AUTO_FRAME_WIDTH = 1064
+const DEFAULT_FRAME_RATIO = 2 / 3
+const MIN_RATIO = 0.2
+const MAX_RATIO = 5
+const MAX_PADDING = 220
+const MAX_GAP = 160
 const fileInputs = ref<HTMLInputElement[]>([])
 const canvas = ref<HTMLCanvasElement>()
 const images = shallowRef<Array<PlacedImage | undefined>>([undefined, undefined])
+const ratioMode = ref<RatioMode>('preset')
 const ratio = ref(4 / 5)
+const customRatioWidth = ref(4)
+const customRatioHeight = ref(5)
+const layoutDirection = ref<LayoutDirection>('horizontal')
 const background = ref('#E9E4DA')
+const backgroundHexInput = ref(background.value)
 const pattern = ref<Pattern>('none')
 const fit = ref<FitMode>('cover')
-const padding = ref(112)
+const advancedPadding = ref(false)
+const paddingTop = ref(112)
+const paddingRight = ref(112)
+const paddingBottom = ref(112)
+const paddingLeft = ref(112)
 const gap = ref(48)
-const caption = ref('')
-const showFrameNumbers = ref(false)
 const outputFormat = ref<OutputFormat>('jpeg')
 const outputQuality = ref(0.92)
 const rendering = ref(false)
+const isDragging = ref(false)
 const toast = useToast()
 
 useSeoMeta({
   title: '半格胶片排版拼图',
-  description: '将两张半格胶片排版成单张图像，自定义画布、间距、底纹与文字。'
+  description: '将两张半格胶片排版成单张图像，自定义画布、间距、布局与底纹。'
 })
 
 const ratios = [
@@ -47,10 +70,160 @@ const patterns: Array<{ label: string; value: Pattern; icon: string }> = [
 ]
 
 const hasImages = computed(() => images.value.some(Boolean))
-const canvasHeight = computed(() => Math.round(CANVAS_WIDTH / ratio.value))
-const aspectStyle = computed(() => ({ aspectRatio: String(ratio.value) }))
+const clampRatio = (value: number) => Math.min(MAX_RATIO, Math.max(MIN_RATIO, value))
+const clampSpacing = (value: number | string, maximum: number) => {
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? Math.min(maximum, Math.max(0, Math.round(parsed))) : 0
+}
+const spacingModel = (source: Ref<number>, maximum: number) =>
+  computed({
+    get: () => source.value,
+    set: (value: number | string) => {
+      source.value = clampSpacing(value, maximum)
+    }
+  })
+const paddingModel = computed({
+  get: () => paddingTop.value,
+  set: (value: number | string) => {
+    const next = clampSpacing(value, MAX_PADDING)
+    paddingTop.value = next
+    paddingRight.value = next
+    paddingBottom.value = next
+    paddingLeft.value = next
+  }
+})
+const paddingTopModel = spacingModel(paddingTop, MAX_PADDING)
+const paddingRightModel = spacingModel(paddingRight, MAX_PADDING)
+const paddingBottomModel = spacingModel(paddingBottom, MAX_PADDING)
+const paddingLeftModel = spacingModel(paddingLeft, MAX_PADDING)
+const gapModel = spacingModel(gap, MAX_GAP)
+const isMixedPadding = computed(
+  () =>
+    paddingTop.value !== paddingRight.value ||
+    paddingTop.value !== paddingBottom.value ||
+    paddingTop.value !== paddingLeft.value
+)
+const paddingInsets = computed(() => ({
+  top: paddingTop.value,
+  right: paddingRight.value,
+  bottom: paddingBottom.value,
+  left: paddingLeft.value
+}))
+const customRatio = computed(() => {
+  const width = Number(customRatioWidth.value)
+  const height = Number(customRatioHeight.value)
+  return Number.isFinite(width) && Number.isFinite(height) && width > 0 && height > 0
+    ? clampRatio(width / height)
+    : 1
+})
+const commonFrameRatio = computed(() => {
+  const loadedRatios = images.value.flatMap((entry) =>
+    entry ? [clampRatio(entry.decoded.width / entry.decoded.height)] : []
+  )
+  if (!loadedRatios.length) return DEFAULT_FRAME_RATIO
+  return loadedRatios.reduce((sum, value) => sum + value, 0) / loadedRatios.length
+})
+const geometry = computed(() => {
+  const { top, right, bottom, left } = paddingInsets.value
+  if (ratioMode.value === 'auto') {
+    const frameWidth = AUTO_FRAME_WIDTH
+    const frameHeight = Math.max(1, Math.round(frameWidth / commonFrameRatio.value))
+    const horizontal = layoutDirection.value === 'horizontal'
+    const width = horizontal ? left + right + frameWidth * 2 + gap.value : left + right + frameWidth
+    const height = horizontal
+      ? top + bottom + frameHeight
+      : top + bottom + frameHeight * 2 + gap.value
+    const frames: FrameRect[] = [0, 1].map((index) => ({
+      x: horizontal ? left + index * (frameWidth + gap.value) : left,
+      y: horizontal ? top : top + index * (frameHeight + gap.value),
+      width: frameWidth,
+      height: frameHeight
+    }))
+    return { width, height, frames }
+  }
+
+  const selectedRatio = ratioMode.value === 'custom' ? customRatio.value : ratio.value
+  const width = CANVAS_WIDTH
+  const height = Math.max(1, Math.round(width / selectedRatio))
+  const horizontal = layoutDirection.value === 'horizontal'
+  const frameWidth = horizontal
+    ? Math.max(1, (width - left - right - gap.value) / 2)
+    : Math.max(1, width - left - right)
+  const frameHeight = horizontal
+    ? Math.max(1, height - top - bottom)
+    : Math.max(1, (height - top - bottom - gap.value) / 2)
+  const frames: FrameRect[] = [0, 1].map((index) => ({
+    x: horizontal ? left + index * (frameWidth + gap.value) : left,
+    y: horizontal ? top : top + index * (frameHeight + gap.value),
+    width: frameWidth,
+    height: frameHeight
+  }))
+  return { width, height, frames }
+})
+const aspectStyle = computed(() => ({
+  aspectRatio: `${geometry.value.width} / ${geometry.value.height}`
+}))
+
+const selectPresetRatio = (value: number) => {
+  ratioMode.value = 'preset'
+  ratio.value = value
+}
+
+const normalizeHexColor = (value: string) => {
+  const hex = value.trim().replace(/^#/, '')
+  return /^[\dA-Fa-f]{6}$/.test(hex) ? `#${hex.toUpperCase()}` : undefined
+}
+
+const updateBackgroundHex = () => {
+  const normalized = normalizeHexColor(backgroundHexInput.value)
+  if (normalized) background.value = normalized
+}
+
+const commitBackgroundHex = () => {
+  const normalized = normalizeHexColor(backgroundHexInput.value)
+  backgroundHexInput.value = normalized || background.value.toUpperCase()
+  if (normalized) background.value = normalized
+}
+
+watch(background, (value) => {
+  backgroundHexInput.value = value.toUpperCase()
+})
 
 const pickFile = (index: number) => fileInputs.value[index]?.click()
+
+const placeFiles = async (assignments: Array<{ index: number; file: File }>) => {
+  rendering.value = true
+  try {
+    const decodedAssignments = await Promise.all(
+      assignments.map(async ({ index, file }) => {
+        try {
+          return { index, file, decoded: await decodeImage(file) }
+        } catch (error) {
+          toast.add({
+            title: `无法读取 ${file.name}`,
+            description: error instanceof Error ? error.message : '图像解码失败',
+            color: 'error'
+          })
+          return undefined
+        }
+      })
+    )
+    const next = [...images.value]
+    for (const assignment of decodedAssignments) {
+      if (!assignment) continue
+      const { index, file, decoded } = assignment
+      next[index]?.decoded.dispose()
+      next[index] = { name: file.name, decoded }
+    }
+    if (decodedAssignments.some(Boolean)) {
+      images.value = next
+    }
+    await nextTick()
+    drawCanvas()
+  } finally {
+    rendering.value = false
+  }
+}
 
 const handleInput = async (index: number, event: Event) => {
   const input = event.target as HTMLInputElement
@@ -67,23 +240,54 @@ const handleInput = async (index: number, event: Event) => {
     return
   }
 
-  rendering.value = true
-  try {
-    const decoded = await decodeImage(file)
-    images.value[index]?.decoded.dispose()
-    const next = [...images.value]
-    next[index] = { name: file.name, decoded }
-    images.value = next
-    await nextTick()
-    drawCanvas()
-  } catch (error) {
+  await placeFiles([{ index, file }])
+}
+
+const handleDragOver = (event: DragEvent) => {
+  if (event.dataTransfer) event.dataTransfer.dropEffect = 'copy'
+}
+
+const handleDragLeave = (event: DragEvent) => {
+  const section = event.currentTarget as HTMLElement
+  const nextTarget = event.relatedTarget as Node | null
+  if (!nextTarget || !section.contains(nextTarget)) isDragging.value = false
+}
+
+const handleDrop = async (event: DragEvent) => {
+  isDragging.value = false
+  const files = [...(event.dataTransfer?.files || [])]
+  const supported = files.filter(isSupportedImage)
+  const rejectedCount = files.length - supported.length
+
+  if (!supported.length) {
+    if (files.length) {
+      toast.add({
+        title: '没有可用的图像',
+        description: '请选择 TIFF、JPEG、PNG 或 WebP。',
+        color: 'warning'
+      })
+    }
+    return
+  }
+
+  const emptySlots = [0, 1].filter((index) => !images.value[index])
+  const occupiedSlots = [0, 1].filter((index) => images.value[index])
+  const targets = [...emptySlots, ...occupiedSlots]
+  const selectedFiles = supported.slice(0, 2)
+  await placeFiles(selectedFiles.map((file, index) => ({ index: targets[index] ?? index, file })))
+
+  if (supported.length > selectedFiles.length) {
     toast.add({
-      title: '无法读取图像',
-      description: error instanceof Error ? error.message : '图像解码失败',
-      color: 'error'
+      title: '已加入前两张图像',
+      description: '排版画布最多放置两张图像。',
+      color: 'warning'
     })
-  } finally {
-    rendering.value = false
+  } else if (rejectedCount) {
+    toast.add({
+      title: `已忽略 ${rejectedCount} 个不支持的文件`,
+      description: '支持 TIFF、JPEG、PNG 与 WebP。',
+      color: 'warning'
+    })
   }
 }
 
@@ -164,10 +368,6 @@ const drawPlacedImage = (
   context.beginPath()
   context.rect(x, y, width, height)
   context.clip()
-  if (fit.value === 'contain') {
-    context.fillStyle = isLightColor(background.value) ? '#F7F6F2' : '#0D0D0D'
-    context.fillRect(x, y, width, height)
-  }
   context.drawImage(image.source, renderX, renderY, renderWidth, renderHeight)
   context.restore()
 }
@@ -199,8 +399,7 @@ const drawPlaceholder = (
 const drawCanvas = () => {
   if (!canvas.value) return
   const target = canvas.value
-  const width = CANVAS_WIDTH
-  const height = canvasHeight.value
+  const { width, height, frames } = geometry.value
   target.width = width
   target.height = height
   const context = target.getContext('2d')
@@ -210,43 +409,20 @@ const drawCanvas = () => {
   context.fillRect(0, 0, width, height)
   drawPattern(context, width, height)
 
-  const captionSpace = caption.value.trim() ? 104 : 0
-  const frameWidth = Math.max(1, (width - padding.value * 2 - gap.value) / 2)
-  const frameHeight = Math.max(1, height - padding.value * 2 - captionSpace)
-  const top = padding.value
-
   images.value.forEach((entry, index) => {
-    const x = padding.value + index * (frameWidth + gap.value)
+    const frame = frames[index]
+    if (!frame) return
     context.save()
     context.shadowColor = 'rgba(0,0,0,.18)'
     context.shadowBlur = 30
     context.shadowOffsetY = 12
-    if (entry) drawPlacedImage(context, entry.decoded, x, top, frameWidth, frameHeight)
-    else drawPlaceholder(context, x, top, frameWidth, frameHeight, index)
-    context.restore()
-
-    if (showFrameNumbers.value) {
-      context.save()
-      context.fillStyle = 'rgba(255,255,255,.92)'
-      context.font = '600 24px SFMono-Regular, monospace'
-      context.textAlign = 'left'
-      context.textBaseline = 'bottom'
-      context.shadowColor = 'rgba(0,0,0,.65)'
-      context.shadowBlur = 8
-      context.fillText(`0${index + 1}`, x + 24, top + frameHeight - 20)
-      context.restore()
+    if (entry) {
+      drawPlacedImage(context, entry.decoded, frame.x, frame.y, frame.width, frame.height)
+    } else {
+      drawPlaceholder(context, frame.x, frame.y, frame.width, frame.height, index)
     }
-  })
-
-  if (caption.value.trim()) {
-    context.save()
-    context.fillStyle = isLightColor(background.value) ? '#242321' : '#F3F1ED'
-    context.font = '500 28px Avenir Next, sans-serif'
-    context.textAlign = 'center'
-    context.textBaseline = 'middle'
-    context.fillText(caption.value.trim().slice(0, 80), width / 2, height - padding.value / 2)
     context.restore()
-  }
+  })
 }
 
 const download = () => {
@@ -270,20 +446,20 @@ const download = () => {
   )
 }
 
-watch([ratio, background, pattern, fit, padding, gap, caption, showFrameNumbers], () => {
-  requestAnimationFrame(drawCanvas)
-})
+watch([geometry, background, pattern, fit], () => requestAnimationFrame(drawCanvas))
 
 onMounted(drawCanvas)
 onBeforeUnmount(() => images.value.forEach((entry) => entry?.decoded.dispose()))
 </script>
 
 <template>
-  <main
-    class="mx-auto grid w-full max-w-[1680px] gap-5 px-4 py-5 sm:px-6 lg:grid-cols-[minmax(0,1fr)_330px] lg:px-8 lg:py-7"
-  >
+  <main class="grid w-full lg:min-h-0 lg:grid-cols-[minmax(0,1fr)_350px] lg:overflow-y-auto">
     <section
-      class="flex min-h-[620px] min-w-0 flex-col overflow-hidden rounded-2xl bg-[#10100f] shadow-2xl shadow-black/15"
+      class="relative flex min-h-[620px] min-w-0 flex-col overflow-hidden bg-[#10100f] lg:min-h-0"
+      @dragenter.prevent="isDragging = true"
+      @dragover.prevent="handleDragOver"
+      @dragleave="handleDragLeave"
+      @drop.prevent="handleDrop"
     >
       <div
         class="flex min-h-14 flex-wrap items-center justify-between gap-3 border-b border-white/8 px-5 text-white/70"
@@ -300,10 +476,19 @@ onBeforeUnmount(() => images.value.forEach((entry) => entry?.decoded.dispose()))
             :disabled="!hasImages"
             @click="swapImages"
           >
-            <UIcon name="i-lucide-arrow-left-right" class="size-3.5" />
+            <UIcon
+              :name="
+                layoutDirection === 'horizontal'
+                  ? 'i-lucide-arrow-left-right'
+                  : 'i-lucide-arrow-up-down'
+              "
+              class="size-3.5"
+            />
             交换位置
           </button>
-          <span class="font-mono text-[9px] text-white/35">2400 × {{ canvasHeight }} PX</span>
+          <span class="font-mono text-[9px] text-white/35">
+            {{ geometry.width }} × {{ geometry.height }} PX
+          </span>
         </div>
       </div>
 
@@ -316,7 +501,7 @@ onBeforeUnmount(() => images.value.forEach((entry) => entry?.decoded.dispose()))
         >
           <canvas
             ref="canvas"
-            class="block max-h-[650px] max-w-full bg-white shadow-2xl shadow-black/50"
+            class="block max-h-full max-w-full bg-white shadow-2xl shadow-black/50"
           />
           <div
             v-if="rendering"
@@ -355,7 +540,7 @@ onBeforeUnmount(() => images.value.forEach((entry) => entry?.decoded.dispose()))
               images[index]?.name || `选择画面 0${index + 1}`
             }}</span>
             <span class="mt-0.5 block font-mono text-[9px] text-white/35">{{
-              images[index] ? '点击替换' : 'TIFF · JPEG · PNG · WEBP'
+              images[index] ? '点击替换 · 支持拖拽' : 'TIFF · JPEG · PNG · WEBP'
             }}</span>
           </button>
           <button
@@ -368,136 +553,375 @@ onBeforeUnmount(() => images.value.forEach((entry) => entry?.decoded.dispose()))
           </button>
         </div>
       </div>
+
+      <div
+        v-if="isDragging"
+        class="pointer-events-none absolute inset-0 z-30 grid place-items-center border-2 border-dashed border-orange-300/70 bg-black/72 text-center text-white backdrop-blur-sm"
+      >
+        <div>
+          <UIcon name="i-lucide-images" class="mx-auto size-8 text-orange-300" />
+          <p class="mt-3 text-sm font-semibold">松开以加入排版画布</p>
+          <p class="mt-1 font-mono text-[9px] tracking-wider text-white/45 uppercase">
+            最多读取前两张图像
+          </p>
+        </div>
+      </div>
     </section>
 
-    <aside
-      class="panel-surface self-start overflow-hidden rounded-2xl lg:max-h-[calc(100dvh-172px)] lg:overflow-y-auto"
-    >
-      <div class="border-b border-film-900/10 p-5">
-        <p class="eyebrow">画布比例</p>
-        <div class="mt-4 grid grid-cols-4 gap-1 rounded-lg bg-film-200/75 p-1">
-          <button
-            v-for="option in ratios"
-            :key="option.label"
-            class="rounded-md py-2 font-mono text-[10px] transition"
-            :class="
-              ratio === option.value
-                ? 'bg-film-100 text-film-900 shadow-sm'
-                : 'text-film-500 hover:text-film-900'
-            "
-            @click="ratio = option.value"
-          >
-            {{ option.label }}
-          </button>
-        </div>
-      </div>
+    <aside class="panel-surface min-h-0 overflow-hidden lg:flex lg:flex-col">
+      <div class="controls-scroll min-h-0 lg:flex-1 lg:overflow-y-auto lg:overscroll-contain">
+        <div class="border-b border-film-900/10 p-5">
+          <p class="eyebrow">画布比例</p>
+          <div class="mt-4 grid grid-cols-3 gap-1 rounded-lg bg-film-200/75 p-1">
+            <button
+              v-for="option in ratios"
+              :key="option.label"
+              class="rounded-md py-2 font-mono text-[10px] transition"
+              :class="
+                ratioMode === 'preset' && ratio === option.value
+                  ? 'bg-film-100 text-film-900 shadow-sm'
+                  : 'text-film-500 hover:text-film-900'
+              "
+              @click="selectPresetRatio(option.value)"
+            >
+              {{ option.label }}
+            </button>
+            <button
+              class="rounded-md py-2 text-[10px] transition"
+              :class="
+                ratioMode === 'auto'
+                  ? 'bg-film-100 font-medium text-film-900 shadow-sm'
+                  : 'text-film-500 hover:text-film-900'
+              "
+              @click="ratioMode = 'auto'"
+            >
+              自动
+            </button>
+            <button
+              class="rounded-md py-2 text-[10px] transition"
+              :class="
+                ratioMode === 'custom'
+                  ? 'bg-film-100 font-medium text-film-900 shadow-sm'
+                  : 'text-film-500 hover:text-film-900'
+              "
+              @click="ratioMode = 'custom'"
+            >
+              自定义
+            </button>
+          </div>
 
-      <div class="border-b border-film-900/10 p-5">
-        <div class="flex items-center justify-between">
+          <div v-if="ratioMode === 'custom'" class="mt-3 flex items-center gap-2">
+            <label class="min-w-0 flex-1">
+              <span class="sr-only">自定义比例宽度</span>
+              <input
+                v-model.number="customRatioWidth"
+                class="w-full rounded-md border border-film-900/12 bg-film-100 px-3 py-2 text-center font-mono text-xs outline-none focus:border-orange-500"
+                type="number"
+                min="1"
+                max="99"
+                step="1"
+                aria-label="自定义比例宽度"
+              />
+            </label>
+            <span class="font-mono text-xs text-film-400">:</span>
+            <label class="min-w-0 flex-1">
+              <span class="sr-only">自定义比例高度</span>
+              <input
+                v-model.number="customRatioHeight"
+                class="w-full rounded-md border border-film-900/12 bg-film-100 px-3 py-2 text-center font-mono text-xs outline-none focus:border-orange-500"
+                type="number"
+                min="1"
+                max="99"
+                step="1"
+                aria-label="自定义比例高度"
+              />
+            </label>
+          </div>
+          <p
+            v-else-if="ratioMode === 'auto'"
+            class="mt-3 text-[10px] leading-relaxed text-film-500"
+          >
+            根据图像比例与当前间距自动调整导出尺寸。
+          </p>
+        </div>
+
+        <div class="border-b border-film-900/10 p-5">
+          <p class="eyebrow">画面布局</p>
+          <div class="mt-4 grid grid-cols-2 gap-1 rounded-lg bg-film-200/75 p-1">
+            <button
+              class="flex items-center justify-center gap-2 rounded-md py-2 text-[11px] transition"
+              :class="
+                layoutDirection === 'horizontal'
+                  ? 'bg-film-100 font-medium text-film-900 shadow-sm'
+                  : 'text-film-500 hover:text-film-900'
+              "
+              @click="layoutDirection = 'horizontal'"
+            >
+              <UIcon name="i-lucide-columns-2" class="size-3.5" />
+              左右
+            </button>
+            <button
+              class="flex items-center justify-center gap-2 rounded-md py-2 text-[11px] transition"
+              :class="
+                layoutDirection === 'vertical'
+                  ? 'bg-film-100 font-medium text-film-900 shadow-sm'
+                  : 'text-film-500 hover:text-film-900'
+              "
+              @click="layoutDirection = 'vertical'"
+            >
+              <UIcon name="i-lucide-rows-2" class="size-3.5" />
+              上下
+            </button>
+          </div>
+        </div>
+
+        <div class="border-b border-film-900/10 p-5">
           <p class="eyebrow">背景与底纹</p>
-          <label class="flex items-center gap-2 text-[10px] text-film-500">
-            <input
-              v-model="background"
-              type="color"
-              class="size-6 rounded border-0 bg-transparent p-0"
-            />
-            {{ background.toUpperCase() }}
-          </label>
-        </div>
-        <div class="mt-4 grid grid-cols-3 gap-2">
-          <button
-            v-for="option in patterns"
-            :key="option.value"
-            class="flex flex-col items-center gap-1.5 rounded-lg border px-2 py-2.5 text-[10px] transition"
-            :class="
-              pattern === option.value
-                ? 'border-film-800 bg-film-200/70 text-film-900'
-                : 'border-film-900/10 text-film-500 hover:border-film-500/50'
-            "
-            @click="pattern = option.value"
-          >
-            <UIcon :name="option.icon" class="size-4" />
-            {{ option.label }}
-          </button>
-        </div>
-      </div>
-
-      <div class="space-y-5 border-b border-film-900/10 p-5">
-        <div>
-          <div class="mb-3 flex items-center justify-between text-xs">
-            <span class="font-medium">外边距</span
-            ><output class="font-mono text-[10px] text-film-500">{{ padding }} px</output>
+          <div class="mt-4 flex items-center gap-2">
+            <label class="shrink-0">
+              <span class="sr-only">选择背景颜色</span>
+              <input
+                v-model="background"
+                type="color"
+                class="size-9 rounded-md border border-film-900/12 bg-transparent p-0.5"
+                aria-label="选择背景颜色"
+              />
+            </label>
+            <label class="min-w-0 flex-1">
+              <span class="sr-only">背景颜色十六进制 RGB 值</span>
+              <input
+                v-model="backgroundHexInput"
+                class="w-full rounded-md border border-film-900/12 bg-film-100 px-3 py-2 font-mono text-xs uppercase outline-none transition focus:border-orange-500"
+                type="text"
+                maxlength="7"
+                autocomplete="off"
+                spellcheck="false"
+                aria-label="背景颜色十六进制 RGB 值"
+                placeholder="#E9E4DA"
+                @input="updateBackgroundHex"
+                @blur="commitBackgroundHex"
+                @keydown.enter="commitBackgroundHex"
+              />
+            </label>
           </div>
-          <input v-model.number="padding" class="range" type="range" min="48" max="220" step="4" />
-        </div>
-        <div>
-          <div class="mb-3 flex items-center justify-between text-xs">
-            <span class="font-medium">画面间距</span
-            ><output class="font-mono text-[10px] text-film-500">{{ gap }} px</output>
+          <div class="mt-4 grid grid-cols-3 gap-2">
+            <button
+              v-for="option in patterns"
+              :key="option.value"
+              class="flex flex-col items-center gap-1.5 rounded-lg border px-2 py-2.5 text-[10px] transition"
+              :class="
+                pattern === option.value
+                  ? 'border-film-800 bg-film-200/70 text-film-900'
+                  : 'border-film-900/10 text-film-500 hover:border-film-500/50'
+              "
+              @click="pattern = option.value"
+            >
+              <UIcon :name="option.icon" class="size-4" />
+              {{ option.label }}
+            </button>
           </div>
-          <input v-model.number="gap" class="range" type="range" min="0" max="160" step="4" />
         </div>
-        <div class="grid grid-cols-2 gap-2 rounded-lg bg-film-200/70 p-1">
-          <button
-            class="rounded-md py-2 text-[11px]"
-            :class="fit === 'cover' ? 'bg-film-100 font-medium shadow-sm' : 'text-film-500'"
-            @click="fit = 'cover'"
-          >
-            填满裁切
-          </button>
-          <button
-            class="rounded-md py-2 text-[11px]"
-            :class="fit === 'contain' ? 'bg-film-100 font-medium shadow-sm' : 'text-film-500'"
-            @click="fit = 'contain'"
-          >
-            完整显示
-          </button>
-        </div>
-      </div>
 
-      <div class="border-b border-film-900/10 p-5">
-        <p class="eyebrow">文字内容</p>
-        <input
-          v-model="caption"
-          maxlength="80"
-          class="mt-4 w-full rounded-lg border border-film-900/12 bg-film-100 px-3 py-2.5 text-xs outline-none transition placeholder:text-film-400 focus:border-orange-500"
-          placeholder="例如：TOKYO · SUMMER 2026"
-        />
-        <label class="mt-4 flex items-center justify-between text-xs">
-          <span>显示画面编号</span>
-          <USwitch v-model="showFrameNumbers" size="sm" />
-        </label>
-      </div>
+        <div class="space-y-5 border-b border-film-900/10 p-5">
+          <div>
+            <div class="flex items-center justify-between gap-3 text-xs">
+              <span class="font-medium">外边距</span>
+              <label class="flex items-center gap-2 text-[10px] text-film-500">
+                独立设置
+                <USwitch
+                  v-model="advancedPadding"
+                  size="sm"
+                  checked-icon="i-lucide-check"
+                  aria-label="分别设置四边外边距"
+                />
+              </label>
+            </div>
 
-      <div class="sticky bottom-0 space-y-3 bg-film-50/95 p-5 backdrop-blur">
-        <div class="grid grid-cols-2 gap-1 rounded-lg bg-film-200/70 p-1">
-          <button
-            class="rounded-md py-2 font-mono text-[10px]"
-            :class="outputFormat === 'jpeg' ? 'bg-film-100 shadow-sm' : 'text-film-500'"
-            @click="outputFormat = 'jpeg'"
-          >
-            JPG
-          </button>
-          <button
-            class="rounded-md py-2 font-mono text-[10px]"
-            :class="outputFormat === 'png' ? 'bg-film-100 shadow-sm' : 'text-film-500'"
-            @click="outputFormat = 'png'"
-          >
-            PNG
-          </button>
+            <div v-if="!advancedPadding && !isMixedPadding" class="mt-4 flex items-center gap-3">
+              <input
+                v-model.number="paddingModel"
+                class="range min-w-0 flex-1"
+                type="range"
+                min="0"
+                :max="MAX_PADDING"
+                step="4"
+                aria-label="统一外边距"
+              />
+              <label
+                class="flex shrink-0 items-center gap-1 rounded-md border border-film-900/12 bg-film-100 px-2"
+              >
+                <span class="sr-only">输入统一外边距</span>
+                <input
+                  v-model.number="paddingModel"
+                  class="w-12 bg-transparent py-1.5 text-right font-mono text-[10px] outline-none"
+                  type="number"
+                  min="0"
+                  :max="MAX_PADDING"
+                  step="1"
+                  aria-label="输入统一外边距"
+                />
+                <span class="font-mono text-[9px] text-film-400">px</span>
+              </label>
+            </div>
+
+            <div
+              v-else-if="!advancedPadding"
+              class="mt-4 flex items-center justify-between gap-3 rounded-md bg-film-200/65 px-3 py-2.5"
+            >
+              <p class="font-mono text-[9px] leading-relaxed text-film-500">
+                上 {{ paddingTop }} · 右 {{ paddingRight }} · 下 {{ paddingBottom }} · 左
+                {{ paddingLeft }} px
+              </p>
+              <button
+                class="shrink-0 text-[10px] font-medium text-film-700 hover:text-film-900"
+                @click="advancedPadding = true"
+              >
+                展开编辑
+              </button>
+            </div>
+
+            <div v-else class="mt-4 grid grid-cols-2 gap-2">
+              <label
+                class="flex items-center gap-2 rounded-md border border-film-900/12 bg-film-100 px-2.5"
+              >
+                <span class="w-4 text-[10px] text-film-500">上</span>
+                <input
+                  v-model.number="paddingTopModel"
+                  class="min-w-0 flex-1 bg-transparent py-2 text-right font-mono text-[10px] outline-none"
+                  type="number"
+                  min="0"
+                  :max="MAX_PADDING"
+                  step="1"
+                  aria-label="上边距"
+                />
+                <span class="font-mono text-[9px] text-film-400">px</span>
+              </label>
+              <label
+                class="flex items-center gap-2 rounded-md border border-film-900/12 bg-film-100 px-2.5"
+              >
+                <span class="w-4 text-[10px] text-film-500">右</span>
+                <input
+                  v-model.number="paddingRightModel"
+                  class="min-w-0 flex-1 bg-transparent py-2 text-right font-mono text-[10px] outline-none"
+                  type="number"
+                  min="0"
+                  :max="MAX_PADDING"
+                  step="1"
+                  aria-label="右边距"
+                />
+                <span class="font-mono text-[9px] text-film-400">px</span>
+              </label>
+              <label
+                class="flex items-center gap-2 rounded-md border border-film-900/12 bg-film-100 px-2.5"
+              >
+                <span class="w-4 text-[10px] text-film-500">下</span>
+                <input
+                  v-model.number="paddingBottomModel"
+                  class="min-w-0 flex-1 bg-transparent py-2 text-right font-mono text-[10px] outline-none"
+                  type="number"
+                  min="0"
+                  :max="MAX_PADDING"
+                  step="1"
+                  aria-label="下边距"
+                />
+                <span class="font-mono text-[9px] text-film-400">px</span>
+              </label>
+              <label
+                class="flex items-center gap-2 rounded-md border border-film-900/12 bg-film-100 px-2.5"
+              >
+                <span class="w-4 text-[10px] text-film-500">左</span>
+                <input
+                  v-model.number="paddingLeftModel"
+                  class="min-w-0 flex-1 bg-transparent py-2 text-right font-mono text-[10px] outline-none"
+                  type="number"
+                  min="0"
+                  :max="MAX_PADDING"
+                  step="1"
+                  aria-label="左边距"
+                />
+                <span class="font-mono text-[9px] text-film-400">px</span>
+              </label>
+            </div>
+          </div>
+          <div>
+            <div class="mb-3 flex items-center justify-between text-xs">
+              <span class="font-medium">画面间距</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <input
+                v-model.number="gapModel"
+                class="range min-w-0 flex-1"
+                type="range"
+                min="0"
+                :max="MAX_GAP"
+                step="4"
+                aria-label="画面间距"
+              />
+              <label
+                class="flex shrink-0 items-center gap-1 rounded-md border border-film-900/12 bg-film-100 px-2"
+              >
+                <span class="sr-only">输入画面间距</span>
+                <input
+                  v-model.number="gapModel"
+                  class="w-12 bg-transparent py-1.5 text-right font-mono text-[10px] outline-none"
+                  type="number"
+                  min="0"
+                  :max="MAX_GAP"
+                  step="1"
+                  aria-label="输入画面间距"
+                />
+                <span class="font-mono text-[9px] text-film-400">px</span>
+              </label>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-2 rounded-lg bg-film-200/70 p-1">
+            <button
+              class="rounded-md py-2 text-[11px]"
+              :class="fit === 'cover' ? 'bg-film-100 font-medium shadow-sm' : 'text-film-500'"
+              @click="fit = 'cover'"
+            >
+              填满裁切
+            </button>
+            <button
+              class="rounded-md py-2 text-[11px]"
+              :class="fit === 'contain' ? 'bg-film-100 font-medium shadow-sm' : 'text-film-500'"
+              @click="fit = 'contain'"
+            >
+              完整显示
+            </button>
+          </div>
         </div>
-        <UButton
-          block
-          color="neutral"
-          size="lg"
-          icon="i-lucide-download"
-          :disabled="!hasImages"
-          label="生成并下载"
-          @click="download"
-        />
-        <p class="text-center font-mono text-[9px] tracking-wide text-film-400">
-          LOCAL RENDER · NO UPLOAD
-        </p>
+
+        <div class="sticky bottom-0 space-y-3 bg-film-50/95 p-5 backdrop-blur">
+          <div class="grid grid-cols-2 gap-1 rounded-lg bg-film-200/70 p-1">
+            <button
+              class="rounded-md py-2 font-mono text-[10px]"
+              :class="outputFormat === 'jpeg' ? 'bg-film-100 shadow-sm' : 'text-film-500'"
+              @click="outputFormat = 'jpeg'"
+            >
+              JPG
+            </button>
+            <button
+              class="rounded-md py-2 font-mono text-[10px]"
+              :class="outputFormat === 'png' ? 'bg-film-100 shadow-sm' : 'text-film-500'"
+              @click="outputFormat = 'png'"
+            >
+              PNG
+            </button>
+          </div>
+          <UButton
+            block
+            color="neutral"
+            size="lg"
+            icon="i-lucide-download"
+            :disabled="!hasImages"
+            label="生成并下载"
+            @click="download"
+          />
+          <p class="text-center font-mono text-[9px] tracking-wide text-film-400">
+            LOCAL RENDER · NO UPLOAD
+          </p>
+        </div>
       </div>
     </aside>
   </main>
@@ -522,5 +946,23 @@ onBeforeUnmount(() => images.value.forEach((entry) => entry?.decoded.dispose()))
 canvas {
   width: auto;
   height: auto;
+}
+
+.controls-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--color-film-500) 58%, transparent) transparent;
+}
+
+.controls-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.controls-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.controls-scroll::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-film-500) 58%, transparent);
 }
 </style>
