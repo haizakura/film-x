@@ -918,9 +918,6 @@ onBeforeUnmount(() => images.value.forEach((entry) => entry?.decoded.dispose()))
             label="生成并下载"
             @click="download"
           />
-          <p class="text-center font-mono text-[9px] tracking-wide text-film-400">
-            LOCAL RENDER · NO UPLOAD
-          </p>
         </div>
       </div>
     </aside>
