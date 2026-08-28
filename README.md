@@ -1,13 +1,24 @@
 # Film X
 
-一个在浏览器本地运行的胶片图像处理工具合集。
+一个在浏览器本地运行的胶片图像处理工具合集。图像解码、编辑与导出均在本地完成，不会上传到服务器。
 
 ## 工具
 
-- 半格胶片切分工具
-  - 将包含左右两幅半格照片的扫描图像切成独立文件，支持 TIFF、JPEG、PNG 和 WebP 输入。导入后会逐张自动识别分割位置和中缝宽度，也可手动微调分割线、中缝宽度与旋转方向，并批量打包下载。
-- 半格胶片排版拼图工具
-  - 将2张半格胶片图像进行排版拼接成单张图像。支持自定义画布比例调节，自定义画布颜色和图案，以及添加各类水印和文字内容。
+### 半格胶片切分
+
+- 支持批量导入 TIFF、JPEG、PNG 和 WebP，也可将文件直接拖入页面。
+- 自动识别每张扫描图像的分割位置与中缝宽度，并允许手动微调。
+- 两侧画面可分别旋转，也可将当前设置应用到全部图像。
+- 支持导出 JPEG、PNG、WebP 与 TIF，并将批量结果打包为 ZIP 下载。
+
+### 排版拼图
+
+- 最多放置两张图像并排版为一张成品图，支持点击选择和拖拽导入 TIFF、JPEG、PNG 与 WebP。
+- 支持左右、上下两种布局，以及交换画面顺序。
+- 画布可使用预设比例、自定义比例或根据图像与间距自动计算比例。
+- 外边距和画面间距均可滑动或直接输入；外边距支持统一设置和上、右、下、左独立设置。
+- 支持填满裁切或完整显示，并可输入十六进制 RGB 背景色、选择纯色、方格或圆点底纹。
+- 支持导出 JPEG 或 PNG。
 
 页面顶部的横向菜单用于在两项工具之间切换。工具页面会保留工作状态，切换后返回不会丢失已导入的图像。
 
@@ -19,9 +30,11 @@
 
 ## 技术栈
 
-前后端：Nuxt 4 + Nuxt UI + Tailwind CSS
+应用框架与界面：Nuxt 4 + Vue 3 + Nuxt UI + Tailwind CSS
 
-代码检查与格式化：Oxlint + Oxfmt
+图像与压缩：UTIF + fflate
+
+代码检查与格式化：TypeScript + Oxlint + Oxfmt
 
 ## 本地开发
 
@@ -29,8 +42,8 @@
 
 ```bash
 mise install
-mise exec -- corepack pnpm install
-mise exec -- corepack pnpm dev
+mise exec -- pnpm install
+mise exec -- pnpm dev
 ```
 
 开发服务器默认运行在 `http://localhost:3000`。
@@ -38,25 +51,27 @@ mise exec -- corepack pnpm dev
 ## 检查与构建
 
 ```bash
-mise exec -- corepack pnpm check
-mise exec -- corepack pnpm build
+mise exec -- pnpm check
+mise exec -- pnpm build
 ```
 
 ## 代码结构
 
-- `app/pages`：只负责页面组合和跨模块事件协调。
-- `app/components/film`：无业务状态所有权的展示与表单组件，通过 props / emits 复用。
-- `app/composables`：文件队列、图像预览和批量导出工作流。
-- `app/utils`：图像解码、裁切、旋转及格式转换等纯工具函数。
+- `app/pages`：半格切分与排版拼图页面，以及各自的工作流编排。
+- `app/components/film`：通用的上传、图像队列、预览、参数控制与导出组件。
+- `app/composables`：文件队列、自动识别、图像预览和批量导出状态。
+- `app/types`：图像条目、切分设置与导出格式等共享类型。
+- `app/utils`：图像解码、检测、裁切、旋转及格式转换工具。
+- `app/assets/css`：全局主题、颜色和基础控件样式。
+- `public`：favicon 等公开静态资源。
 
 半格切分工作流复用了 [Full2Half](https://github.com/haizakura/full2half) 的 GPL-3.0-only 源码，并在 Film X 的统一页面结构与主题系统中重新组织。
 
-- `oxlint` 负责代码检查。
-- `oxfmt` 负责格式化。
+## 图像处理说明
 
 - 图像处理完全在浏览器内完成，不会上传到服务器。
 - 自动切分会分析中央区域的纵向亮度、纹理和边界变化；无法可靠识别中缝时不会主动移除像素。
-- TIFF 会在浏览器中解码；输出支持 JPEG、PNG、WebP 与 TIF。TIF 使用未压缩的 8 位 RGBA 像素切分与 90° 整数旋转，避免再次有损编码；高位深 TIFF 输入仍会受浏览器端解码为 8 位 RGBA 的限制。
+- TIFF 会在浏览器中解码；半格切分输出支持 JPEG、PNG、WebP 与 TIF。TIF 使用未压缩的 8 位 RGBA 像素切分与 90° 整数旋转，避免再次有损编码；高位深 TIFF 输入仍会受浏览器端解码为 8 位 RGBA 的限制。
 
 ## 许可证
 
