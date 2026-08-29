@@ -30,7 +30,7 @@ const cycleTheme = () => {
 <template>
   <header class="app-header shrink-0 border-b border-film-900/10 bg-film-100/88 backdrop-blur-xl">
     <div
-      class="mx-auto flex max-w-[1680px] flex-wrap items-center gap-x-5 px-4 sm:px-6 lg:flex-nowrap lg:px-8"
+      class="mx-auto flex max-w-420 flex-wrap items-center gap-x-5 px-4 sm:px-6 lg:flex-nowrap lg:px-8"
     >
       <NuxtLink to="/" class="flex h-16 shrink-0 items-center gap-3" aria-label="Film X 首页">
         <div class="brand-mark" aria-hidden="true">
@@ -46,7 +46,7 @@ const cycleTheme = () => {
       </NuxtLink>
 
       <nav
-        class="order-3 flex w-full items-stretch gap-1 overflow-x-auto border-t border-film-900/8 py-2 lg:order-none lg:w-auto lg:flex-1 lg:justify-center lg:border-t-0 lg:py-0"
+        class="order-3 flex w-full items-stretch gap-1 overflow-x-auto border-t border-film-900/8 py-2 lg:order-0 lg:w-auto lg:flex-1 lg:justify-center lg:border-t-0 lg:py-0"
         aria-label="图像工具"
       >
         <NuxtLink

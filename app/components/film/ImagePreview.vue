@@ -36,7 +36,7 @@ const updateCenter = (event: Event) => {
 </script>
 
 <template>
-  <section class="flex min-h-[560px] min-w-0 flex-col bg-[#171612] lg:min-h-0">
+  <section class="flex min-h-140 min-w-0 flex-col bg-[#171612] lg:min-h-0">
     <div class="flex h-13 items-center justify-between border-b border-white/8 px-5 text-white/70">
       <p class="min-w-0 truncate text-xs font-medium text-white/90">{{ name }}</p>
       <div v-if="decoded" class="font-mono text-[10px] tracking-wide text-white/45">

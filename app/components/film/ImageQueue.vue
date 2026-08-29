@@ -15,6 +15,52 @@ const emit = defineEmits<{
   clear: []
 }>()
 
+type PendingAction = { type: 'clear'; count: number } | { type: 'remove'; id: string; name: string }
+
+const confirmationOpen = ref(false)
+const pendingAction = ref<PendingAction>()
+
+const confirmationTitle = computed(() =>
+  pendingAction.value?.type === 'clear' ? '确认清空列表？' : '确认删除图像？'
+)
+
+const confirmationDescription = computed(() => {
+  if (pendingAction.value?.type === 'clear') {
+    return `将从本次扫描中移除全部 ${pendingAction.value.count} 张图像。此操作无法撤销。`
+  }
+  if (pendingAction.value?.type === 'remove') {
+    return `将从本次扫描中移除“${pendingAction.value.name}”。此操作无法撤销。`
+  }
+  return ''
+})
+
+const confirmationLabel = computed(() =>
+  pendingAction.value?.type === 'clear' ? '清空列表' : '删除图像'
+)
+
+const requestClear = () => {
+  pendingAction.value = { type: 'clear', count: props.items.length }
+  confirmationOpen.value = true
+}
+
+const requestRemove = (item: ImageQueueItem) => {
+  pendingAction.value = { type: 'remove', id: item.id, name: item.name }
+  confirmationOpen.value = true
+}
+
+const confirmPendingAction = () => {
+  const action = pendingAction.value
+  if (!action) return
+
+  confirmationOpen.value = false
+  if (action.type === 'clear') emit('clear')
+  if (action.type === 'remove') emit('remove', action.id)
+}
+
+const resetPendingAction = () => {
+  pendingAction.value = undefined
+}
+
 const statusText = (item: ImageQueueItem) => {
   if (item.status === 'done') return '已完成'
   if (item.status === 'error') return '失败'
@@ -46,7 +92,7 @@ const selectAdjacent = (direction: -1 | 1) => {
 
 <template>
   <aside
-    class="queue-panel border-b border-film-900/10 bg-film-50/45 lg:flex lg:h-full lg:min-h-0 lg:flex-col lg:overflow-hidden lg:border-r lg:border-b-0"
+    class="queue-panel w-full min-w-0 overflow-hidden border-b border-film-900/10 bg-film-50/45 lg:flex lg:h-full lg:min-h-0 lg:flex-col lg:border-r lg:border-b-0"
   >
     <div
       class="sticky top-0 z-10 flex shrink-0 items-center justify-between border-b border-film-900/10 bg-film-50/90 px-4 py-4 backdrop-blur"
@@ -57,18 +103,29 @@ const selectAdjacent = (direction: -1 | 1) => {
           {{ items.length }} FILES · {{ formatBytes(totalSize) }}
         </p>
       </div>
-      <UButton
-        icon="i-lucide-plus"
-        color="neutral"
-        variant="ghost"
-        size="sm"
-        aria-label="添加图像"
-        @click="emit('add')"
-      />
+      <div class="flex items-center gap-1">
+        <UButton
+          icon="i-lucide-plus"
+          color="neutral"
+          variant="ghost"
+          size="sm"
+          aria-label="添加图像"
+          @click="emit('add')"
+        />
+        <UButton
+          class="lg:hidden"
+          icon="i-lucide-trash-2"
+          color="error"
+          variant="ghost"
+          size="sm"
+          aria-label="清空列表"
+          @click="requestClear"
+        />
+      </div>
     </div>
 
     <div
-      class="queue-list flex gap-2 overflow-x-auto p-3 lg:block lg:min-h-0 lg:flex-1 lg:overflow-x-hidden lg:overflow-y-auto lg:overscroll-contain"
+      class="queue-list flex w-full min-w-0 max-w-full gap-2 overflow-x-auto p-3 lg:block lg:min-h-0 lg:flex-1 lg:overflow-x-hidden lg:overflow-y-auto lg:overscroll-contain"
       tabindex="0"
       aria-label="图像列表，使用上、下方向键选择"
       @keydown.up.prevent="selectAdjacent(-1)"
@@ -78,7 +135,7 @@ const selectAdjacent = (direction: -1 | 1) => {
         v-for="(item, index) in items"
         :id="`queue-item-${item.id}`"
         :key="item.id"
-        class="queue-item group mb-0 flex min-w-52 items-stretch rounded-lg border transition lg:mb-2 lg:w-full lg:min-w-0"
+        class="queue-item group mb-0 flex w-52 shrink-0 items-stretch rounded-lg border transition lg:mb-2 lg:w-full lg:min-w-0"
         :class="
           activeId === item.id
             ? 'border-film-800 bg-film-100 shadow-sm'
@@ -116,23 +173,49 @@ const selectAdjacent = (direction: -1 | 1) => {
             </span>
           </span>
         </button>
-        <button
-          type="button"
-          class="invisible my-auto mr-2 grid size-7 shrink-0 place-items-center rounded text-film-400 hover:bg-film-100 hover:text-film-800 focus:visible group-hover:visible"
-          aria-label="移除图像"
-          @click="emit('remove', item.id)"
-        >
-          <UIcon name="i-lucide-x" class="size-3.5" />
-        </button>
+        <UButton
+          class="my-auto mr-2 shrink-0 lg:invisible lg:group-hover:visible lg:focus:visible"
+          icon="i-lucide-x"
+          color="error"
+          variant="ghost"
+          size="xs"
+          :aria-label="`移除图像 ${item.name}`"
+          @click.stop="requestRemove(item)"
+        />
       </div>
     </div>
 
-    <button
-      class="mx-4 mb-5 shrink-0 text-left text-xs text-film-400 underline-offset-4 hover:text-film-700 hover:underline lg:mt-3"
-      @click="emit('clear')"
+    <UButton
+      class="mx-3 mb-4 hidden self-start lg:mt-2 lg:inline-flex"
+      color="error"
+      variant="ghost"
+      size="xs"
+      @click="requestClear"
     >
       清空列表
-    </button>
+    </UButton>
+
+    <UModal
+      v-model:open="confirmationOpen"
+      :description="confirmationDescription"
+      :close="false"
+      :ui="{ content: 'sm:max-w-md', footer: 'justify-end' }"
+      @after:leave="resetPendingAction"
+    >
+      <template #title>
+        <span class="flex items-center gap-2 text-red-600">
+          <UIcon name="i-lucide-triangle-alert" class="size-5" />
+          {{ confirmationTitle }}
+        </span>
+      </template>
+
+      <template #footer>
+        <UButton color="neutral" variant="soft" @click="confirmationOpen = false"> 取消 </UButton>
+        <UButton color="error" @click="confirmPendingAction">
+          {{ confirmationLabel }}
+        </UButton>
+      </template>
+    </UModal>
   </aside>
 </template>
 

@@ -81,6 +81,13 @@ const emit = defineEmits<{ pick: [] }>()
   right: 33.333%;
 }
 
+@media (max-width: 639px) {
+  .drop-zone::before,
+  .drop-zone::after {
+    display: none;
+  }
+}
+
 .step-index {
   display: inline-grid;
   width: 28px;
