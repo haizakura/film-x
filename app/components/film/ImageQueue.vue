@@ -46,7 +46,7 @@ const selectAdjacent = (direction: -1 | 1) => {
 
 <template>
   <aside
-    class="queue-panel border-b border-film-900/10 bg-film-50/45 lg:flex lg:h-full lg:min-h-0 lg:flex-col lg:overflow-hidden lg:border-r lg:border-b-0"
+    class="queue-panel w-full min-w-0 overflow-hidden border-b border-film-900/10 bg-film-50/45 lg:flex lg:h-full lg:min-h-0 lg:flex-col lg:border-r lg:border-b-0"
   >
     <div
       class="sticky top-0 z-10 flex shrink-0 items-center justify-between border-b border-film-900/10 bg-film-50/90 px-4 py-4 backdrop-blur"
@@ -68,7 +68,7 @@ const selectAdjacent = (direction: -1 | 1) => {
     </div>
 
     <div
-      class="queue-list flex gap-2 overflow-x-auto p-3 lg:block lg:min-h-0 lg:flex-1 lg:overflow-x-hidden lg:overflow-y-auto lg:overscroll-contain"
+      class="queue-list flex w-full min-w-0 max-w-full gap-2 overflow-x-auto p-3 lg:block lg:min-h-0 lg:flex-1 lg:overflow-x-hidden lg:overflow-y-auto lg:overscroll-contain"
       tabindex="0"
       aria-label="图像列表，使用上、下方向键选择"
       @keydown.up.prevent="selectAdjacent(-1)"
@@ -78,7 +78,7 @@ const selectAdjacent = (direction: -1 | 1) => {
         v-for="(item, index) in items"
         :id="`queue-item-${item.id}`"
         :key="item.id"
-        class="queue-item group mb-0 flex min-w-52 items-stretch rounded-lg border transition lg:mb-2 lg:w-full lg:min-w-0"
+        class="queue-item group mb-0 flex w-52 shrink-0 items-stretch rounded-lg border transition lg:mb-2 lg:w-full lg:min-w-0"
         :class="
           activeId === item.id
             ? 'border-film-800 bg-film-100 shadow-sm'

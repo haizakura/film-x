@@ -5,7 +5,7 @@ const currentYear = new Date().getFullYear()
 <template>
   <footer class="shrink-0 border-t border-film-900/10 bg-film-100/85">
     <p
-      class="mx-auto flex h-10 max-w-[1680px] items-center justify-center px-5 font-mono text-[10px] tracking-wide text-film-500"
+      class="mx-auto flex h-10 max-w-420 items-center justify-center px-5 font-mono text-[10px] tracking-wide text-film-500"
     >
       © {{ currentYear }} HAIZAKURA · FILM X
       <span class="mx-2 text-film-300" aria-hidden="true">|</span>

@@ -455,7 +455,7 @@ onBeforeUnmount(() => images.value.forEach((entry) => entry?.decoded.dispose()))
 <template>
   <main class="grid w-full lg:min-h-0 lg:grid-cols-[minmax(0,1fr)_350px] lg:overflow-y-auto">
     <section
-      class="relative flex min-h-[620px] min-w-0 flex-col overflow-hidden bg-[#10100f] lg:min-h-0"
+      class="relative flex min-h-155 min-w-0 flex-col overflow-hidden bg-[#10100f] lg:min-h-0"
       @dragenter.prevent="isDragging = true"
       @dragover.prevent="handleDragOver"
       @dragleave="handleDragLeave"

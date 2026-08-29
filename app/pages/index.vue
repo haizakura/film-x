@@ -166,7 +166,7 @@ const detectActiveImage = () => {
 
     <main
       v-else
-      class="mx-auto grid w-full max-w-[1680px] flex-1 lg:min-h-0 lg:grid-cols-[260px_minmax(0,1fr)_300px] lg:overflow-hidden"
+      class="mx-auto grid w-full min-w-0 max-w-420 grid-cols-[minmax(0,1fr)] flex-1 lg:min-h-0 lg:grid-cols-[260px_minmax(0,1fr)_300px] lg:overflow-hidden"
     >
       <FilmImageQueue
         :items="queue"
