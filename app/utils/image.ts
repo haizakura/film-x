@@ -11,9 +11,16 @@ export const DEFAULT_SETTINGS: SplitSettings = {
 
 export const SUPPORTED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'tif', 'tiff']
 
+export const IMAGE_FILE_ACCEPT = 'image/jpeg,image/png,image/webp,image/tiff,.tif,.tiff'
+
 export const isSupportedImage = (file: File) => {
   const extension = file.name.split('.').pop()?.toLowerCase()
   return extension ? SUPPORTED_EXTENSIONS.includes(extension) : false
+}
+
+export const partitionSupportedImages = (files: File[]) => {
+  const supported = files.filter(isSupportedImage)
+  return { supported, rejectedCount: files.length - supported.length }
 }
 
 export const isTiff = (file: File) => /\.(tif|tiff)$/i.test(file.name)
