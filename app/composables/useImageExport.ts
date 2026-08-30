@@ -1,6 +1,7 @@
 import { zip } from 'fflate'
 
 import type { ExportFormat, ImageQueueItem } from '~/types/image'
+import { downloadBlob } from '~/utils/download'
 import {
   baseName,
   calculateCropRects,
@@ -18,15 +19,6 @@ const makeZip = (files: Record<string, Uint8Array>) =>
   new Promise<Uint8Array>((resolve, reject) => {
     zip(files, { level: 0 }, (error, data) => (error ? reject(error) : resolve(data)))
   })
-
-const downloadBlob = (blob: Blob, filename: string) => {
-  const url = URL.createObjectURL(blob)
-  const anchor = document.createElement('a')
-  anchor.href = url
-  anchor.download = filename
-  anchor.click()
-  setTimeout(() => URL.revokeObjectURL(url), 1000)
-}
 
 export const useImageExport = () => {
   const format = ref<ExportFormat>('jpeg')

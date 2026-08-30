@@ -29,21 +29,12 @@ const formats: ExportFormat[] = ['jpeg', 'png', 'webp', 'tiff']
         {{ completedCount }}/{{ totalCount }} DONE
       </span>
     </div>
-    <div class="mt-4 grid grid-cols-4 gap-1 rounded-lg bg-film-200/70 p-1">
-      <button
-        v-for="option in formats"
-        :key="option"
-        class="rounded-md px-2 py-2 font-mono text-[10px] font-medium uppercase transition"
-        :class="
-          format === option
-            ? 'bg-film-100 text-film-900 shadow-sm'
-            : 'text-film-500 hover:text-film-800'
-        "
-        @click="emit('update:format', option)"
-      >
-        {{ option === 'jpeg' ? 'JPG' : option === 'tiff' ? 'TIF' : option }}
-      </button>
-    </div>
+    <FilmOutputFormatSelector
+      class="mt-4"
+      :model-value="format"
+      :formats="formats"
+      @update:model-value="emit('update:format', $event)"
+    />
 
     <label v-if="format === 'jpeg' || format === 'webp'" class="mt-5 block">
       <span class="mb-3 flex items-center justify-between text-xs">

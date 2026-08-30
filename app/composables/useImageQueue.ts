@@ -1,5 +1,5 @@
 import type { ImageQueueItem, SplitSettings } from '~/types/image'
-import { DEFAULT_SETTINGS, isSupportedImage } from '~/utils/image'
+import { DEFAULT_SETTINGS, partitionSupportedImages } from '~/utils/image'
 
 export interface AddFilesResult {
   addedCount: number
@@ -18,8 +18,7 @@ export const useImageQueue = () => {
   const completedCount = computed(() => queue.value.filter((item) => item.status === 'done').length)
 
   const addFiles = (files: File[]): AddFilesResult => {
-    const supported = files.filter(isSupportedImage)
-    const rejectedCount = files.length - supported.length
+    const { supported, rejectedCount } = partitionSupportedImages(files)
     const knownFiles = new Set(queue.value.map((item) => `${item.name}:${item.size}`))
     const unique = supported.filter((file) => !knownFiles.has(`${file.name}:${file.size}`))
 
