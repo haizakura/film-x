@@ -25,12 +25,13 @@
 ## 界面与主题
 
 - 默认跟随系统的 light / dark 外观设置，也可在页面右上角手动循环切换。
-- light 模式使用 `#FEFEFE` 作为页面背景，dark 模式使用 `#141414`。
+- light 模式使用 `#F2F3F5` 作为页面背景，dark 模式使用 `#0A0A0A`。
+- 交互主色使用 `#409EFF`，成功、警告、危险与信息状态采用统一语义色板。
 - 两种模式均使用独立的文字、边框、浮层与交互状态配色；图像预览工作台始终保持深色，便于判断照片边缘。
 
 ## 技术栈
 
-应用框架与界面：Nuxt 4 + Vue 3 + Nuxt UI + Tailwind CSS
+应用框架与界面：Nuxt 4 + Vue 3 + shadcn-vue + Reka UI + Tailwind CSS
 
 图像与压缩：UTIF + fflate
 
