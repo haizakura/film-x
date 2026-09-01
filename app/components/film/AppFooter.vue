@@ -13,7 +13,7 @@ const currentYear = new Date().getFullYear()
         href="https://github.com/haizakura/film-x"
         target="_blank"
         rel="noopener noreferrer"
-        class="transition-colors hover:text-amber-700 focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-700"
+        class="transition-colors hover:text-primary focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
       >
         GitHub
       </a>

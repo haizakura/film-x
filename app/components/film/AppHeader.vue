@@ -1,16 +1,19 @@
 <script setup lang="ts">
+import { MonitorCog, Moon, PanelsTopLeft, ScanLine, ShieldCheck, Sun } from '@lucide/vue'
+import { Button } from '@/components/ui/button'
+
 const route = useRoute()
 const colorMode = useColorMode()
 
 const tools = [
-  { label: '半格切分', description: '一分为二', icon: 'i-lucide-scan-line', to: '/' },
-  { label: '排版拼图', description: '双片成章', icon: 'i-lucide-panels-top-left', to: '/compose' }
+  { label: '半格切分', description: '一分为二', icon: ScanLine, to: '/' },
+  { label: '排版拼图', description: '双片成章', icon: PanelsTopLeft, to: '/compose' }
 ]
 
 const isActive = (to: string) => route.path === to
 const themeIcon = computed(() => {
-  if (colorMode.preference === 'system') return 'i-lucide-monitor-cog'
-  return colorMode.value === 'dark' ? 'i-lucide-moon' : 'i-lucide-sun'
+  if (colorMode.preference === 'system') return MonitorCog
+  return colorMode.value === 'dark' ? Moon : Sun
 })
 const themeLabel = computed(() => {
   if (colorMode.preference === 'system') return '主题：跟随系统'
@@ -28,7 +31,7 @@ const cycleTheme = () => {
 </script>
 
 <template>
-  <header class="app-header shrink-0 border-b border-film-900/10 bg-film-100/88 backdrop-blur-xl">
+  <header class="app-header shrink-0 border-b border-border bg-card/88 backdrop-blur-xl">
     <div
       class="mx-auto flex max-w-420 flex-wrap items-center gap-x-5 px-4 sm:px-6 lg:flex-nowrap lg:px-8"
     >
@@ -56,12 +59,12 @@ const cycleTheme = () => {
           class="tool-tab group flex min-w-max items-center gap-2.5 rounded-lg px-3 py-2 transition-colors lg:px-4"
           :class="
             isActive(tool.to)
-              ? 'bg-film-900 text-film-50'
-              : 'text-film-500 hover:bg-film-200/65 hover:text-film-900'
+              ? 'bg-primary text-primary-foreground shadow-sm'
+              : 'text-film-500 hover:bg-accent hover:text-accent-foreground'
           "
           :aria-current="isActive(tool.to) ? 'page' : undefined"
         >
-          <UIcon :name="tool.icon" class="size-4" />
+          <component :is="tool.icon" class="size-4" />
           <span>
             <span class="block text-xs font-semibold">{{ tool.label }}</span>
             <span
@@ -74,19 +77,20 @@ const cycleTheme = () => {
 
       <div class="ml-auto flex h-16 shrink-0 items-center gap-1.5">
         <div class="mr-1 hidden items-center gap-2 text-[11px] text-film-500 xl:flex">
-          <UIcon name="i-lucide-shield-check" class="size-3.5 text-emerald-600" />
+          <ShieldCheck class="size-3.5 text-success" />
           图像仅在本地处理
         </div>
         <ClientOnly>
-          <UButton
-            :icon="themeIcon"
-            color="neutral"
+          <Button
+            type="button"
             variant="ghost"
-            size="sm"
+            size="icon-sm"
             :aria-label="themeLabel"
             :title="`${themeLabel}，点击切换`"
             @click="cycleTheme"
-          />
+          >
+            <component :is="themeIcon" />
+          </Button>
         </ClientOnly>
       </div>
     </div>
@@ -101,13 +105,13 @@ const cycleTheme = () => {
   width: 22px;
   height: 30px;
   padding: 3px;
-  border: 1px solid color-mix(in srgb, var(--color-film-900) 55%, transparent);
+  border: 1px solid currentColor;
   border-radius: 2px;
   transform: rotate(-2deg);
 }
 
 .brand-mark span {
-  background: var(--color-film-900);
+  background: currentColor;
 }
 
 .app-header {

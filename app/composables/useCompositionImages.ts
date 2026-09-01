@@ -1,8 +1,8 @@
+import { toast } from 'vue-sonner'
 import type { CompositionImage } from '~/types/composition'
 import { decodeImage, partitionSupportedImages } from '~/utils/image'
 
 export const useCompositionImages = () => {
-  const toast = useToast()
   const images = shallowRef<Array<CompositionImage | undefined>>([undefined, undefined])
   const renderingCount = ref(0)
   const rendering = computed(() => renderingCount.value > 0)
@@ -26,10 +26,8 @@ export const useCompositionImages = () => {
             return { index, file, decoded, version }
           } catch (error) {
             if (!disposed) {
-              toast.add({
-                title: `无法读取 ${file.name}`,
-                description: error instanceof Error ? error.message : '图像解码失败',
-                color: 'error'
+              toast.error(`无法读取 ${file.name}`, {
+                description: error instanceof Error ? error.message : '图像解码失败'
               })
             }
             return undefined
@@ -65,10 +63,8 @@ export const useCompositionImages = () => {
     const { supported } = partitionSupportedImages([file])
     const selected = supported[0]
     if (!selected) {
-      toast.add({
-        title: '不支持这个文件',
-        description: '请选择 TIFF、JPEG、PNG 或 WebP。',
-        color: 'warning'
+      toast.warning('不支持这个文件', {
+        description: '请选择 TIFF、JPEG、PNG 或 WebP。'
       })
       return
     }
@@ -78,10 +74,8 @@ export const useCompositionImages = () => {
   const placeDroppedFiles = async (files: File[]) => {
     const { supported, rejectedCount } = partitionSupportedImages(files)
     if (!supported.length) {
-      toast.add({
-        title: '没有可用的图像',
-        description: '请选择 TIFF、JPEG、PNG 或 WebP。',
-        color: 'warning'
+      toast.warning('没有可用的图像', {
+        description: '请选择 TIFF、JPEG、PNG 或 WebP。'
       })
       return
     }
@@ -93,16 +87,12 @@ export const useCompositionImages = () => {
     await placeFiles(selectedFiles.map((file, index) => ({ index: targets[index] ?? index, file })))
 
     if (supported.length > selectedFiles.length) {
-      toast.add({
-        title: '已加入前两张图像',
-        description: '排版画布最多放置两张图像。',
-        color: 'warning'
+      toast.warning('已加入前两张图像', {
+        description: '排版画布最多放置两张图像。'
       })
     } else if (rejectedCount) {
-      toast.add({
-        title: `已忽略 ${rejectedCount} 个不支持的文件`,
-        description: '支持 TIFF、JPEG、PNG 与 WebP。',
-        color: 'warning'
+      toast.warning(`已忽略 ${rejectedCount} 个不支持的文件`, {
+        description: '支持 TIFF、JPEG、PNG 与 WebP。'
       })
     }
   }

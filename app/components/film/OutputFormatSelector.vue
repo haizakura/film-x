@@ -26,8 +26,8 @@ const formatLabel = (format: ExportFormat) => {
       class="rounded-md px-2 py-2 font-mono text-[10px] font-medium uppercase transition"
       :class="
         modelValue === option
-          ? 'bg-film-100 text-film-900 shadow-sm'
-          : 'text-film-500 hover:text-film-800'
+          ? 'bg-primary text-primary-foreground shadow-sm'
+          : 'text-film-500 hover:bg-accent hover:text-accent-foreground'
       "
       @click="emit('update:modelValue', option)"
     >

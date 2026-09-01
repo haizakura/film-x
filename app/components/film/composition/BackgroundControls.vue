@@ -1,13 +1,15 @@
 <script setup lang="ts">
+import type { Component } from 'vue'
+import { Grid3X3, Grip, Square } from '@lucide/vue'
 import type { CompositionPattern, CompositionSettings } from '~/types/composition'
 
 const settings = defineModel<CompositionSettings>({ required: true })
 const backgroundHexInput = ref(settings.value.background)
 
-const patterns: Array<{ label: string; value: CompositionPattern; icon: string }> = [
-  { label: '纯色', value: 'none', icon: 'i-lucide-square' },
-  { label: '方格', value: 'grid', icon: 'i-lucide-grid-3x3' },
-  { label: '圆点', value: 'dots', icon: 'i-lucide-grip' }
+const patterns: Array<{ label: string; value: CompositionPattern; icon: Component }> = [
+  { label: '纯色', value: 'none', icon: Square },
+  { label: '方格', value: 'grid', icon: Grid3X3 },
+  { label: '圆点', value: 'dots', icon: Grip }
 ]
 
 const normalizeHexColor = (value: string) => {
@@ -51,7 +53,7 @@ watch(
         <span class="sr-only">背景颜色十六进制 RGB 值</span>
         <input
           v-model="backgroundHexInput"
-          class="w-full rounded-md border border-film-900/12 bg-film-100 px-3 py-2 font-mono text-xs uppercase outline-none transition focus:border-orange-500"
+          class="w-full rounded-md border border-film-900/12 bg-film-100 px-3 py-2 font-mono text-xs uppercase outline-none transition focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           type="text"
           maxlength="7"
           autocomplete="off"
@@ -71,12 +73,12 @@ watch(
         class="flex flex-col items-center gap-1.5 rounded-lg border px-2 py-2.5 text-[10px] transition"
         :class="
           settings.pattern === option.value
-            ? 'border-film-800 bg-film-200/70 text-film-900'
-            : 'border-film-900/10 text-film-500 hover:border-film-500/50'
+            ? 'border-primary bg-accent text-accent-foreground'
+            : 'border-film-900/10 text-film-500 hover:border-primary/50 hover:bg-accent/60'
         "
         @click="settings.pattern = option.value"
       >
-        <UIcon :name="option.icon" class="size-4" />
+        <component :is="option.icon" class="size-4" aria-hidden="true" />
         {{ option.label }}
       </button>
     </div>

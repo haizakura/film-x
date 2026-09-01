@@ -1,4 +1,16 @@
 <script setup lang="ts">
+import { Plus, Trash2, TriangleAlert, X } from '@lucide/vue'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
+} from '@/components/ui/alert-dialog'
+import { Button } from '@/components/ui/button'
 import type { ImageQueueItem } from '~/types/image'
 import { formatBytes } from '~/utils/image'
 
@@ -61,6 +73,10 @@ const resetPendingAction = () => {
   pendingAction.value = undefined
 }
 
+watch(confirmationOpen, (open) => {
+  if (!open) resetPendingAction()
+})
+
 const statusText = (item: ImageQueueItem) => {
   if (item.status === 'done') return '已完成'
   if (item.status === 'error') return '失败'
@@ -104,23 +120,25 @@ const selectAdjacent = (direction: -1 | 1) => {
         </p>
       </div>
       <div class="flex items-center gap-1">
-        <UButton
-          icon="i-lucide-plus"
-          color="neutral"
+        <Button
+          type="button"
           variant="ghost"
-          size="sm"
+          size="icon-sm"
           aria-label="添加图像"
           @click="emit('add')"
-        />
-        <UButton
-          class="lg:hidden"
-          icon="i-lucide-trash-2"
-          color="error"
+        >
+          <Plus />
+        </Button>
+        <Button
+          type="button"
+          class="text-destructive hover:bg-destructive/10 hover:text-destructive lg:hidden"
           variant="ghost"
-          size="sm"
+          size="icon-sm"
           aria-label="清空列表"
           @click="requestClear"
-        />
+        >
+          <Trash2 />
+        </Button>
       </div>
     </div>
 
@@ -138,7 +156,7 @@ const selectAdjacent = (direction: -1 | 1) => {
         class="queue-item group mb-0 flex w-52 shrink-0 items-stretch rounded-lg border transition lg:mb-2 lg:w-full lg:min-w-0"
         :class="
           activeId === item.id
-            ? 'border-film-800 bg-film-100 shadow-sm'
+            ? 'border-primary bg-accent/55 shadow-sm'
             : 'border-transparent hover:bg-film-100/60'
         "
       >
@@ -161,61 +179,61 @@ const selectAdjacent = (direction: -1 | 1) => {
                   'bg-film-300':
                     item.status === 'ready' &&
                     (item.analysisStatus === 'pending' || item.analysisStatus === 'failed'),
-                  'animate-pulse bg-amber-500':
+                  'animate-pulse bg-warning':
                     item.status === 'processing' || item.analysisStatus === 'analyzing',
-                  'bg-emerald-500':
+                  'bg-success':
                     item.status === 'done' ||
                     (item.status === 'ready' && item.analysisStatus === 'done'),
-                  'bg-red-500': item.status === 'error'
+                  'bg-destructive': item.status === 'error'
                 }"
               />
               {{ statusText(item) }}
             </span>
           </span>
         </button>
-        <UButton
-          class="my-auto mr-2 shrink-0 lg:invisible lg:group-hover:visible lg:focus:visible"
-          icon="i-lucide-x"
-          color="error"
+        <Button
+          type="button"
+          class="my-auto mr-2 shrink-0 text-destructive hover:bg-destructive/10 hover:text-destructive lg:invisible lg:group-hover:visible lg:focus:visible"
           variant="ghost"
-          size="xs"
+          size="icon-xs"
           :aria-label="`移除图像 ${item.name}`"
           @click.stop="requestRemove(item)"
-        />
+        >
+          <X />
+        </Button>
       </div>
     </div>
 
-    <UButton
-      class="mx-3 mb-4 hidden self-start lg:mt-2 lg:inline-flex"
-      color="error"
+    <Button
+      type="button"
+      class="mx-3 mb-4 hidden self-start text-destructive hover:bg-destructive/10 hover:text-destructive lg:mt-2 lg:inline-flex"
       variant="ghost"
       size="xs"
       @click="requestClear"
     >
       清空列表
-    </UButton>
+    </Button>
 
-    <UModal
-      v-model:open="confirmationOpen"
-      :description="confirmationDescription"
-      :close="false"
-      :ui="{ content: 'sm:max-w-md', footer: 'justify-end' }"
-      @after:leave="resetPendingAction"
-    >
-      <template #title>
-        <span class="flex items-center gap-2 text-red-600">
-          <UIcon name="i-lucide-triangle-alert" class="size-5" />
-          {{ confirmationTitle }}
-        </span>
-      </template>
-
-      <template #footer>
-        <UButton color="neutral" variant="soft" @click="confirmationOpen = false"> 取消 </UButton>
-        <UButton color="error" @click="confirmPendingAction">
-          {{ confirmationLabel }}
-        </UButton>
-      </template>
-    </UModal>
+    <AlertDialog v-model:open="confirmationOpen">
+      <AlertDialogContent class="sm:max-w-md">
+        <AlertDialogHeader>
+          <AlertDialogTitle class="flex items-center gap-2 text-destructive">
+            <TriangleAlert class="size-5" />
+            {{ confirmationTitle }}
+          </AlertDialogTitle>
+          <AlertDialogDescription>{{ confirmationDescription }}</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>取消</AlertDialogCancel>
+          <AlertDialogAction
+            class="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            @click="confirmPendingAction"
+          >
+            {{ confirmationLabel }}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   </aside>
 </template>
 

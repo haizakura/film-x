@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Image as ImageIcon, Plus, X } from '@lucide/vue'
 import type { CompositionImage } from '~/types/composition'
 
 defineProps<{ images: Array<CompositionImage | undefined> }>()
@@ -33,7 +34,8 @@ const pickFile = (index: number) => document.getElementById(inputId(index))?.cli
         @keydown.enter.prevent="pickFile(index)"
         @keydown.space.prevent="pickFile(index)"
       >
-        <UIcon :name="images[index] ? 'i-lucide-image' : 'i-lucide-plus'" class="size-4" />
+        <ImageIcon v-if="images[index]" class="size-4" aria-hidden="true" />
+        <Plus v-else class="size-4" aria-hidden="true" />
       </label>
       <label
         :for="inputId(index)"
@@ -56,7 +58,7 @@ const pickFile = (index: number) => document.getElementById(inputId(index))?.cli
         :aria-label="`移除画面 0${index + 1}`"
         @click="emit('remove', index)"
       >
-        <UIcon name="i-lucide-x" class="size-3.5" />
+        <X class="size-3.5" aria-hidden="true" />
       </button>
     </div>
   </div>

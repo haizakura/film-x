@@ -26,8 +26,8 @@ const selectPresetRatio = (value: number) => {
         class="rounded-md py-2 font-mono text-[10px] transition"
         :class="
           settings.ratioMode === 'preset' && settings.ratio === option.value
-            ? 'bg-film-100 text-film-900 shadow-sm'
-            : 'text-film-500 hover:text-film-900'
+            ? 'bg-primary text-primary-foreground shadow-sm'
+            : 'text-film-500 hover:bg-accent hover:text-accent-foreground'
         "
         @click="selectPresetRatio(option.value)"
       >
@@ -37,8 +37,8 @@ const selectPresetRatio = (value: number) => {
         class="rounded-md py-2 text-[10px] transition"
         :class="
           settings.ratioMode === 'auto'
-            ? 'bg-film-100 font-medium text-film-900 shadow-sm'
-            : 'text-film-500 hover:text-film-900'
+            ? 'bg-primary font-medium text-primary-foreground shadow-sm'
+            : 'text-film-500 hover:bg-accent hover:text-accent-foreground'
         "
         @click="settings.ratioMode = 'auto'"
       >
@@ -48,8 +48,8 @@ const selectPresetRatio = (value: number) => {
         class="rounded-md py-2 text-[10px] transition"
         :class="
           settings.ratioMode === 'custom'
-            ? 'bg-film-100 font-medium text-film-900 shadow-sm'
-            : 'text-film-500 hover:text-film-900'
+            ? 'bg-primary font-medium text-primary-foreground shadow-sm'
+            : 'text-film-500 hover:bg-accent hover:text-accent-foreground'
         "
         @click="settings.ratioMode = 'custom'"
       >
@@ -62,7 +62,7 @@ const selectPresetRatio = (value: number) => {
         <span class="sr-only">自定义比例宽度</span>
         <input
           v-model.number="settings.customRatioWidth"
-          class="w-full rounded-md border border-film-900/12 bg-film-100 px-3 py-2 text-center font-mono text-xs outline-none focus:border-orange-500"
+          class="w-full rounded-md border border-film-900/12 bg-film-100 px-3 py-2 text-center font-mono text-xs outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           type="number"
           min="1"
           max="99"
@@ -75,7 +75,7 @@ const selectPresetRatio = (value: number) => {
         <span class="sr-only">自定义比例高度</span>
         <input
           v-model.number="settings.customRatioHeight"
-          class="w-full rounded-md border border-film-900/12 bg-film-100 px-3 py-2 text-center font-mono text-xs outline-none focus:border-orange-500"
+          class="w-full rounded-md border border-film-900/12 bg-film-100 px-3 py-2 text-center font-mono text-xs outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           type="number"
           min="1"
           max="99"

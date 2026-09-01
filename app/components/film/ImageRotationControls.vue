@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { RotateCcw, RotateCw } from '@lucide/vue'
+import { Button } from '@/components/ui/button'
 import type { Rotation, SplitSettings } from '~/types/image'
 import { rotateClockwise, rotateCounterClockwise } from '~/utils/image'
 
@@ -35,22 +37,24 @@ const rotationLabel = (rotation: Rotation) => (rotation === 0 ? '原向' : `${ro
           </p>
         </div>
         <div class="flex gap-1">
-          <UButton
-            icon="i-lucide-rotate-ccw"
-            color="neutral"
+          <Button
+            type="button"
             variant="ghost"
-            size="sm"
+            size="icon-sm"
             :aria-label="`画面 ${side === 'left' ? '01' : '02'} 逆时针旋转`"
             @click="setRotation(side, 'ccw')"
-          />
-          <UButton
-            icon="i-lucide-rotate-cw"
-            color="neutral"
+          >
+            <RotateCcw />
+          </Button>
+          <Button
+            type="button"
             variant="ghost"
-            size="sm"
+            size="icon-sm"
             :aria-label="`画面 ${side === 'left' ? '01' : '02'} 顺时针旋转`"
             @click="setRotation(side, 'cw')"
-          />
+          >
+            <RotateCw />
+          </Button>
         </div>
       </div>
     </div>

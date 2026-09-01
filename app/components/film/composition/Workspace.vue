@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ArrowLeftRight, ArrowUpDown, LoaderCircle } from '@lucide/vue'
 import type {
   CompositionGeometry,
   CompositionImage,
@@ -49,7 +50,7 @@ defineExpose({ download })
       class="flex min-h-14 flex-wrap items-center justify-between gap-3 border-b border-white/8 px-5 text-white/70"
     >
       <div>
-        <p class="font-mono text-[9px] tracking-[0.18em] text-orange-300 uppercase">
+        <p class="font-mono text-[9px] tracking-[0.18em] text-white/45 uppercase">
           Tool 02 · Composer
         </p>
         <h2 class="mt-1 text-sm font-semibold text-white">半格胶片排版拼图</h2>
@@ -60,14 +61,12 @@ defineExpose({ download })
           :disabled="!images.some(Boolean)"
           @click="emit('swap')"
         >
-          <UIcon
-            :name="
-              settings.layoutDirection === 'horizontal'
-                ? 'i-lucide-arrow-left-right'
-                : 'i-lucide-arrow-up-down'
-            "
+          <ArrowLeftRight
+            v-if="settings.layoutDirection === 'horizontal'"
             class="size-3.5"
+            aria-hidden="true"
           />
+          <ArrowUpDown v-else class="size-3.5" aria-hidden="true" />
           交换位置
         </button>
         <span class="font-mono text-[9px] text-white/35">
@@ -91,7 +90,7 @@ defineExpose({ download })
           v-if="rendering"
           class="absolute inset-0 grid place-items-center bg-black/40 text-white backdrop-blur-sm"
         >
-          <UIcon name="i-lucide-loader-circle" class="size-7 animate-spin" />
+          <LoaderCircle class="size-7 animate-spin" aria-hidden="true" />
         </div>
       </div>
     </div>
