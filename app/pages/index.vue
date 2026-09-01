@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { toast } from 'vue-sonner'
 import type { ImageQueueItem, SplitSettings } from '~/types/image'
 import { baseName } from '~/utils/image'
 
@@ -8,8 +9,6 @@ useSeoMeta({
   title: '半格胶片切分',
   description: '自动识别半格胶片扫描中缝，在浏览器本地完成切分、旋转与批量导出。'
 })
-
-const toast = useToast()
 
 const {
   queue,
@@ -30,7 +29,7 @@ const { analyzeDecodedItem, analyzeItems } = useAutoSplitDetection()
 const { decoded, isLoading } = useImagePreview(activeItem, {
   onError: (item, message) => {
     item.analysisStatus = 'failed'
-    toast.add({ title: `无法读取 ${item.name}`, description: message, color: 'error' })
+    toast.error(`无法读取 ${item.name}`, { description: message })
   },
   onDecoded: (item, image) => {
     if (item.analysisStatus === 'pending') analyzeDecodedItem(item, image)
@@ -53,10 +52,8 @@ const acceptFiles = (files: File[]) => {
   const backgroundItems = addedItems.filter((item) => item.id !== activeId.value)
   void analyzeItems(backgroundItems)
   if (rejectedCount) {
-    toast.add({
-      title: `已忽略 ${rejectedCount} 个不支持的文件`,
-      description: '支持 TIFF、JPEG、PNG 与 WebP。',
-      color: 'warning'
+    toast.warning(`已忽略 ${rejectedCount} 个不支持的文件`, {
+      description: '支持 TIFF、JPEG、PNG 与 WebP。'
     })
   }
 }
@@ -71,7 +68,7 @@ const updateCenter = (center: number) => {
 const applyCurrentSettingsToAll = () => {
   if (!activeItem.value) return
   applySettingsToAll(activeItem.value.settings)
-  toast.add({ title: '已应用到全部图像', color: 'success' })
+  toast.success('已应用到全部图像')
 }
 
 const waitForActivePreview = (items: ImageQueueItem[]) => {
@@ -96,16 +93,13 @@ const runExport = async (items: ImageQueueItem[], archiveName: string) => {
     const result = await exportItems(items, archiveName)
     if (!result) return
 
-    toast.add({
-      title: result.failedCount ? `导出完成，${result.failedCount} 个文件失败` : '切分完成',
-      description: `已生成 ${result.generatedCount} 张图像。`,
-      color: result.failedCount ? 'warning' : 'success'
-    })
+    const title = result.failedCount ? `导出完成，${result.failedCount} 个文件失败` : '切分完成'
+    const options = { description: `已生成 ${result.generatedCount} 张图像。` }
+    if (result.failedCount) toast.warning(title, options)
+    else toast.success(title, options)
   } catch (error) {
-    toast.add({
-      title: '导出失败',
-      description: error instanceof Error ? error.message : '无法生成压缩包',
-      color: 'error'
+    toast.error('导出失败', {
+      description: error instanceof Error ? error.message : '无法生成压缩包'
     })
   }
 }

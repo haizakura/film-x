@@ -1,52 +1,102 @@
 @import 'tailwindcss';
-@import '@nuxt/ui';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
 
 @theme static {
   --font-sans: 'Avenir Next', 'PingFang SC', 'Hiragino Sans GB', 'Noto Sans CJK SC', sans-serif;
   --font-mono: 'SFMono-Regular', 'Cascadia Code', monospace;
-  --color-film-50: #f8f8f6;
-  --color-film-100: #fefefe;
-  --color-film-200: #efefeb;
-  --color-film-300: #deddd7;
-  --color-film-400: #aaa69d;
-  --color-film-500: #726e66;
-  --color-film-600: #58544d;
-  --color-film-700: #413e39;
-  --color-film-800: #2b2926;
-  --color-film-900: #191817;
-  --color-film-950: #0f0f0e;
+  --color-film-50: #fafcff;
+  --color-film-100: #ffffff;
+  --color-film-200: #f0f2f5;
+  --color-film-300: #cdd0d6;
+  --color-film-400: #a8abb2;
+  --color-film-500: #909399;
+  --color-film-600: #606266;
+  --color-film-700: #4f5155;
+  --color-film-800: #303133;
+  --color-film-900: #303133;
+  --color-film-950: #000000;
 }
 
 :root {
   color-scheme: light;
-  --ui-primary: var(--color-orange-600);
-  --ui-radius: 0.65rem;
-  --ui-bg: var(--color-film-100);
-  --ui-bg-elevated: var(--color-film-50);
-  --ui-border: color-mix(in srgb, var(--color-film-500) 18%, transparent);
-  --ui-text: var(--color-film-900);
-  --ui-text-muted: color-mix(in srgb, var(--color-film-900) 62%, transparent);
+  --radius: 0.625rem;
+  --background: #f2f3f5;
+  --foreground: #303133;
+  --card: #ffffff;
+  --card-foreground: #303133;
+  --popover: #ffffff;
+  --popover-foreground: #303133;
+  --primary: #409eff;
+  --primary-foreground: #ffffff;
+  --secondary: #f0f2f5;
+  --secondary-foreground: #303133;
+  --muted: #f5f7fa;
+  --muted-foreground: #909399;
+  --accent: #ecf5ff;
+  --accent-foreground: #337ecc;
+  --destructive: #f56c6c;
+  --destructive-foreground: #303133;
+  --success: #67c23a;
+  --warning: #e6a23c;
+  --info: #909399;
+  --border: #dcdfe6;
+  --input: #d4d7de;
+  --ring: #409eff;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #303133;
+  --sidebar-primary: #409eff;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #ecf5ff;
+  --sidebar-accent-foreground: #337ecc;
+  --sidebar-border: #dcdfe6;
+  --sidebar-ring: #409eff;
 }
 
 .dark {
   color-scheme: dark;
-  --color-film-50: #1c1c1c;
+  --color-film-50: #1d1d1d;
   --color-film-100: #141414;
-  --color-film-200: #272725;
-  --color-film-300: #3b3a37;
-  --color-film-400: #77736c;
-  --color-film-500: #aaa59c;
-  --color-film-600: #c6c2ba;
-  --color-film-700: #ddd9d2;
-  --color-film-800: #efede9;
-  --color-film-900: #f8f7f4;
-  --color-film-950: #fefdfb;
-  --ui-primary: var(--color-orange-400);
-  --ui-bg: var(--color-film-100);
-  --ui-bg-elevated: var(--color-film-50);
-  --ui-border: color-mix(in srgb, var(--color-film-500) 24%, transparent);
-  --ui-text: var(--color-film-900);
-  --ui-text-muted: color-mix(in srgb, var(--color-film-900) 62%, transparent);
+  --color-film-200: #303030;
+  --color-film-300: #424243;
+  --color-film-400: #6c6e72;
+  --color-film-500: #a3a6ad;
+  --color-film-600: #cfd3dc;
+  --color-film-700: #cfd3dc;
+  --color-film-800: #e5eaf3;
+  --color-film-900: #e5eaf3;
+  --color-film-950: #ffffff;
+  --background: #0a0a0a;
+  --foreground: #e5eaf3;
+  --card: #141414;
+  --card-foreground: #e5eaf3;
+  --popover: #1d1e1f;
+  --popover-foreground: #e5eaf3;
+  --primary: #409eff;
+  --primary-foreground: #303133;
+  --secondary: #303030;
+  --secondary-foreground: #e5eaf3;
+  --muted: #262727;
+  --muted-foreground: #a3a6ad;
+  --accent: color-mix(in srgb, #409eff 18%, #141414);
+  --accent-foreground: #79bbff;
+  --destructive: #f56c6c;
+  --destructive-foreground: #303133;
+  --success: #67c23a;
+  --warning: #e6a23c;
+  --info: #a3a6ad;
+  --border: #4c4d4f;
+  --input: #58585b;
+  --ring: #409eff;
+  --sidebar: #141414;
+  --sidebar-foreground: #e5eaf3;
+  --sidebar-primary: #409eff;
+  --sidebar-primary-foreground: #303133;
+  --sidebar-accent: color-mix(in srgb, #409eff 18%, #141414);
+  --sidebar-accent-foreground: #79bbff;
+  --sidebar-border: #4c4d4f;
+  --sidebar-ring: #409eff;
 }
 
 * {
@@ -54,24 +104,24 @@
 }
 
 html {
-  background: var(--color-film-100);
+  background: var(--background);
   transition: background-color 180ms ease;
 }
 
 body {
   margin: 0;
   min-width: 320px;
-  color: var(--color-film-900);
+  color: var(--foreground);
   background:
-    radial-gradient(circle at 18% -20%, rgb(234 88 12 / 5.5%), transparent 34rem),
-    var(--color-film-100);
+    radial-gradient(circle at 18% -20%, rgb(64 158 255 / 7%), transparent 34rem), var(--background);
   transition:
     color 180ms ease,
     background-color 180ms ease;
 }
 
 .dark body {
-  background: radial-gradient(circle at 18% -20%, rgb(251 146 60 / 5%), transparent 32rem), #141414;
+  background:
+    radial-gradient(circle at 18% -20%, rgb(64 158 255 / 8%), transparent 32rem), var(--background);
 }
 
 button,
@@ -93,12 +143,12 @@ label[for],
 
 ::selection {
   color: white;
-  background: var(--color-film-700);
+  background: var(--primary);
 }
 
 .film-grain::after {
   position: fixed;
-  z-index: 50;
+  z-index: 20;
   inset: 0;
   pointer-events: none;
   content: '';
@@ -117,7 +167,7 @@ label[for],
   appearance: none;
   border-radius: 999px;
   outline: none;
-  background: var(--color-film-200);
+  background: var(--secondary);
 }
 
 .range::-webkit-slider-thumb {
@@ -125,9 +175,9 @@ label[for],
   height: 17px;
   appearance: none;
   cursor: grab;
-  border: 3px solid var(--color-film-50);
+  border: 3px solid var(--card);
   border-radius: 50%;
-  background: var(--color-film-800);
+  background: var(--primary);
   box-shadow: 0 0 0 1px rgb(0 0 0 / 16%);
 }
 
@@ -135,25 +185,72 @@ label[for],
   width: 12px;
   height: 12px;
   cursor: grab;
-  border: 3px solid var(--color-film-50);
+  border: 3px solid var(--card);
   border-radius: 50%;
-  background: var(--color-film-800);
+  background: var(--primary);
 }
 
 .eyebrow {
   font-family: var(--font-mono);
   font-size: 9px;
   letter-spacing: 0.2em;
-  color: var(--color-film-500);
+  color: var(--primary);
   text-transform: uppercase;
 }
 
 .panel-surface {
-  border: 1px solid color-mix(in srgb, var(--color-film-900) 10%, transparent);
-  background: color-mix(in srgb, var(--color-film-50) 78%, transparent);
-  box-shadow: 0 18px 50px color-mix(in srgb, var(--color-film-950) 8%, transparent);
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--card) 88%, transparent);
+  box-shadow: 0 18px 50px color-mix(in srgb, var(--foreground) 8%, transparent);
 }
 
 .dark .panel-surface {
   box-shadow: 0 20px 60px rgb(0 0 0 / 24%);
+}
+
+@theme inline {
+  --font-heading: var(--font-sans);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-info: var(--info);
+  --color-warning: var(--warning);
+  --color-success: var(--success);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }

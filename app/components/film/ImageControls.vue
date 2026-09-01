@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { CopyCheck } from '@lucide/vue'
+import { Button } from '@/components/ui/button'
 import type { AnalysisStatus, ExportFormat, SplitSettings } from '~/types/image'
 
 defineProps<{
@@ -56,14 +58,10 @@ const emit = defineEmits<{
     >
       <template #actions>
         <div class="space-y-2 p-5">
-          <UButton
-            block
-            color="neutral"
-            variant="outline"
-            icon="i-lucide-copy-check"
-            label="将设置应用到全部"
-            @click="emit('apply-all')"
-          />
+          <Button type="button" class="w-full" variant="outline" @click="emit('apply-all')">
+            <CopyCheck />
+            将设置应用到全部
+          </Button>
           <button
             class="mx-auto block py-1 text-[11px] text-film-400 hover:text-film-700"
             @click="emit('reset')"

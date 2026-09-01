@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { Check } from '@lucide/vue'
+import { Switch } from '@/components/ui/switch'
 import type { CompositionSettings } from '~/types/composition'
 
 const MAX_PADDING = 220
@@ -51,12 +53,11 @@ const isMixedPadding = computed(() => {
         <span class="font-medium">外边距</span>
         <label class="flex items-center gap-2 text-[10px] text-film-500">
           独立设置
-          <USwitch
-            v-model="advancedPadding"
-            size="sm"
-            checked-icon="i-lucide-check"
-            aria-label="分别设置四边外边距"
-          />
+          <Switch v-model="advancedPadding" size="sm" aria-label="分别设置四边外边距">
+            <template #thumb="{ checked }">
+              <Check v-if="checked" class="size-2 stroke-3" aria-hidden="true" />
+            </template>
+          </Switch>
         </label>
       </div>
 
@@ -160,14 +161,22 @@ const isMixedPadding = computed(() => {
     <div class="grid grid-cols-2 gap-2 rounded-lg bg-film-200/70 p-1">
       <button
         class="rounded-md py-2 text-[11px]"
-        :class="settings.fit === 'cover' ? 'bg-film-100 font-medium shadow-sm' : 'text-film-500'"
+        :class="
+          settings.fit === 'cover'
+            ? 'bg-primary font-medium text-primary-foreground shadow-sm'
+            : 'text-film-500 hover:bg-accent hover:text-accent-foreground'
+        "
         @click="settings.fit = 'cover'"
       >
         填满裁切
       </button>
       <button
         class="rounded-md py-2 text-[11px]"
-        :class="settings.fit === 'contain' ? 'bg-film-100 font-medium shadow-sm' : 'text-film-500'"
+        :class="
+          settings.fit === 'contain'
+            ? 'bg-primary font-medium text-primary-foreground shadow-sm'
+            : 'text-film-500 hover:bg-accent hover:text-accent-foreground'
+        "
         @click="settings.fit = 'contain'"
       >
         完整显示

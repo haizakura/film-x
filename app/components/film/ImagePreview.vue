@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ImageOff, LoaderCircle } from '@lucide/vue'
 import type { DecodedImage, SplitSettings } from '~/types/image'
 
 const props = defineProps<{
@@ -36,7 +37,7 @@ const updateCenter = (event: Event) => {
 </script>
 
 <template>
-  <section class="flex min-h-140 min-w-0 flex-col bg-[#171612] lg:min-h-0">
+  <section class="flex min-h-140 min-w-0 flex-col bg-[#141414] lg:min-h-0">
     <div class="flex h-13 items-center justify-between border-b border-white/8 px-5 text-white/70">
       <p class="min-w-0 truncate text-xs font-medium text-white/90">{{ name }}</p>
       <div v-if="decoded" class="font-mono text-[10px] tracking-wide text-white/45">
@@ -48,7 +49,7 @@ const updateCenter = (event: Event) => {
       class="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden p-5 sm:p-8"
     >
       <div v-if="loading" class="flex flex-col items-center gap-3 text-white/50">
-        <UIcon name="i-lucide-loader-circle" class="size-6 animate-spin" />
+        <LoaderCircle class="size-6 animate-spin" />
         <span class="font-mono text-[10px] tracking-widest uppercase">正在读取原片</span>
       </div>
 
@@ -58,14 +59,14 @@ const updateCenter = (event: Event) => {
       >
         <canvas ref="canvas" class="block max-h-[calc(100vh-180px)] max-w-full object-contain" />
         <div
-          class="pointer-events-none absolute inset-y-0 bg-amber-400/18 ring-1 ring-amber-300/80"
+          class="pointer-events-none absolute inset-y-0 bg-warning/20 ring-1 ring-warning/80"
           :style="{
             left: `${(settings.center - settings.gap / 2) * 100}%`,
             width: `${settings.gap * 100}%`
           }"
         >
           <span
-            class="absolute top-0 bottom-0 left-1/2 w-px -translate-x-1/2 bg-amber-300 shadow-[0_0_8px_rgba(252,211,77,.9)]"
+            class="absolute top-0 bottom-0 left-1/2 w-px -translate-x-1/2 bg-warning shadow-[0_0_8px_rgb(230_162_60/.9)]"
           />
         </div>
         <div
@@ -77,9 +78,9 @@ const updateCenter = (event: Event) => {
       </div>
 
       <div v-else class="text-center text-white/50">
-        <UIcon name="i-lucide-image-off" class="mx-auto mb-3 size-7" />
+        <ImageOff class="mx-auto mb-3 size-7" />
         <p class="text-sm">无法预览这张图像</p>
-        <p v-if="error" class="mt-1 text-xs text-red-300">{{ error }}</p>
+        <p v-if="error" class="mt-1 text-xs text-[#f89898]">{{ error }}</p>
       </div>
     </div>
 
@@ -108,7 +109,7 @@ const updateCenter = (event: Event) => {
 }
 
 .range-dark::-webkit-slider-thumb {
-  border-color: #171612;
-  background: #f5d06f;
+  border-color: #141414;
+  background: var(--primary);
 }
 </style>

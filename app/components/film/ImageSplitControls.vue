@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { LoaderCircle, ScanSearch } from '@lucide/vue'
 import type { AnalysisStatus, SplitSettings } from '~/types/image'
 
 const props = defineProps<{ settings: SplitSettings; analysisStatus: AnalysisStatus }>()
@@ -25,11 +26,11 @@ const updateNumber = (key: 'center' | 'gap', event: Event) => {
         :disabled="analysisStatus === 'analyzing' || analysisStatus === 'pending'"
         @click="emit('detect')"
       >
-        <UIcon
-          :name="
+        <component
+          :is="
             analysisStatus === 'analyzing' || analysisStatus === 'pending'
-              ? 'i-lucide-loader-circle'
-              : 'i-lucide-scan-search'
+              ? LoaderCircle
+              : ScanSearch
           "
           class="size-3"
           :class="{ 'animate-spin': analysisStatus === 'analyzing' }"

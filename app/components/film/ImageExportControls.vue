@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { Loader2, PackageOpen } from '@lucide/vue'
+import { Button } from '@/components/ui/button'
+import { Progress } from '@/components/ui/progress'
 import type { ExportFormat } from '~/types/image'
 
 defineProps<{
@@ -25,7 +28,7 @@ const formats: ExportFormat[] = ['jpeg', 'png', 'webp', 'tiff']
   <div class="border-b border-film-900/10 px-5 py-5">
     <div class="flex items-center justify-between">
       <p class="eyebrow">输出</p>
-      <span v-if="completedCount" class="font-mono text-[9px] text-emerald-700">
+      <span v-if="completedCount" class="font-mono text-[9px] text-success">
         {{ completedCount }}/{{ totalCount }} DONE
       </span>
     </div>
@@ -69,63 +72,30 @@ const formats: ExportFormat[] = ['jpeg', 'png', 'webp', 'tiff']
         <span class="truncate">{{ exportLabel }}</span>
         <span class="font-mono">{{ exportProgress }}%</span>
       </div>
-      <UProgress :model-value="exportProgress" size="xs" />
+      <Progress :model-value="exportProgress" />
     </div>
-    <UButton
-      block
-      class="export-button"
-      color="neutral"
-      variant="solid"
+    <Button
+      type="button"
+      class="w-full shadow-md shadow-primary/15"
       size="lg"
-      icon="i-lucide-package-open"
-      :loading="exporting"
-      :label="totalCount > 1 ? `切分全部 ${totalCount} 张` : '切分并下载'"
+      :disabled="exporting"
+      :aria-busy="exporting"
       @click="emit('export-all')"
-    />
-    <UButton
+    >
+      <Loader2 v-if="exporting" class="animate-spin" />
+      <PackageOpen v-else />
+      {{ totalCount > 1 ? `切分全部 ${totalCount} 张` : '切分并下载' }}
+    </Button>
+    <Button
       v-if="totalCount > 1"
-      block
-      class="current-export-button mt-2"
-      color="neutral"
+      type="button"
+      class="mt-2 w-full"
       variant="outline"
       size="sm"
       :disabled="exporting"
-      label="仅导出当前图像"
       @click="emit('export-current')"
-    />
+    >
+      仅导出当前图像
+    </Button>
   </div>
 </template>
-
-<style scoped>
-.export-button {
-  border: 1px solid var(--color-film-900) !important;
-  color: var(--color-film-100) !important;
-  background: var(--color-film-900) !important;
-  box-shadow: 0 8px 22px rgb(29 24 18 / 18%);
-}
-
-.export-button:hover {
-  background: var(--color-film-700) !important;
-}
-
-.export-button:focus-visible {
-  outline: 3px solid rgb(245 158 11 / 35%);
-  outline-offset: 2px;
-}
-
-.current-export-button {
-  border-color: var(--color-film-300) !important;
-  color: var(--color-film-800) !important;
-  background: var(--color-film-100) !important;
-}
-
-.current-export-button:hover:not(:disabled) {
-  border-color: var(--color-film-500) !important;
-  background: var(--color-film-200) !important;
-}
-
-.current-export-button:focus-visible {
-  outline: 3px solid rgb(120 97 67 / 25%);
-  outline-offset: 2px;
-}
-</style>

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Columns2, Rows2 } from '@lucide/vue'
 import type { CompositionSettings } from '~/types/composition'
 
 const settings = defineModel<CompositionSettings>({ required: true })
@@ -12,24 +13,24 @@ const settings = defineModel<CompositionSettings>({ required: true })
         class="flex items-center justify-center gap-2 rounded-md py-2 text-[11px] transition"
         :class="
           settings.layoutDirection === 'horizontal'
-            ? 'bg-film-100 font-medium text-film-900 shadow-sm'
-            : 'text-film-500 hover:text-film-900'
+            ? 'bg-primary font-medium text-primary-foreground shadow-sm'
+            : 'text-film-500 hover:bg-accent hover:text-accent-foreground'
         "
         @click="settings.layoutDirection = 'horizontal'"
       >
-        <UIcon name="i-lucide-columns-2" class="size-3.5" />
+        <Columns2 class="size-3.5" aria-hidden="true" />
         左右
       </button>
       <button
         class="flex items-center justify-center gap-2 rounded-md py-2 text-[11px] transition"
         :class="
           settings.layoutDirection === 'vertical'
-            ? 'bg-film-100 font-medium text-film-900 shadow-sm'
-            : 'text-film-500 hover:text-film-900'
+            ? 'bg-primary font-medium text-primary-foreground shadow-sm'
+            : 'text-film-500 hover:bg-accent hover:text-accent-foreground'
         "
         @click="settings.layoutDirection = 'vertical'"
       >
-        <UIcon name="i-lucide-rows-2" class="size-3.5" />
+        <Rows2 class="size-3.5" aria-hidden="true" />
         上下
       </button>
     </div>

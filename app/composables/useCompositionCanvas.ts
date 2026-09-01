@@ -1,4 +1,5 @@
 import type { MaybeRefOrGetter } from 'vue'
+import { toast } from 'vue-sonner'
 
 import type {
   CompositionGeometry,
@@ -107,7 +108,6 @@ export const useCompositionCanvas = (
   geometry: MaybeRefOrGetter<CompositionGeometry>,
   settings: MaybeRefOrGetter<CompositionSettings>
 ) => {
-  const toast = useToast()
   const canvas = ref<HTMLCanvasElement>()
   let animationFrame: number | undefined
 
@@ -153,7 +153,7 @@ export const useCompositionCanvas = (
     const currentImages = toValue(images)
     const currentSettings = toValue(settings)
     if (!target || !currentImages.some(Boolean)) {
-      toast.add({ title: '请先加入照片', color: 'warning' })
+      toast.warning('请先加入照片')
       return
     }
 
@@ -165,12 +165,10 @@ export const useCompositionCanvas = (
       )
       const extension = currentSettings.outputFormat === 'jpeg' ? 'jpg' : 'png'
       downloadBlob(blob, `film-x-layout.${extension}`)
-      toast.add({ title: '排版图像已生成', color: 'success' })
+      toast.success('排版图像已生成')
     } catch (error) {
-      toast.add({
-        title: '生成失败',
-        description: error instanceof Error ? error.message : '无法生成排版图像',
-        color: 'error'
+      toast.error('生成失败', {
+        description: error instanceof Error ? error.message : '无法生成排版图像'
       })
     }
   }

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { Download } from '@lucide/vue'
+import { Button } from '@/components/ui/button'
 import type { CompositionOutputFormat, CompositionSettings } from '~/types/composition'
 import type { ExportFormat } from '~/types/image'
 
@@ -19,14 +21,9 @@ const updateFormat = (format: ExportFormat) => {
       :formats="formats"
       @update:model-value="updateFormat"
     />
-    <UButton
-      block
-      color="neutral"
-      size="lg"
-      icon="i-lucide-download"
-      :disabled="!hasImages"
-      label="生成并下载"
-      @click="emit('download')"
-    />
+    <Button class="w-full" size="lg" type="button" :disabled="!hasImages" @click="emit('download')">
+      <Download class="size-4" aria-hidden="true" />
+      生成并下载
+    </Button>
   </div>
 </template>

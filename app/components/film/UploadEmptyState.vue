@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { ScanLine } from '@lucide/vue'
+
 defineProps<{
   fileInputId: string
   isDragging: boolean
@@ -11,9 +13,9 @@ const emit = defineEmits<{ pick: [] }>()
   <main class="mx-auto flex max-w-6xl flex-col px-5 py-10 lg:py-14">
     <section class="mb-8 max-w-3xl lg:mb-10">
       <p
-        class="mb-4 flex items-center gap-2 font-mono text-xs tracking-[0.2em] text-amber-700 uppercase"
+        class="mb-4 flex items-center gap-2 font-mono text-xs tracking-[0.2em] text-primary uppercase"
       >
-        <span class="h-px w-7 bg-amber-700" />
+        <span class="h-px w-7 bg-primary" />
         Tool 01 · Splitter
       </p>
       <h2
@@ -30,8 +32,8 @@ const emit = defineEmits<{ pick: [] }>()
       :for="fileInputId"
       role="button"
       tabindex="0"
-      class="drop-zone group relative min-h-64 overflow-hidden rounded-2xl border border-dashed border-film-500/45 bg-film-50/60 p-8 text-left transition hover:border-orange-600/60 hover:bg-film-50 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-orange-600"
-      :class="{ 'border-orange-600 bg-orange-500/8': isDragging }"
+      class="drop-zone group relative min-h-64 overflow-hidden rounded-2xl border border-dashed border-film-500/45 bg-card/65 p-8 text-left transition hover:border-primary/70 hover:bg-card focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
+      :class="{ 'border-primary bg-accent/70': isDragging }"
       @keydown.enter.prevent="emit('pick')"
       @keydown.space.prevent="emit('pick')"
     >
@@ -42,7 +44,7 @@ const emit = defineEmits<{ pick: [] }>()
         <span
           class="mb-6 grid size-15 place-items-center rounded-full border border-film-900/10 bg-film-100 shadow-sm transition group-hover:-translate-y-1"
         >
-          <UIcon name="i-lucide-scan-line" class="size-6 text-film-800" />
+          <ScanLine class="size-6 text-primary" />
         </span>
         <span class="text-lg font-semibold">拖入扫描图像</span>
         <span class="mt-2 text-sm text-film-500">或点击选择单张 / 多张文件</span>
@@ -70,7 +72,7 @@ const emit = defineEmits<{ pick: [] }>()
   bottom: 0;
   width: 1px;
   content: '';
-  background: linear-gradient(transparent 8%, rgb(120 97 67 / 18%) 8% 92%, transparent 92%);
+  background: linear-gradient(transparent 8%, rgb(64 158 255 / 18%) 8% 92%, transparent 92%);
 }
 
 .drop-zone::before {
@@ -94,7 +96,7 @@ const emit = defineEmits<{ pick: [] }>()
   height: 22px;
   place-items: center;
   flex: 0 0 auto;
-  border: 1px solid rgb(71 54 35 / 16%);
+  border: 1px solid rgb(64 158 255 / 24%);
   border-radius: 4px;
   font-family: var(--font-mono);
   font-size: 9px;
