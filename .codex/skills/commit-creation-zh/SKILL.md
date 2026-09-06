@@ -1,5 +1,5 @@
 ---
-name: commit-creation
+name: commit-creation-zh
 description: Generate, split, and validate Git commits using this repository's Conventional Commits format with concise Chinese summaries and bullet bodies. Use when staging changes, planning multiple commits, creating commits, or writing commit messages.
 ---
 
