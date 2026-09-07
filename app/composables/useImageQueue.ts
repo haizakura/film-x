@@ -22,15 +22,17 @@ export const useImageQueue = () => {
     const knownFiles = new Set(queue.value.map((item) => `${item.name}:${item.size}`))
     const unique = supported.filter((file) => !knownFiles.has(`${file.name}:${file.size}`))
 
-    const addedItems: ImageQueueItem[] = unique.map((file) => ({
-      id: crypto.randomUUID(),
-      file,
-      name: file.name,
-      size: file.size,
-      status: 'ready' as const,
-      analysisStatus: 'pending' as const,
-      settings: createSettings()
-    }))
+    const addedItems: ImageQueueItem[] = unique.map((file) =>
+      reactive({
+        id: crypto.randomUUID(),
+        file,
+        name: file.name,
+        size: file.size,
+        status: 'ready' as const,
+        analysisStatus: 'pending' as const,
+        settings: createSettings()
+      })
+    )
     queue.value.push(...addedItems)
 
     if (!activeId.value && queue.value[0]) activeId.value = queue.value[0].id
