@@ -25,7 +25,7 @@ const emit = defineEmits<{ download: [] }>()
 <style scoped>
 .controls-scroll {
   scrollbar-width: thin;
-  scrollbar-color: color-mix(in srgb, var(--color-film-500) 58%, transparent) transparent;
+  scrollbar-color: color-mix(in srgb, var(--muted-foreground) 58%, transparent) transparent;
 }
 
 .controls-scroll::-webkit-scrollbar {
@@ -38,6 +38,6 @@ const emit = defineEmits<{ download: [] }>()
 
 .controls-scroll::-webkit-scrollbar-thumb {
   border-radius: 999px;
-  background: color-mix(in srgb, var(--color-film-500) 58%, transparent);
+  background: color-mix(in srgb, var(--muted-foreground) 58%, transparent);
 }
 </style>

@@ -6,15 +6,15 @@ const settings = defineModel<CompositionSettings>({ required: true })
 </script>
 
 <template>
-  <div class="border-b border-film-900/10 p-5">
+  <div class="border-b border-border p-5">
     <p class="eyebrow">画面布局</p>
-    <div class="mt-4 grid grid-cols-2 gap-1 rounded-lg bg-film-200/75 p-1">
+    <div class="mt-4 grid grid-cols-2 gap-1 rounded-lg bg-muted p-1">
       <button
         class="flex items-center justify-center gap-2 rounded-md py-2 text-[11px] transition"
         :class="
           settings.layoutDirection === 'horizontal'
             ? 'bg-primary font-medium text-primary-foreground shadow-sm'
-            : 'text-film-500 hover:bg-accent hover:text-accent-foreground'
+            : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
         "
         @click="settings.layoutDirection = 'horizontal'"
       >
@@ -26,7 +26,7 @@ const settings = defineModel<CompositionSettings>({ required: true })
         :class="
           settings.layoutDirection === 'vertical'
             ? 'bg-primary font-medium text-primary-foreground shadow-sm'
-            : 'text-film-500 hover:bg-accent hover:text-accent-foreground'
+            : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
         "
         @click="settings.layoutDirection = 'vertical'"
       >

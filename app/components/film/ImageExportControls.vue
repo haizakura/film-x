@@ -25,10 +25,10 @@ const formats: ExportFormat[] = ['jpeg', 'png', 'webp', 'tiff']
 </script>
 
 <template>
-  <div class="border-b border-film-900/10 px-5 py-5">
+  <div class="border-b border-border px-5 py-5">
     <div class="flex items-center justify-between">
       <p class="eyebrow">输出</p>
-      <span v-if="completedCount" class="font-mono text-[9px] text-success">
+      <span v-if="completedCount" class="font-mono text-[9px] text-primary">
         {{ completedCount }}/{{ totalCount }} DONE
       </span>
     </div>
@@ -42,7 +42,7 @@ const formats: ExportFormat[] = ['jpeg', 'png', 'webp', 'tiff']
     <label v-if="format === 'jpeg' || format === 'webp'" class="mt-5 block">
       <span class="mb-3 flex items-center justify-between text-xs">
         <span class="font-medium">输出质量</span>
-        <output class="font-mono text-[10px] text-film-500"
+        <output class="font-mono text-[10px] text-muted-foreground"
           >{{ Math.round(quality * 100) }}%</output
         >
       </span>
@@ -56,7 +56,7 @@ const formats: ExportFormat[] = ['jpeg', 'png', 'webp', 'tiff']
         @input="emit('update:quality', Number(($event.target as HTMLInputElement).value))"
       />
     </label>
-    <p v-else class="mt-4 text-[11px] leading-5 text-film-500">
+    <p v-else class="mt-4 text-[11px] leading-5 text-muted-foreground">
       <template v-if="format === 'tiff'">
         TIF 使用未压缩 RGBA 像素输出，避免再次有损编码，文件体积会很大。
       </template>
@@ -66,9 +66,9 @@ const formats: ExportFormat[] = ['jpeg', 'png', 'webp', 'tiff']
 
   <slot name="actions" />
 
-  <div class="sticky bottom-0 border-t border-film-900/10 bg-film-50/95 p-5 backdrop-blur">
+  <div class="sticky bottom-0 border-t border-border bg-background/95 p-5 backdrop-blur">
     <div v-if="exporting" class="mb-4">
-      <div class="mb-2 flex justify-between gap-3 text-[10px] text-film-500">
+      <div class="mb-2 flex justify-between gap-3 text-[10px] text-muted-foreground">
         <span class="truncate">{{ exportLabel }}</span>
         <span class="font-mono">{{ exportProgress }}%</span>
       </div>

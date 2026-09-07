@@ -37,7 +37,7 @@ watch(
 </script>
 
 <template>
-  <div class="border-b border-film-900/10 p-5">
+  <div class="border-b border-border p-5">
     <p class="eyebrow">背景与底纹</p>
     <div class="mt-4 flex items-center gap-2">
       <label class="shrink-0">
@@ -45,7 +45,7 @@ watch(
         <input
           v-model="settings.background"
           type="color"
-          class="size-9 rounded-md border border-film-900/12 bg-transparent p-0.5"
+          class="size-9 rounded-md border border-border bg-transparent p-0.5"
           aria-label="选择背景颜色"
         />
       </label>
@@ -53,7 +53,7 @@ watch(
         <span class="sr-only">背景颜色十六进制 RGB 值</span>
         <input
           v-model="backgroundHexInput"
-          class="w-full rounded-md border border-film-900/12 bg-film-100 px-3 py-2 font-mono text-xs uppercase outline-none transition focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+          class="w-full rounded-md border border-border bg-card px-3 py-2 font-mono text-xs uppercase outline-none transition focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           type="text"
           maxlength="7"
           autocomplete="off"
@@ -74,7 +74,7 @@ watch(
         :class="
           settings.pattern === option.value
             ? 'border-primary bg-accent text-accent-foreground'
-            : 'border-film-900/10 text-film-500 hover:border-primary/50 hover:bg-accent/60'
+            : 'border-border text-muted-foreground hover:border-primary/50 hover:bg-accent/60'
         "
         @click="settings.pattern = option.value"
       >

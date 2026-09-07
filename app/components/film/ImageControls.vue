@@ -29,7 +29,7 @@ const emit = defineEmits<{
 
 <template>
   <aside
-    class="controls-panel border-t border-film-900/10 bg-film-50/55 lg:overflow-y-auto lg:border-t-0 lg:border-l"
+    class="controls-panel border-t border-border bg-background/55 lg:overflow-y-auto lg:border-t-0 lg:border-l"
   >
     <FilmImageSplitControls
       :settings="settings"
@@ -63,7 +63,7 @@ const emit = defineEmits<{
             将设置应用到全部
           </Button>
           <button
-            class="mx-auto block py-1 text-[11px] text-film-400 hover:text-film-700"
+            class="mx-auto block py-1 text-[11px] text-muted-foreground/70 hover:text-foreground"
             @click="emit('reset')"
           >
             重置当前设置

@@ -15,7 +15,7 @@ const updateFormat = (format: ExportFormat) => {
 </script>
 
 <template>
-  <div class="sticky bottom-0 space-y-3 bg-film-50/95 p-5 backdrop-blur">
+  <div class="sticky bottom-0 space-y-3 bg-background/95 p-5 backdrop-blur">
     <FilmOutputFormatSelector
       :model-value="settings.outputFormat"
       :formats="formats"

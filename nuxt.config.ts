@@ -27,7 +27,7 @@ export default defineNuxtConfig({
           name: 'description',
           content: '在浏览器本地完成胶片扫描图像的切分与排版。'
         },
-        { name: 'theme-color', media: '(prefers-color-scheme: light)', content: '#F2F3F5' },
+        { name: 'theme-color', media: '(prefers-color-scheme: light)', content: '#FFFFFF' },
         { name: 'theme-color', media: '(prefers-color-scheme: dark)', content: '#0A0A0A' }
       ]
     }

@@ -108,14 +108,14 @@ const selectAdjacent = (direction: -1 | 1) => {
 
 <template>
   <aside
-    class="queue-panel w-full min-w-0 overflow-hidden border-b border-film-900/10 bg-film-50/45 lg:flex lg:h-full lg:min-h-0 lg:flex-col lg:border-r lg:border-b-0"
+    class="queue-panel w-full min-w-0 overflow-hidden border-b border-border bg-background/45 lg:flex lg:h-full lg:min-h-0 lg:flex-col lg:border-r lg:border-b-0"
   >
     <div
-      class="sticky top-0 z-10 flex shrink-0 items-center justify-between border-b border-film-900/10 bg-film-50/90 px-4 py-4 backdrop-blur"
+      class="sticky top-0 z-10 flex shrink-0 items-center justify-between border-b border-border bg-background/90 px-4 py-4 backdrop-blur"
     >
       <div>
         <p class="text-sm font-semibold">本次扫描</p>
-        <p class="mt-0.5 font-mono text-[10px] text-film-500">
+        <p class="mt-0.5 font-mono text-[10px] text-muted-foreground">
           {{ items.length }} FILES · {{ formatBytes(totalSize) }}
         </p>
       </div>
@@ -157,7 +157,7 @@ const selectAdjacent = (direction: -1 | 1) => {
         :class="
           activeId === item.id
             ? 'border-primary bg-accent/55 shadow-sm'
-            : 'border-transparent hover:bg-film-100/60'
+            : 'border-transparent hover:bg-muted/60'
         "
       >
         <button
@@ -165,23 +165,23 @@ const selectAdjacent = (direction: -1 | 1) => {
           class="flex min-w-0 flex-1 items-start gap-3 p-3 text-left"
           @click="emit('select', item.id)"
         >
-          <span class="mt-0.5 font-mono text-[10px] text-film-400">{{
+          <span class="mt-0.5 font-mono text-[10px] text-muted-foreground/70">{{
             String(index + 1).padStart(2, '0')
           }}</span>
           <span class="min-w-0 flex-1">
             <span class="block truncate text-xs font-medium">{{ item.name }}</span>
             <span
-              class="mt-1 flex items-center gap-1.5 font-mono text-[9px] tracking-wide text-film-500 uppercase"
+              class="mt-1 flex items-center gap-1.5 font-mono text-[9px] tracking-wide text-muted-foreground uppercase"
             >
               <span
                 class="size-1.5 rounded-full"
                 :class="{
-                  'bg-film-300':
+                  'bg-muted-foreground/40':
                     item.status === 'ready' &&
                     (item.analysisStatus === 'pending' || item.analysisStatus === 'failed'),
-                  'animate-pulse bg-warning':
+                  'animate-pulse bg-muted-foreground':
                     item.status === 'processing' || item.analysisStatus === 'analyzing',
-                  'bg-success':
+                  'bg-primary':
                     item.status === 'done' ||
                     (item.status === 'ready' && item.analysisStatus === 'done'),
                   'bg-destructive': item.status === 'error'
@@ -225,10 +225,7 @@ const selectAdjacent = (direction: -1 | 1) => {
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>取消</AlertDialogCancel>
-          <AlertDialogAction
-            class="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            @click="confirmPendingAction"
-          >
+          <AlertDialogAction variant="destructive" @click="confirmPendingAction">
             {{ confirmationLabel }}
           </AlertDialogAction>
         </AlertDialogFooter>
