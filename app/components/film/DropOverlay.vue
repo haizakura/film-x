@@ -18,10 +18,10 @@ const positionClass = computed(() =>
   props.mode === 'container' ? 'absolute inset-0 z-30' : 'fixed inset-3 z-40 rounded-2xl'
 )
 const surfaceClass = computed(() =>
-  props.mode === 'container' ? 'border-primary/70 bg-black/72' : 'border-primary bg-film-900/88'
+  props.mode === 'container' ? 'border-white/70 bg-black/72' : 'border-white/80 bg-black/88'
 )
 const iconClass = computed(() =>
-  props.mode === 'container' ? 'mx-auto size-8 text-primary' : 'mx-auto mb-4 size-10 text-primary'
+  props.mode === 'container' ? 'mx-auto size-8 text-white/90' : 'mx-auto mb-4 size-10 text-white/90'
 )
 const titleClass = computed(() =>
   props.mode === 'container' ? 'mt-3 text-sm font-semibold' : 'text-xl font-semibold'

@@ -22,17 +22,17 @@ const rotationLabel = (rotation: Rotation) => (rotation === 0 ? '原向' : `${ro
 </script>
 
 <template>
-  <div class="border-b border-film-900/10 px-5 py-5">
+  <div class="border-b border-border px-5 py-5">
     <p class="eyebrow">方向</p>
     <div class="mt-4 space-y-3">
       <div
         v-for="side in sides"
         :key="side"
-        class="flex items-center justify-between rounded-lg border border-film-900/10 bg-film-100/55 p-3"
+        class="flex items-center justify-between rounded-lg border border-border bg-card/55 p-3"
       >
         <div>
           <p class="text-xs font-medium">画面 {{ side === 'left' ? '01' : '02' }}</p>
-          <p class="mt-0.5 font-mono text-[9px] text-film-500">
+          <p class="mt-0.5 font-mono text-[9px] text-muted-foreground">
             {{ rotationLabel(rotationFor(side)) }}
           </p>
         </div>

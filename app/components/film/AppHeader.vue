@@ -41,7 +41,9 @@ const cycleTheme = () => {
           <span />
         </div>
         <div>
-          <p class="font-mono text-[9px] leading-none tracking-[0.24em] text-film-500 uppercase">
+          <p
+            class="font-mono text-[9px] leading-none tracking-[0.24em] text-muted-foreground uppercase"
+          >
             Local film lab
           </p>
           <h1 class="mt-1 text-[18px] leading-none font-semibold tracking-[-0.03em]">Film X</h1>
@@ -49,7 +51,7 @@ const cycleTheme = () => {
       </NuxtLink>
 
       <nav
-        class="order-3 flex w-full items-stretch gap-1 overflow-x-auto border-t border-film-900/8 py-2 lg:order-0 lg:w-auto lg:flex-1 lg:justify-center lg:border-t-0 lg:py-0"
+        class="order-3 flex w-full items-stretch gap-1 overflow-x-auto border-t border-border py-2 lg:order-0 lg:w-auto lg:flex-1 lg:justify-center lg:border-t-0 lg:py-0"
         aria-label="图像工具"
       >
         <NuxtLink
@@ -60,7 +62,7 @@ const cycleTheme = () => {
           :class="
             isActive(tool.to)
               ? 'bg-primary text-primary-foreground shadow-sm'
-              : 'text-film-500 hover:bg-accent hover:text-accent-foreground'
+              : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
           "
           :aria-current="isActive(tool.to) ? 'page' : undefined"
         >
@@ -76,8 +78,8 @@ const cycleTheme = () => {
       </nav>
 
       <div class="ml-auto flex h-16 shrink-0 items-center gap-1.5">
-        <div class="mr-1 hidden items-center gap-2 text-[11px] text-film-500 xl:flex">
-          <ShieldCheck class="size-3.5 text-success" />
+        <div class="mr-1 hidden items-center gap-2 text-[11px] text-muted-foreground xl:flex">
+          <ShieldCheck class="size-3.5 text-primary" />
           图像仅在本地处理
         </div>
         <ClientOnly>

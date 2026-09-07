@@ -23,7 +23,7 @@ const emit = defineEmits<{ pick: [] }>()
       >
         一张扫描，<br />还原两次快门。
       </h2>
-      <p class="mt-6 max-w-xl text-base leading-7 text-film-600 sm:text-lg">
+      <p class="mt-6 max-w-xl text-base leading-7 text-muted-foreground sm:text-lg">
         自动识别两幅半格照片之间的中缝。你可以逐张校准分割线、分别旋转，再一次导出整卷照片。
       </p>
     </section>
@@ -32,31 +32,32 @@ const emit = defineEmits<{ pick: [] }>()
       :for="fileInputId"
       role="button"
       tabindex="0"
-      class="drop-zone group relative min-h-64 overflow-hidden rounded-2xl border border-dashed border-film-500/45 bg-card/65 p-8 text-left transition hover:border-primary/70 hover:bg-card focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
+      class="drop-zone group relative min-h-64 overflow-hidden rounded-2xl border border-dashed border-border bg-card/65 p-8 text-left transition hover:border-primary/70 hover:bg-card focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
       :class="{ 'border-primary bg-accent/70': isDragging }"
       @keydown.enter.prevent="emit('pick')"
       @keydown.space.prevent="emit('pick')"
     >
-      <span class="absolute top-0 right-0 p-5 font-mono text-[10px] tracking-wider text-film-400"
+      <span
+        class="absolute top-0 right-0 p-5 font-mono text-[10px] tracking-wider text-muted-foreground/70"
         >A / B</span
       >
       <span class="flex h-full min-h-56 flex-col items-center justify-center text-center">
         <span
-          class="mb-6 grid size-15 place-items-center rounded-full border border-film-900/10 bg-film-100 shadow-sm transition group-hover:-translate-y-1"
+          class="mb-6 grid size-15 place-items-center rounded-full border border-border bg-card shadow-sm transition group-hover:-translate-y-1"
         >
           <ScanLine class="size-6 text-primary" />
         </span>
         <span class="text-lg font-semibold">拖入扫描图像</span>
-        <span class="mt-2 text-sm text-film-500">或点击选择单张 / 多张文件</span>
+        <span class="mt-2 text-sm text-muted-foreground">或点击选择单张 / 多张文件</span>
         <span
-          class="mt-5 rounded-full bg-film-200/70 px-3 py-1 font-mono text-[10px] tracking-wider text-film-600 uppercase"
+          class="mt-5 rounded-full bg-muted px-3 py-1 font-mono text-[10px] tracking-wider text-muted-foreground uppercase"
         >
           TIFF · JPEG · PNG · WEBP
         </span>
       </span>
     </label>
 
-    <div class="mt-7 grid gap-4 text-sm text-film-600 sm:grid-cols-3">
+    <div class="mt-7 grid gap-4 text-sm text-muted-foreground sm:grid-cols-3">
       <p class="flex items-center gap-2"><span class="step-index">01</span> 原尺寸画质输出</p>
       <p class="flex items-center gap-2"><span class="step-index">02</span> 左右画面独立旋转</p>
       <p class="flex items-center gap-2"><span class="step-index">03</span> 整卷 ZIP 批量下载</p>
@@ -72,7 +73,11 @@ const emit = defineEmits<{ pick: [] }>()
   bottom: 0;
   width: 1px;
   content: '';
-  background: linear-gradient(transparent 8%, rgb(64 158 255 / 18%) 8% 92%, transparent 92%);
+  background: linear-gradient(
+    transparent 8%,
+    color-mix(in srgb, var(--primary) 18%, transparent) 8% 92%,
+    transparent 92%
+  );
 }
 
 .drop-zone::before {
@@ -96,7 +101,7 @@ const emit = defineEmits<{ pick: [] }>()
   height: 22px;
   place-items: center;
   flex: 0 0 auto;
-  border: 1px solid rgb(64 158 255 / 24%);
+  border: 1px solid color-mix(in srgb, var(--primary) 24%, transparent);
   border-radius: 4px;
   font-family: var(--font-mono);
   font-size: 9px;

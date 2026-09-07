@@ -17,7 +17,7 @@ const formatLabel = (format: ExportFormat) => {
 
 <template>
   <div
-    class="grid gap-1 rounded-lg bg-film-200/70 p-1"
+    class="grid gap-1 rounded-lg bg-muted p-1"
     :style="{ gridTemplateColumns: `repeat(${formats.length}, minmax(0, 1fr))` }"
   >
     <button
@@ -27,7 +27,7 @@ const formatLabel = (format: ExportFormat) => {
       :class="
         modelValue === option
           ? 'bg-primary text-primary-foreground shadow-sm'
-          : 'text-film-500 hover:bg-accent hover:text-accent-foreground'
+          : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
       "
       @click="emit('update:modelValue', option)"
     >

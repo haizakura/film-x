@@ -47,11 +47,11 @@ const isMixedPadding = computed(() => {
 </script>
 
 <template>
-  <div class="space-y-5 border-b border-film-900/10 p-5">
+  <div class="space-y-5 border-b border-border p-5">
     <div>
       <div class="flex items-center justify-between gap-3 text-xs">
         <span class="font-medium">外边距</span>
-        <label class="flex items-center gap-2 text-[10px] text-film-500">
+        <label class="flex items-center gap-2 text-[10px] text-muted-foreground">
           独立设置
           <Switch v-model="advancedPadding" size="sm" aria-label="分别设置四边外边距">
             <template #thumb="{ checked }">
@@ -72,7 +72,7 @@ const isMixedPadding = computed(() => {
           aria-label="统一外边距"
         />
         <label
-          class="flex shrink-0 items-center gap-1 rounded-md border border-film-900/12 bg-film-100 px-2"
+          class="flex shrink-0 items-center gap-1 rounded-md border border-border bg-card px-2"
         >
           <span class="sr-only">输入统一外边距</span>
           <input
@@ -84,20 +84,20 @@ const isMixedPadding = computed(() => {
             step="1"
             aria-label="输入统一外边距"
           />
-          <span class="font-mono text-[9px] text-film-400">px</span>
+          <span class="font-mono text-[9px] text-muted-foreground/70">px</span>
         </label>
       </div>
 
       <div
         v-else-if="!advancedPadding"
-        class="mt-4 flex items-center justify-between gap-3 rounded-md bg-film-200/65 px-3 py-2.5"
+        class="mt-4 flex items-center justify-between gap-3 rounded-md bg-muted px-3 py-2.5"
       >
-        <p class="font-mono text-[9px] leading-relaxed text-film-500">
+        <p class="font-mono text-[9px] leading-relaxed text-muted-foreground">
           上 {{ settings.padding.top }} · 右 {{ settings.padding.right }} · 下
           {{ settings.padding.bottom }} · 左 {{ settings.padding.left }} px
         </p>
         <button
-          class="shrink-0 text-[10px] font-medium text-film-700 hover:text-film-900"
+          class="shrink-0 text-[10px] font-medium text-foreground/80 hover:text-foreground"
           @click="advancedPadding = true"
         >
           展开编辑
@@ -108,9 +108,9 @@ const isMixedPadding = computed(() => {
         <label
           v-for="control in paddingControls"
           :key="control.name"
-          class="flex items-center gap-2 rounded-md border border-film-900/12 bg-film-100 px-2.5"
+          class="flex items-center gap-2 rounded-md border border-border bg-card px-2.5"
         >
-          <span class="w-4 text-[10px] text-film-500">{{ control.label }}</span>
+          <span class="w-4 text-[10px] text-muted-foreground">{{ control.label }}</span>
           <input
             :value="settings.padding[control.key]"
             class="min-w-0 flex-1 bg-transparent py-2 text-right font-mono text-[10px] outline-none"
@@ -121,7 +121,7 @@ const isMixedPadding = computed(() => {
             :aria-label="control.name"
             @input="updatePadding(control.key, $event)"
           />
-          <span class="font-mono text-[9px] text-film-400">px</span>
+          <span class="font-mono text-[9px] text-muted-foreground/70">px</span>
         </label>
       </div>
     </div>
@@ -141,7 +141,7 @@ const isMixedPadding = computed(() => {
           aria-label="画面间距"
         />
         <label
-          class="flex shrink-0 items-center gap-1 rounded-md border border-film-900/12 bg-film-100 px-2"
+          class="flex shrink-0 items-center gap-1 rounded-md border border-border bg-card px-2"
         >
           <span class="sr-only">输入画面间距</span>
           <input
@@ -153,18 +153,18 @@ const isMixedPadding = computed(() => {
             step="1"
             aria-label="输入画面间距"
           />
-          <span class="font-mono text-[9px] text-film-400">px</span>
+          <span class="font-mono text-[9px] text-muted-foreground/70">px</span>
         </label>
       </div>
     </div>
 
-    <div class="grid grid-cols-2 gap-2 rounded-lg bg-film-200/70 p-1">
+    <div class="grid grid-cols-2 gap-2 rounded-lg bg-muted p-1">
       <button
         class="rounded-md py-2 text-[11px]"
         :class="
           settings.fit === 'cover'
             ? 'bg-primary font-medium text-primary-foreground shadow-sm'
-            : 'text-film-500 hover:bg-accent hover:text-accent-foreground'
+            : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
         "
         @click="settings.fit = 'cover'"
       >
@@ -175,7 +175,7 @@ const isMixedPadding = computed(() => {
         :class="
           settings.fit === 'contain'
             ? 'bg-primary font-medium text-primary-foreground shadow-sm'
-            : 'text-film-500 hover:bg-accent hover:text-accent-foreground'
+            : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
         "
         @click="settings.fit = 'contain'"
       >

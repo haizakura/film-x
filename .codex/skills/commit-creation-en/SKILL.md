@@ -18,7 +18,7 @@ Use this skill after making code changes to create commits with messages that fo
 2. **Categorize Before Staging**：Divide files into groups based on responsibilities such as dependencies/build, schema/API, domain tools, UI components, tests, and documentation, then stage each group with clear paths.
 3. **Verify Staged Content**：Before each commit, run `git status` and `git diff --cached` in parallel to ensure the staging area contains only one responsibility group.
 4. **Select Prefix**：Choose a prefix based on the responsibility group (see table below).
-5. **Generate Message**：`<Prefix>: <Summary (within 50 characters)>` + bullet-pointed body (0-4 lines).
+5. **Generate Message**：`<Prefix>(<Scope>): <Summary (within 50 characters)>` + bullet-pointed body (0-4 lines).
 6. **Execute Commit**：After creating a commit, proceed to handle the next responsibility group until no changes remain in the working tree.
 
 ### Commit Splitting Rules
@@ -48,7 +48,7 @@ Use this skill after making code changes to create commits with messages that fo
 ### 3. Commit Message Format
 
 ```
-<Prefix>: <Summary (imperative/clear)>
+<Prefix>(<Scope>): <Summary (imperative/clear)>
 
 - Change content 1 (bullet point)
 - Change content 2 (bullet point)
@@ -60,7 +60,7 @@ Use this skill after making code changes to create commits with messages that fo
 
 ```bash
 git commit -m "$(cat <<'EOF'
-fix: Remove unnecessary debug log output
+fix(debug): Remove unnecessary debug log output
 
 - Remove redundant log lines in user information retrieval processing
 EOF
@@ -70,10 +70,10 @@ EOF
 ## Examples
 
 ```
-fix: Remove unnecessary debug log output
+fix(debug): Remove unnecessary debug log output
 - Remove redundant log lines in user information retrieval processing
 
-feat: Add two-step verification feature
+feat(auth): Add two-step verification feature
 - Implement SMS authentication workflow
 - Add generation and validation of authentication tokens
 ```

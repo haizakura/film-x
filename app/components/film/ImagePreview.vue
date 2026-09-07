@@ -59,14 +59,14 @@ const updateCenter = (event: Event) => {
       >
         <canvas ref="canvas" class="block max-h-[calc(100vh-180px)] max-w-full object-contain" />
         <div
-          class="pointer-events-none absolute inset-y-0 bg-warning/20 ring-1 ring-warning/80"
+          class="pointer-events-none absolute inset-y-0 bg-white/15 ring-1 ring-white/70"
           :style="{
             left: `${(settings.center - settings.gap / 2) * 100}%`,
             width: `${settings.gap * 100}%`
           }"
         >
           <span
-            class="absolute top-0 bottom-0 left-1/2 w-px -translate-x-1/2 bg-warning shadow-[0_0_8px_rgb(230_162_60/.9)]"
+            class="absolute top-0 bottom-0 left-1/2 w-px -translate-x-1/2 bg-white shadow-[0_0_8px_rgb(255_255_255/.8)]"
           />
         </div>
         <div
@@ -80,7 +80,7 @@ const updateCenter = (event: Event) => {
       <div v-else class="text-center text-white/50">
         <ImageOff class="mx-auto mb-3 size-7" />
         <p class="text-sm">无法预览这张图像</p>
-        <p v-if="error" class="mt-1 text-xs text-[#f89898]">{{ error }}</p>
+        <p v-if="error" class="mt-1 text-xs text-destructive">{{ error }}</p>
       </div>
     </div>
 
@@ -110,6 +110,11 @@ const updateCenter = (event: Event) => {
 
 .range-dark::-webkit-slider-thumb {
   border-color: #141414;
-  background: var(--primary);
+  background: white;
+}
+
+.range-dark::-moz-range-thumb {
+  border-color: #141414;
+  background: white;
 }
 </style>

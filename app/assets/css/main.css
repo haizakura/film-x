@@ -6,97 +6,77 @@
 @theme static {
   --font-sans: 'Avenir Next', 'PingFang SC', 'Hiragino Sans GB', 'Noto Sans CJK SC', sans-serif;
   --font-mono: 'SFMono-Regular', 'Cascadia Code', monospace;
-  --color-film-50: #fafcff;
-  --color-film-100: #ffffff;
-  --color-film-200: #f0f2f5;
-  --color-film-300: #cdd0d6;
-  --color-film-400: #a8abb2;
-  --color-film-500: #909399;
-  --color-film-600: #606266;
-  --color-film-700: #4f5155;
-  --color-film-800: #303133;
-  --color-film-900: #303133;
-  --color-film-950: #000000;
 }
 
 :root {
   color-scheme: light;
   --radius: 0.625rem;
-  --background: #f2f3f5;
-  --foreground: #303133;
-  --card: #ffffff;
-  --card-foreground: #303133;
-  --popover: #ffffff;
-  --popover-foreground: #303133;
-  --primary: #409eff;
-  --primary-foreground: #ffffff;
-  --secondary: #f0f2f5;
-  --secondary-foreground: #303133;
-  --muted: #f5f7fa;
-  --muted-foreground: #909399;
-  --accent: #ecf5ff;
-  --accent-foreground: #337ecc;
-  --destructive: #f56c6c;
-  --destructive-foreground: #303133;
-  --success: #67c23a;
-  --warning: #e6a23c;
-  --info: #909399;
-  --border: #dcdfe6;
-  --input: #d4d7de;
-  --ring: #409eff;
-  --sidebar: #ffffff;
-  --sidebar-foreground: #303133;
-  --sidebar-primary: #409eff;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #ecf5ff;
-  --sidebar-accent-foreground: #337ecc;
-  --sidebar-border: #dcdfe6;
-  --sidebar-ring: #409eff;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
 }
 
 .dark {
   color-scheme: dark;
-  --color-film-50: #1d1d1d;
-  --color-film-100: #141414;
-  --color-film-200: #303030;
-  --color-film-300: #424243;
-  --color-film-400: #6c6e72;
-  --color-film-500: #a3a6ad;
-  --color-film-600: #cfd3dc;
-  --color-film-700: #cfd3dc;
-  --color-film-800: #e5eaf3;
-  --color-film-900: #e5eaf3;
-  --color-film-950: #ffffff;
-  --background: #0a0a0a;
-  --foreground: #e5eaf3;
-  --card: #141414;
-  --card-foreground: #e5eaf3;
-  --popover: #1d1e1f;
-  --popover-foreground: #e5eaf3;
-  --primary: #409eff;
-  --primary-foreground: #303133;
-  --secondary: #303030;
-  --secondary-foreground: #e5eaf3;
-  --muted: #262727;
-  --muted-foreground: #a3a6ad;
-  --accent: color-mix(in srgb, #409eff 18%, #141414);
-  --accent-foreground: #79bbff;
-  --destructive: #f56c6c;
-  --destructive-foreground: #303133;
-  --success: #67c23a;
-  --warning: #e6a23c;
-  --info: #a3a6ad;
-  --border: #4c4d4f;
-  --input: #58585b;
-  --ring: #409eff;
-  --sidebar: #141414;
-  --sidebar-foreground: #e5eaf3;
-  --sidebar-primary: #409eff;
-  --sidebar-primary-foreground: #303133;
-  --sidebar-accent: color-mix(in srgb, #409eff 18%, #141414);
-  --sidebar-accent-foreground: #79bbff;
-  --sidebar-border: #4c4d4f;
-  --sidebar-ring: #409eff;
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
 }
 
 * {
@@ -112,16 +92,10 @@ body {
   margin: 0;
   min-width: 320px;
   color: var(--foreground);
-  background:
-    radial-gradient(circle at 18% -20%, rgb(64 158 255 / 7%), transparent 34rem), var(--background);
+  background: var(--background);
   transition:
     color 180ms ease,
     background-color 180ms ease;
-}
-
-.dark body {
-  background:
-    radial-gradient(circle at 18% -20%, rgb(64 158 255 / 8%), transparent 32rem), var(--background);
 }
 
 button,
@@ -142,7 +116,7 @@ label[for],
 }
 
 ::selection {
-  color: white;
+  color: var(--primary-foreground);
   background: var(--primary);
 }
 
@@ -221,10 +195,11 @@ label[for],
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
-  --color-info: var(--info);
-  --color-warning: var(--warning);
-  --color-success: var(--success);
-  --color-destructive-foreground: var(--destructive-foreground);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
   --color-destructive: var(--destructive);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);

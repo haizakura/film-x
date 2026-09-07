@@ -27,8 +27,7 @@ The horizontal menu at the top of the page switches between the two tools. Each 
 ## Interface and Theme
 
 - Follows the system light / dark appearance by default; you can also cycle through modes manually from the top-right corner of the page.
-- Light mode uses `#F2F3F5` as the page background; dark mode uses `#0A0A0A`.
-- The primary interactive color is `#409EFF`; success, warning, danger, and info states use a unified semantic palette.
+- The interface follows shadcn/ui's default neutral theme and adapts its semantic color tokens to light and dark modes.
 - Both modes have their own text, border, overlay, and interaction-state colors. The image preview workbench always stays dark to make photo edges easier to judge.
 
 ## Tech Stack
