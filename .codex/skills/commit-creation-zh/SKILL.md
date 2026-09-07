@@ -5,11 +5,11 @@ description: Generate, split, and validate Git commits using this repository's C
 
 # Commit Creation
 
-分析已暂存的更改，自动生成符合Conventional Commits规范的提交信息并执行提交。
+分析已暂存的更改，自动生成符合 Conventional Commits 规范的提交信息并执行提交。
 
 ## When to Use
 
-代码更改后的提交创建，符合Conventional Commits规范的消息自动生成时使用。
+代码更改后的提交创建，符合 Conventional Commits 规范的消息自动生成时使用。
 
 ## Instructions
 
@@ -19,7 +19,7 @@ description: Generate, split, and validate Git commits using this repository's C
 2. **先分类再暂存**：按依赖/构建、schema/API、领域工具、页面组件、测试、文档等职责划分文件组，并使用明确路径逐组暂存。
 3. **检查暂存内容**：每次提交前并行执行 `git status` 和 `git diff --cached`，确认暂存区只包含一个职责组。
 4. **前缀选择**：根据该职责组选择前缀（参见下表）。
-5. **消息生成**：`<前缀>: <摘要（50字以内）>` + 项目符号正文（0-4行）。
+5. **消息生成**：`<前缀>(<作用域>): <摘要（50字以内）>` + 项目符号正文（0-4行）。
 6. **执行提交**：创建提交后继续处理下一职责组，直至工作树无遗漏。
 
 ### 提交拆分规则
@@ -49,7 +49,7 @@ description: Generate, split, and validate Git commits using this repository's C
 ### 3. 提交信息格式
 
 ```
-<前缀>: <摘要（命令式/简洁）>
+<前缀>(<作用域>): <摘要（命令式/简洁）>
 
 - 变更内容1（项目符号）
 - 变更内容2（项目符号）
@@ -61,7 +61,7 @@ description: Generate, split, and validate Git commits using this repository's C
 
 ```bash
 git commit -m "$(cat <<'EOF'
-fix：删除不必要的调试日志输出
+fix(debug)：删除不必要的调试日志输出
 
 - 删除用户信息获取处理中的冗余日志行
 EOF
@@ -71,10 +71,10 @@ EOF
 ## Examples
 
 ```
-fix：删除不必要的调试日志输出
+fix(debug)：删除不必要的调试日志输出
 - 删除用户信息获取处理中的冗余日志行
 
-feat：添加两步验证功能
+feat(auth)：添加两步验证功能
 - 实现短信认证流程
 - 添加认证令牌的生成与验证功能
 ```
