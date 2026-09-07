@@ -59,14 +59,14 @@ const updateCenter = (event: Event) => {
       >
         <canvas ref="canvas" class="block max-h-[calc(100vh-180px)] max-w-full object-contain" />
         <div
-          class="pointer-events-none absolute inset-y-0 bg-white/15 ring-1 ring-white/70"
+          class="pointer-events-none absolute inset-y-0 bg-amber-500/15 ring-1 ring-amber-500/70"
           :style="{
             left: `${(settings.center - settings.gap / 2) * 100}%`,
             width: `${settings.gap * 100}%`
           }"
         >
           <span
-            class="absolute top-0 bottom-0 left-1/2 w-px -translate-x-1/2 bg-white shadow-[0_0_8px_rgb(255_255_255/.8)]"
+            class="absolute top-0 bottom-0 left-1/2 w-px -translate-x-1/2 bg-amber-500 shadow-[0_0_8px] shadow-amber-500/80"
           />
         </div>
         <div
