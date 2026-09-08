@@ -1,0 +1,187 @@
+{
+  "meta": {
+    "siteDescription": "Split and compose film scan images locally in your browser.",
+    "splitterTitle": "Half-frame film splitter",
+    "splitterDescription": "Detect the center gap in half-frame film scans, then split, rotate, and batch export locally in your browser.",
+    "composerTitle": "Half-frame film composer",
+    "composerDescription": "Compose two half-frame photos into one image with custom canvas, spacing, layout, and patterns."
+  },
+  "language": {
+    "label": "Language"
+  },
+  "notifications": {
+    "label": "Notifications",
+    "close": "Close notification"
+  },
+  "header": {
+    "home": "Film X home",
+    "brandTagline": "Local film lab",
+    "toolsLabel": "Image tools",
+    "splitter": "Half-frame splitter",
+    "splitterTagline": "One scan, two frames",
+    "composer": "Film composer",
+    "composerTagline": "Two frames, one image",
+    "localOnly": "Images stay on this device",
+    "themeLabel": "Theme: {theme}",
+    "themeSwitchTitle": "{label}; click to switch",
+    "theme": {
+      "system": "System default",
+      "light": "Light",
+      "dark": "Dark"
+    }
+  },
+  "emptyState": {
+    "eyebrow": "Tool 01 · Splitter",
+    "headlineFirst": "One scan,",
+    "headlineSecond": "two shutters restored.",
+    "description": "Automatically detect the gap between two half-frame photos. Fine-tune the split, rotate each frame, and export the whole roll at once.",
+    "dropTitle": "Drop scan images here",
+    "dropHint": "or click to choose one or more files",
+    "featureQuality": "Original-resolution output",
+    "featureRotation": "Independent frame rotation",
+    "featureBatch": "Batch ZIP download"
+  },
+  "drop": {
+    "scanTitle": "Release to add scan images",
+    "compositionTitle": "Release to add to the canvas",
+    "compositionDescription": "Only the first two images will be used"
+  },
+  "queue": {
+    "title": "Current scan",
+    "summary": "{count} files · {size}",
+    "add": "Add images",
+    "clear": "Clear list",
+    "listLabel": "Image list; use the up and down arrow keys to select",
+    "remove": "Remove image {name}",
+    "delete": "Delete image",
+    "cancel": "Cancel",
+    "confirmClearTitle": "Clear the list?",
+    "confirmRemoveTitle": "Delete this image?",
+    "confirmClearDescription": "Remove all {count} images from this scan? This cannot be undone.",
+    "confirmRemoveDescription": "Remove “{name}” from this scan? This cannot be undone.",
+    "status": {
+      "done": "Completed",
+      "error": "Failed",
+      "processing": "Processing",
+      "pending": "Waiting for auto-detection",
+      "analyzing": "Detecting center line",
+      "analyzed": "Detected · {size}"
+    }
+  },
+  "preview": {
+    "loading": "Reading film scan",
+    "frame": "Frame {number}",
+    "unavailable": "This image cannot be previewed",
+    "splitPosition": "Split position"
+  },
+  "split": {
+    "heading": "Split",
+    "detecting": "Auto-detecting",
+    "detectAgain": "Detect again",
+    "position": "Split position",
+    "removeGap": "Remove center gap"
+  },
+  "rotation": {
+    "heading": "Orientation",
+    "frame": "Frame {number}",
+    "original": "Original",
+    "counterClockwise": "Rotate frame {number} counterclockwise",
+    "clockwise": "Rotate frame {number} clockwise"
+  },
+  "export": {
+    "heading": "Output",
+    "completed": "{completed}/{total} completed",
+    "quality": "Output quality",
+    "tiffNote": "TIF uses uncompressed RGBA pixels to avoid another lossy encode, so files will be large.",
+    "pngNote": "PNG is lossless and will be noticeably larger than JPEG.",
+    "splitAll": "Split all {count}",
+    "splitDownload": "Split and download",
+    "currentOnly": "Export current image only",
+    "applyAll": "Apply settings to all",
+    "reset": "Reset current settings",
+    "processing": "Processing {name}",
+    "packing": "Creating ZIP"
+  },
+  "composition": {
+    "eyebrow": "Tool 02 · Composer",
+    "title": "Half-frame film composer",
+    "swap": "Swap positions",
+    "frame": "Frame {number}",
+    "selectFrame": "Choose frame {number}",
+    "removeFrame": "Remove frame {number}",
+    "replaceHint": "Click to replace · drag and drop supported",
+    "ratio": {
+      "heading": "Canvas ratio",
+      "auto": "Auto",
+      "custom": "Custom",
+      "customWidth": "Custom ratio width",
+      "customHeight": "Custom ratio height",
+      "autoHint": "Adjust the export dimensions automatically from the image ratio and current spacing."
+    },
+    "layout": {
+      "heading": "Frame layout",
+      "horizontal": "Side by side",
+      "vertical": "Stacked"
+    },
+    "background": {
+      "heading": "Background and pattern",
+      "color": "Choose background color",
+      "hex": "Background color hexadecimal RGB value",
+      "solid": "Solid",
+      "grid": "Grid",
+      "dots": "Dots"
+    },
+    "spacing": {
+      "padding": "Outer margin",
+      "individual": "Set separately",
+      "individualLabel": "Set each outer margin separately",
+      "uniform": "Uniform outer margin",
+      "uniformInput": "Enter uniform outer margin",
+      "summary": "Top {top} · Right {right} · Bottom {bottom} · Left {left} px",
+      "expand": "Edit sides",
+      "top": "T",
+      "right": "R",
+      "bottom": "B",
+      "left": "L",
+      "topPadding": "Top margin",
+      "rightPadding": "Right margin",
+      "bottomPadding": "Bottom margin",
+      "leftPadding": "Left margin",
+      "gap": "Frame spacing",
+      "gapInput": "Enter frame spacing",
+      "cover": "Fill and crop",
+      "contain": "Fit entire image"
+    },
+    "download": "Generate and download"
+  },
+  "toast": {
+    "readFailed": "Could not read {name}",
+    "unsupportedIgnored": "Ignored {count} unsupported files",
+    "supportedTypes": "TIFF, JPEG, PNG, and WebP are supported.",
+    "chooseSupportedTypes": "Choose a TIFF, JPEG, PNG, or WebP file.",
+    "appliedAll": "Settings applied to all images",
+    "exportFailedFiles": "Export complete: {count} files failed",
+    "splitComplete": "Split complete",
+    "generated": "Generated {count} images.",
+    "exportFailed": "Export failed",
+    "unsupportedFile": "Unsupported file",
+    "noUsableImages": "No usable images",
+    "firstTwoAdded": "Added the first two images",
+    "twoImageLimit": "The composition canvas can hold up to two images.",
+    "addPhotoFirst": "Add a photo first",
+    "compositionGenerated": "Composition generated",
+    "compositionFailed": "Generation failed"
+  },
+  "errors": {
+    "imageEncodeFailed": "Image encoding failed",
+    "tiffImageMissing": "The TIFF file does not contain a readable image",
+    "canvasUnavailable": "The browser could not create an image canvas",
+    "exportCanvasUnavailable": "The browser could not create an export canvas",
+    "imageReadFailed": "Could not read the image",
+    "processingFailed": "Processing failed",
+    "noImagesGenerated": "No images were generated successfully",
+    "archiveFailed": "Could not create the archive",
+    "decodeFailed": "Image decoding failed",
+    "compositionFailed": "Could not generate the composition"
+  }
+}

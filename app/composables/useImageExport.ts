@@ -2,6 +2,7 @@ import { zip } from 'fflate'
 
 import type { ExportFormat, ImageQueueItem } from '~/types/image'
 import { downloadBlob } from '~/utils/download'
+import { AppError, errorMessageKey } from '~/utils/errors'
 import {
   baseName,
   calculateCropRects,
@@ -21,11 +22,18 @@ const makeZip = (files: Record<string, Uint8Array>) =>
   })
 
 export const useImageExport = () => {
+  const { t } = useI18n()
   const format = ref<ExportFormat>('jpeg')
   const quality = ref(0.94)
   const exporting = ref(false)
   const progress = ref(0)
-  const progressLabel = ref('')
+  const progressState = ref<{ stage: 'processing'; name: string } | { stage: 'packing' }>()
+  const progressLabel = computed(() => {
+    if (progressState.value?.stage === 'processing') {
+      return t('export.processing', { name: progressState.value.name })
+    }
+    return progressState.value?.stage === 'packing' ? t('export.packing') : ''
+  })
 
   const exportItems = async (
     items: ImageQueueItem[],
@@ -43,7 +51,7 @@ export const useImageExport = () => {
       // oxlint-disable no-await-in-loop
       for (const [index, item] of items.entries()) {
         item.status = 'processing'
-        progressLabel.value = `正在处理 ${item.name}`
+        progressState.value = { stage: 'processing', name: item.name }
         let image: Awaited<ReturnType<typeof decodeImage>> | undefined
 
         try {
@@ -70,7 +78,7 @@ export const useImageExport = () => {
           item.error = undefined
         } catch (error) {
           item.status = 'error'
-          item.error = error instanceof Error ? error.message : '处理失败'
+          item.error = errorMessageKey(error, 'errors.processingFailed')
         } finally {
           image?.dispose()
         }
@@ -81,9 +89,9 @@ export const useImageExport = () => {
       // oxlint-enable no-await-in-loop
 
       const generatedCount = Object.keys(files).length
-      if (!generatedCount) throw new Error('没有成功生成的图像')
+      if (!generatedCount) throw new AppError('noImagesGenerated')
 
-      progressLabel.value = '正在打包 ZIP'
+      progressState.value = { stage: 'packing' }
       const archive = await makeZip(files)
       progress.value = 100
       downloadBlob(
@@ -97,7 +105,7 @@ export const useImageExport = () => {
       }
     } finally {
       exporting.value = false
-      progressLabel.value = ''
+      progressState.value = undefined
     }
   }
 

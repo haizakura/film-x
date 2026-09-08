@@ -14,6 +14,7 @@ defineProps<{
   exportProgress: number
   exportLabel: string
 }>()
+const { t } = useI18n()
 
 const emit = defineEmits<{
   'update:settings': [settings: SplitSettings]
@@ -60,13 +61,13 @@ const emit = defineEmits<{
         <div class="space-y-2 p-5">
           <Button type="button" class="w-full" variant="outline" @click="emit('apply-all')">
             <CopyCheck />
-            将设置应用到全部
+            {{ t('export.applyAll') }}
           </Button>
           <button
             class="mx-auto block py-1 text-[11px] text-muted-foreground/70 hover:text-foreground"
             @click="emit('reset')"
           >
-            重置当前设置
+            {{ t('export.reset') }}
           </button>
         </div>
       </template>

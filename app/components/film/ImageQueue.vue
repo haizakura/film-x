@@ -19,6 +19,7 @@ const props = defineProps<{
   activeId?: string
   totalSize: number
 }>()
+const { t } = useI18n()
 
 const emit = defineEmits<{
   select: [id: string]
@@ -33,21 +34,23 @@ const confirmationOpen = ref(false)
 const pendingAction = ref<PendingAction>()
 
 const confirmationTitle = computed(() =>
-  pendingAction.value?.type === 'clear' ? '确认清空列表？' : '确认删除图像？'
+  pendingAction.value?.type === 'clear'
+    ? t('queue.confirmClearTitle')
+    : t('queue.confirmRemoveTitle')
 )
 
 const confirmationDescription = computed(() => {
   if (pendingAction.value?.type === 'clear') {
-    return `将从本次扫描中移除全部 ${pendingAction.value.count} 张图像。此操作无法撤销。`
+    return t('queue.confirmClearDescription', { count: pendingAction.value.count })
   }
   if (pendingAction.value?.type === 'remove') {
-    return `将从本次扫描中移除“${pendingAction.value.name}”。此操作无法撤销。`
+    return t('queue.confirmRemoveDescription', { name: pendingAction.value.name })
   }
   return ''
 })
 
 const confirmationLabel = computed(() =>
-  pendingAction.value?.type === 'clear' ? '清空列表' : '删除图像'
+  pendingAction.value?.type === 'clear' ? t('queue.clear') : t('queue.delete')
 )
 
 const requestClear = () => {
@@ -78,12 +81,14 @@ watch(confirmationOpen, (open) => {
 })
 
 const statusText = (item: ImageQueueItem) => {
-  if (item.status === 'done') return '已完成'
-  if (item.status === 'error') return '失败'
-  if (item.status === 'processing') return '处理中'
-  if (item.analysisStatus === 'pending') return '等待自动识别'
-  if (item.analysisStatus === 'analyzing') return '正在识别中线'
-  if (item.analysisStatus === 'done') return `已识别 · ${formatBytes(item.size)}`
+  if (item.status === 'done') return t('queue.status.done')
+  if (item.status === 'error') return t('queue.status.error')
+  if (item.status === 'processing') return t('queue.status.processing')
+  if (item.analysisStatus === 'pending') return t('queue.status.pending')
+  if (item.analysisStatus === 'analyzing') return t('queue.status.analyzing')
+  if (item.analysisStatus === 'done') {
+    return t('queue.status.analyzed', { size: formatBytes(item.size) })
+  }
   return formatBytes(item.size)
 }
 
@@ -114,9 +119,9 @@ const selectAdjacent = (direction: -1 | 1) => {
       class="sticky top-0 z-10 flex shrink-0 items-center justify-between border-b border-border bg-background/90 px-4 py-4 backdrop-blur"
     >
       <div>
-        <p class="text-sm font-semibold">本次扫描</p>
+        <p class="text-sm font-semibold">{{ t('queue.title') }}</p>
         <p class="mt-0.5 font-mono text-[10px] text-muted-foreground">
-          {{ items.length }} FILES · {{ formatBytes(totalSize) }}
+          {{ t('queue.summary', { count: items.length, size: formatBytes(totalSize) }) }}
         </p>
       </div>
       <div class="flex items-center gap-1">
@@ -124,7 +129,7 @@ const selectAdjacent = (direction: -1 | 1) => {
           type="button"
           variant="ghost"
           size="icon-sm"
-          aria-label="添加图像"
+          :aria-label="t('queue.add')"
           @click="emit('add')"
         >
           <Plus />
@@ -134,7 +139,7 @@ const selectAdjacent = (direction: -1 | 1) => {
           class="text-destructive hover:bg-destructive/10 hover:text-destructive lg:hidden"
           variant="ghost"
           size="icon-sm"
-          aria-label="清空列表"
+          :aria-label="t('queue.clear')"
           @click="requestClear"
         >
           <Trash2 />
@@ -145,7 +150,7 @@ const selectAdjacent = (direction: -1 | 1) => {
     <div
       class="queue-list flex w-full min-w-0 max-w-full gap-2 overflow-x-auto p-3 lg:block lg:min-h-0 lg:flex-1 lg:overflow-x-hidden lg:overflow-y-auto lg:overscroll-contain"
       tabindex="0"
-      aria-label="图像列表，使用上、下方向键选择"
+      :aria-label="t('queue.listLabel')"
       @keydown.up.prevent="selectAdjacent(-1)"
       @keydown.down.prevent="selectAdjacent(1)"
     >
@@ -196,7 +201,7 @@ const selectAdjacent = (direction: -1 | 1) => {
           class="my-auto mr-2 shrink-0 text-destructive hover:bg-destructive/10 hover:text-destructive lg:invisible lg:group-hover:visible lg:focus:visible"
           variant="ghost"
           size="icon-xs"
-          :aria-label="`移除图像 ${item.name}`"
+          :aria-label="t('queue.remove', { name: item.name })"
           @click.stop="requestRemove(item)"
         >
           <X />
@@ -211,7 +216,7 @@ const selectAdjacent = (direction: -1 | 1) => {
       size="xs"
       @click="requestClear"
     >
-      清空列表
+      {{ t('queue.clear') }}
     </Button>
 
     <AlertDialog v-model:open="confirmationOpen">
@@ -224,7 +229,7 @@ const selectAdjacent = (direction: -1 | 1) => {
           <AlertDialogDescription>{{ confirmationDescription }}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>取消</AlertDialogCancel>
+          <AlertDialogCancel>{{ t('queue.cancel') }}</AlertDialogCancel>
           <AlertDialogAction variant="destructive" @click="confirmPendingAction">
             {{ confirmationLabel }}
           </AlertDialogAction>

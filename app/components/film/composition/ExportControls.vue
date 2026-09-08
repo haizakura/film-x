@@ -5,6 +5,7 @@ import type { CompositionOutputFormat, CompositionSettings } from '~/types/compo
 import type { ExportFormat } from '~/types/image'
 
 defineProps<{ hasImages: boolean }>()
+const { t } = useI18n()
 const settings = defineModel<CompositionSettings>({ required: true })
 const emit = defineEmits<{ download: [] }>()
 const formats: ExportFormat[] = ['jpeg', 'png']
@@ -23,7 +24,7 @@ const updateFormat = (format: ExportFormat) => {
     />
     <Button class="w-full" size="lg" type="button" :disabled="!hasImages" @click="emit('download')">
       <Download class="size-4" aria-hidden="true" />
-      生成并下载
+      {{ t('composition.download') }}
     </Button>
   </div>
 </template>

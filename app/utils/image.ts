@@ -1,6 +1,7 @@
 import UTIF from 'utif'
 
 import type { CropRect, DecodedImage, ExportFormat, Rotation, SplitSettings } from '~/types/image'
+import { AppError } from '~/utils/errors'
 
 export const DEFAULT_SETTINGS: SplitSettings = {
   center: 0.5,
@@ -39,7 +40,7 @@ const decodeImageRaw = async (file: File): Promise<DecodedImage> => {
     const ifds = UTIF.decode(buffer)
     const ifd = ifds[0]
 
-    if (!ifd) throw new Error('TIFF 文件中没有可读取的图像')
+    if (!ifd) throw new AppError('tiffImageMissing')
 
     UTIF.decodeImage(buffer, ifd)
     const rgba = UTIF.toRGBA8(ifd)
@@ -50,7 +51,7 @@ const decodeImageRaw = async (file: File): Promise<DecodedImage> => {
     canvas.height = ifd.height
     const context = canvas.getContext('2d')
 
-    if (!context) throw new Error('浏览器无法创建图像画布')
+    if (!context) throw new AppError('canvasUnavailable')
 
     context.putImageData(new ImageData(pixels, ifd.width, ifd.height), 0, 0)
 
@@ -107,7 +108,7 @@ export const calculateCropRects = (
 const canvasToBlob = (canvas: HTMLCanvasElement, format: ExportFormat, quality: number) =>
   new Promise<Blob>((resolve, reject) => {
     canvas.toBlob(
-      (blob) => (blob ? resolve(blob) : reject(new Error('图像编码失败'))),
+      (blob) => (blob ? resolve(blob) : reject(new AppError('imageEncodeFailed'))),
       `image/${format}`,
       format === 'png' ? undefined : quality
     )
@@ -156,7 +157,7 @@ const renderCropCanvas = (decoded: DecodedImage, rect: CropRect, rotation: Rotat
   canvas.height = swapped ? rect.width : rect.height
   const context = canvas.getContext('2d')
 
-  if (!context) throw new Error('浏览器无法创建导出画布')
+  if (!context) throw new AppError('exportCanvasUnavailable')
 
   context.imageSmoothingEnabled = false
   context.save()

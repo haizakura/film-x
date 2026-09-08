@@ -1,6 +1,7 @@
 import type { ComputedRef } from 'vue'
 
 import type { DecodedImage, ImageQueueItem } from '~/types/image'
+import { errorMessageKey } from '~/utils/errors'
 import { decodeImage } from '~/utils/image'
 
 interface ImagePreviewOptions {
@@ -39,7 +40,7 @@ export const useImagePreview = (
       item.error = undefined
       options.onDecoded?.(item, image)
     } catch (error) {
-      const message = error instanceof Error ? error.message : '无法读取图像'
+      const message = errorMessageKey(error, 'errors.imageReadFailed')
       item.status = 'error'
       item.error = message
       options.onError?.(item, message)

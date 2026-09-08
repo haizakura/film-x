@@ -3,11 +3,12 @@ import { Columns2, Rows2 } from '@lucide/vue'
 import type { CompositionSettings } from '~/types/composition'
 
 const settings = defineModel<CompositionSettings>({ required: true })
+const { t } = useI18n()
 </script>
 
 <template>
   <div class="border-b border-border p-5">
-    <p class="eyebrow">画面布局</p>
+    <p class="eyebrow">{{ t('composition.layout.heading') }}</p>
     <div class="mt-4 grid grid-cols-2 gap-1 rounded-lg bg-muted p-1">
       <button
         class="flex items-center justify-center gap-2 rounded-md py-2 text-[11px] transition"
@@ -19,7 +20,7 @@ const settings = defineModel<CompositionSettings>({ required: true })
         @click="settings.layoutDirection = 'horizontal'"
       >
         <Columns2 class="size-3.5" aria-hidden="true" />
-        左右
+        {{ t('composition.layout.horizontal') }}
       </button>
       <button
         class="flex items-center justify-center gap-2 rounded-md py-2 text-[11px] transition"
@@ -31,7 +32,7 @@ const settings = defineModel<CompositionSettings>({ required: true })
         @click="settings.layoutDirection = 'vertical'"
       >
         <Rows2 class="size-3.5" aria-hidden="true" />
-        上下
+        {{ t('composition.layout.vertical') }}
       </button>
     </div>
   </div>

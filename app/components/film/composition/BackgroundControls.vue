@@ -4,13 +4,16 @@ import { Grid3X3, Grip, Square } from '@lucide/vue'
 import type { CompositionPattern, CompositionSettings } from '~/types/composition'
 
 const settings = defineModel<CompositionSettings>({ required: true })
+const { t } = useI18n()
 const backgroundHexInput = ref(settings.value.background)
 
-const patterns: Array<{ label: string; value: CompositionPattern; icon: Component }> = [
-  { label: '纯色', value: 'none', icon: Square },
-  { label: '方格', value: 'grid', icon: Grid3X3 },
-  { label: '圆点', value: 'dots', icon: Grip }
-]
+const patterns = computed<Array<{ label: string; value: CompositionPattern; icon: Component }>>(
+  () => [
+    { label: t('composition.background.solid'), value: 'none', icon: Square },
+    { label: t('composition.background.grid'), value: 'grid', icon: Grid3X3 },
+    { label: t('composition.background.dots'), value: 'dots', icon: Grip }
+  ]
+)
 
 const normalizeHexColor = (value: string) => {
   const hex = value.trim().replace(/^#/, '')
@@ -38,19 +41,19 @@ watch(
 
 <template>
   <div class="border-b border-border p-5">
-    <p class="eyebrow">背景与底纹</p>
+    <p class="eyebrow">{{ t('composition.background.heading') }}</p>
     <div class="mt-4 flex items-center gap-2">
       <label class="shrink-0">
-        <span class="sr-only">选择背景颜色</span>
+        <span class="sr-only">{{ t('composition.background.color') }}</span>
         <input
           v-model="settings.background"
           type="color"
           class="size-9 rounded-md border border-border bg-transparent p-0.5"
-          aria-label="选择背景颜色"
+          :aria-label="t('composition.background.color')"
         />
       </label>
       <label class="min-w-0 flex-1">
-        <span class="sr-only">背景颜色十六进制 RGB 值</span>
+        <span class="sr-only">{{ t('composition.background.hex') }}</span>
         <input
           v-model="backgroundHexInput"
           class="w-full rounded-md border border-border bg-card px-3 py-2 font-mono text-xs uppercase outline-none transition focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
@@ -58,7 +61,7 @@ watch(
           maxlength="7"
           autocomplete="off"
           spellcheck="false"
-          aria-label="背景颜色十六进制 RGB 值"
+          :aria-label="t('composition.background.hex')"
           placeholder="#E9E4DA"
           @input="updateBackgroundHex"
           @blur="commitBackgroundHex"

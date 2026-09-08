@@ -1,7 +1,7 @@
 import tailwindcss from '@tailwindcss/vite'
 
 export default defineNuxtConfig({
-  modules: ['shadcn-nuxt', '@nuxtjs/color-mode'],
+  modules: ['shadcn-nuxt', '@nuxtjs/color-mode', '@nuxtjs/i18n'],
   css: ['~/assets/css/main.css'],
   shadcn: {
     prefix: '',
@@ -17,16 +17,24 @@ export default defineNuxtConfig({
     fallback: 'light',
     classSuffix: ''
   },
+  i18n: {
+    strategy: 'no_prefix',
+    defaultLocale: 'en',
+    langDir: 'locales',
+    detectBrowserLanguage: {
+      useCookie: true,
+      fallbackLocale: 'en'
+    },
+    locales: [
+      { code: 'en', language: 'en', name: 'English', file: 'en.json' },
+      { code: 'zh-CN', language: 'zh-CN', name: '简体中文', file: 'zh-CN.json' }
+    ]
+  },
   app: {
     head: {
-      htmlAttrs: { lang: 'zh-CN' },
       titleTemplate: '%s · Film X',
       link: [{ rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }],
       meta: [
-        {
-          name: 'description',
-          content: '在浏览器本地完成胶片扫描图像的切分与排版。'
-        },
         { name: 'theme-color', media: '(prefers-color-scheme: light)', content: '#FFFFFF' },
         { name: 'theme-color', media: '(prefers-color-scheme: dark)', content: '#0A0A0A' }
       ]

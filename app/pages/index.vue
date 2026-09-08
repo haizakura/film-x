@@ -1,13 +1,16 @@
 <script setup lang="ts">
 import { toast } from 'vue-sonner'
 import type { ImageQueueItem, SplitSettings } from '~/types/image'
+import { errorMessageKey } from '~/utils/errors'
 import { baseName } from '~/utils/image'
 
 const FILE_INPUT_ID = 'scan-file-input'
+const { t } = useI18n()
+const translateError = useTranslatedError()
 
 useSeoMeta({
-  title: '半格胶片切分',
-  description: '自动识别半格胶片扫描中缝，在浏览器本地完成切分、旋转与批量导出。'
+  title: () => t('meta.splitterTitle'),
+  description: () => t('meta.splitterDescription')
 })
 
 const {
@@ -29,7 +32,9 @@ const { analyzeDecodedItem, analyzeItems } = useAutoSplitDetection()
 const { decoded, isLoading } = useImagePreview(activeItem, {
   onError: (item, message) => {
     item.analysisStatus = 'failed'
-    toast.error(`无法读取 ${item.name}`, { description: message })
+    toast.error(t('toast.readFailed', { name: item.name }), {
+      description: translateError(message, 'errors.imageReadFailed')
+    })
   },
   onDecoded: (item, image) => {
     if (item.analysisStatus === 'pending') analyzeDecodedItem(item, image)
@@ -52,8 +57,8 @@ const acceptFiles = (files: File[]) => {
   const backgroundItems = addedItems.filter((item) => item.id !== activeId.value)
   void analyzeItems(backgroundItems)
   if (rejectedCount) {
-    toast.warning(`已忽略 ${rejectedCount} 个不支持的文件`, {
-      description: '支持 TIFF、JPEG、PNG 与 WebP。'
+    toast.warning(t('toast.unsupportedIgnored', { count: rejectedCount }), {
+      description: t('toast.supportedTypes')
     })
   }
 }
@@ -68,7 +73,7 @@ const updateCenter = (center: number) => {
 const applyCurrentSettingsToAll = () => {
   if (!activeItem.value) return
   applySettingsToAll(activeItem.value.settings)
-  toast.success('已应用到全部图像')
+  toast.success(t('toast.appliedAll'))
 }
 
 const waitForActivePreview = (items: ImageQueueItem[]) => {
@@ -93,13 +98,18 @@ const runExport = async (items: ImageQueueItem[], archiveName: string) => {
     const result = await exportItems(items, archiveName)
     if (!result) return
 
-    const title = result.failedCount ? `导出完成，${result.failedCount} 个文件失败` : '切分完成'
-    const options = { description: `已生成 ${result.generatedCount} 张图像。` }
+    const title = result.failedCount
+      ? t('toast.exportFailedFiles', { count: result.failedCount })
+      : t('toast.splitComplete')
+    const options = { description: t('toast.generated', { count: result.generatedCount }) }
     if (result.failedCount) toast.warning(title, options)
     else toast.success(title, options)
   } catch (error) {
-    toast.error('导出失败', {
-      description: error instanceof Error ? error.message : '无法生成压缩包'
+    toast.error(t('toast.exportFailed'), {
+      description: translateError(
+        errorMessageKey(error, 'errors.archiveFailed'),
+        'errors.archiveFailed'
+      )
     })
   }
 }
@@ -185,6 +195,6 @@ const detectActiveImage = () => {
       />
     </main>
 
-    <FilmDropOverlay v-if="isDragging" />
+    <FilmDropOverlay v-if="isDragging" :title="t('drop.scanTitle')" />
   </div>
 </template>

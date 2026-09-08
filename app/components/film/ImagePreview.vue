@@ -9,6 +9,8 @@ const props = defineProps<{
   decoded?: DecodedImage
   loading: boolean
 }>()
+const { t } = useI18n()
+const translateError = useTranslatedError()
 
 const emit = defineEmits<{ 'update:center': [value: number] }>()
 const canvas = ref<HTMLCanvasElement>()
@@ -50,7 +52,9 @@ const updateCenter = (event: Event) => {
     >
       <div v-if="loading" class="flex flex-col items-center gap-3 text-white/50">
         <LoaderCircle class="size-6 animate-spin" />
-        <span class="font-mono text-[10px] tracking-widest uppercase">正在读取原片</span>
+        <span class="font-mono text-[10px] tracking-widest uppercase">{{
+          t('preview.loading')
+        }}</span>
       </div>
 
       <div
@@ -72,15 +76,17 @@ const updateCenter = (event: Event) => {
         <div
           class="pointer-events-none absolute inset-x-0 bottom-3 flex justify-between px-4 font-mono text-[9px] tracking-[0.18em] text-white/80 uppercase drop-shadow"
         >
-          <span>Frame 01</span>
-          <span>Frame 02</span>
+          <span>{{ t('preview.frame', { number: '01' }) }}</span>
+          <span>{{ t('preview.frame', { number: '02' }) }}</span>
         </div>
       </div>
 
       <div v-else class="text-center text-white/50">
         <ImageOff class="mx-auto mb-3 size-7" />
-        <p class="text-sm">无法预览这张图像</p>
-        <p v-if="error" class="mt-1 text-xs text-destructive">{{ error }}</p>
+        <p class="text-sm">{{ t('preview.unavailable') }}</p>
+        <p v-if="error" class="mt-1 text-xs text-destructive">
+          {{ translateError(error, 'errors.imageReadFailed') }}
+        </p>
       </div>
     </div>
 
@@ -94,7 +100,7 @@ const updateCenter = (event: Event) => {
           min="0.4"
           max="0.6"
           step="0.001"
-          aria-label="分割位置"
+          :aria-label="t('preview.splitPosition')"
           @input="updateCenter"
         />
         <span class="min-w-10 font-mono text-[9px] tracking-wider text-white/35">60%</span>

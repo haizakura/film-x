@@ -13,6 +13,7 @@ const props = defineProps<{
   aspectStyle: Record<string, string>
   rendering: boolean
 }>()
+const { t } = useI18n()
 
 const emit = defineEmits<{
   files: [index: number, file: File]
@@ -51,9 +52,9 @@ defineExpose({ download })
     >
       <div>
         <p class="font-mono text-[9px] tracking-[0.18em] text-white/45 uppercase">
-          Tool 02 · Composer
+          {{ t('composition.eyebrow') }}
         </p>
-        <h2 class="mt-1 text-sm font-semibold text-white">半格胶片排版拼图</h2>
+        <h2 class="mt-1 text-sm font-semibold text-white">{{ t('composition.title') }}</h2>
       </div>
       <div class="flex items-center gap-2">
         <button
@@ -67,7 +68,7 @@ defineExpose({ download })
             aria-hidden="true"
           />
           <ArrowUpDown v-else class="size-3.5" aria-hidden="true" />
-          交换位置
+          {{ t('composition.swap') }}
         </button>
         <span class="font-mono text-[9px] text-white/35">
           {{ geometry.width }} × {{ geometry.height }} PX
@@ -104,8 +105,8 @@ defineExpose({ download })
     <FilmDropOverlay
       v-if="isDragging"
       mode="container"
-      title="松开以加入排版画布"
-      description="最多读取前两张图像"
+      :title="t('drop.compositionTitle')"
+      :description="t('drop.compositionDescription')"
     />
   </section>
 </template>
