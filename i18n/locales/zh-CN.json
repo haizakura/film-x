@@ -1,0 +1,187 @@
+{
+  "meta": {
+    "siteDescription": "在浏览器本地完成胶片扫描图像的切分与排版。",
+    "splitterTitle": "半格胶片切分",
+    "splitterDescription": "自动识别半格胶片扫描中缝，在浏览器本地完成切分、旋转与批量导出。",
+    "composerTitle": "半格胶片排版拼图",
+    "composerDescription": "将两张半格胶片排版成单张图像，自定义画布、间距、布局与底纹。"
+  },
+  "language": {
+    "label": "语言"
+  },
+  "notifications": {
+    "label": "通知",
+    "close": "关闭通知"
+  },
+  "header": {
+    "home": "Film X 首页",
+    "brandTagline": "本地胶片工作台",
+    "toolsLabel": "图像工具",
+    "splitter": "半格切分",
+    "splitterTagline": "一分为二",
+    "composer": "排版拼图",
+    "composerTagline": "双片成章",
+    "localOnly": "图像仅在本地处理",
+    "themeLabel": "主题：{theme}",
+    "themeSwitchTitle": "{label}，点击切换",
+    "theme": {
+      "system": "跟随系统",
+      "light": "浅色",
+      "dark": "深色"
+    }
+  },
+  "emptyState": {
+    "eyebrow": "工具 01 · 切分",
+    "headlineFirst": "一张扫描，",
+    "headlineSecond": "还原两次快门。",
+    "description": "自动识别两幅半格照片之间的中缝。你可以逐张校准分割线、分别旋转，再一次导出整卷照片。",
+    "dropTitle": "拖入扫描图像",
+    "dropHint": "或点击选择单张 / 多张文件",
+    "featureQuality": "原尺寸画质输出",
+    "featureRotation": "左右画面独立旋转",
+    "featureBatch": "整卷 ZIP 批量下载"
+  },
+  "drop": {
+    "scanTitle": "松开以添加扫描图像",
+    "compositionTitle": "松开以加入排版画布",
+    "compositionDescription": "最多读取前两张图像"
+  },
+  "queue": {
+    "title": "本次扫描",
+    "summary": "{count} 个文件 · {size}",
+    "add": "添加图像",
+    "clear": "清空列表",
+    "listLabel": "图像列表，使用上、下方向键选择",
+    "remove": "移除图像 {name}",
+    "delete": "删除图像",
+    "cancel": "取消",
+    "confirmClearTitle": "确认清空列表？",
+    "confirmRemoveTitle": "确认删除图像？",
+    "confirmClearDescription": "将从本次扫描中移除全部 {count} 张图像。此操作无法撤销。",
+    "confirmRemoveDescription": "将从本次扫描中移除“{name}”。此操作无法撤销。",
+    "status": {
+      "done": "已完成",
+      "error": "失败",
+      "processing": "处理中",
+      "pending": "等待自动识别",
+      "analyzing": "正在识别中线",
+      "analyzed": "已识别 · {size}"
+    }
+  },
+  "preview": {
+    "loading": "正在读取原片",
+    "frame": "画面 {number}",
+    "unavailable": "无法预览这张图像",
+    "splitPosition": "分割位置"
+  },
+  "split": {
+    "heading": "切分",
+    "detecting": "正在自动识别",
+    "detectAgain": "重新识别",
+    "position": "分割位置",
+    "removeGap": "移除中缝"
+  },
+  "rotation": {
+    "heading": "方向",
+    "frame": "画面 {number}",
+    "original": "原向",
+    "counterClockwise": "画面 {number} 逆时针旋转",
+    "clockwise": "画面 {number} 顺时针旋转"
+  },
+  "export": {
+    "heading": "输出",
+    "completed": "{completed}/{total} 已完成",
+    "quality": "输出质量",
+    "tiffNote": "TIF 使用未压缩 RGBA 像素输出，避免再次有损编码，文件体积会很大。",
+    "pngNote": "PNG 无损输出，文件体积会明显大于 JPEG。",
+    "splitAll": "切分全部 {count} 张",
+    "splitDownload": "切分并下载",
+    "currentOnly": "仅导出当前图像",
+    "applyAll": "将设置应用到全部",
+    "reset": "重置当前设置",
+    "processing": "正在处理 {name}",
+    "packing": "正在打包 ZIP"
+  },
+  "composition": {
+    "eyebrow": "工具 02 · 排版",
+    "title": "半格胶片排版拼图",
+    "swap": "交换位置",
+    "frame": "画面 {number}",
+    "selectFrame": "选择画面 {number}",
+    "removeFrame": "移除画面 {number}",
+    "replaceHint": "点击替换 · 支持拖拽",
+    "ratio": {
+      "heading": "画布比例",
+      "auto": "自动",
+      "custom": "自定义",
+      "customWidth": "自定义比例宽度",
+      "customHeight": "自定义比例高度",
+      "autoHint": "根据图像比例与当前间距自动调整导出尺寸。"
+    },
+    "layout": {
+      "heading": "画面布局",
+      "horizontal": "左右",
+      "vertical": "上下"
+    },
+    "background": {
+      "heading": "背景与底纹",
+      "color": "选择背景颜色",
+      "hex": "背景颜色十六进制 RGB 值",
+      "solid": "纯色",
+      "grid": "方格",
+      "dots": "圆点"
+    },
+    "spacing": {
+      "padding": "外边距",
+      "individual": "独立设置",
+      "individualLabel": "分别设置四边外边距",
+      "uniform": "统一外边距",
+      "uniformInput": "输入统一外边距",
+      "summary": "上 {top} · 右 {right} · 下 {bottom} · 左 {left} px",
+      "expand": "展开编辑",
+      "top": "上",
+      "right": "右",
+      "bottom": "下",
+      "left": "左",
+      "topPadding": "上边距",
+      "rightPadding": "右边距",
+      "bottomPadding": "下边距",
+      "leftPadding": "左边距",
+      "gap": "画面间距",
+      "gapInput": "输入画面间距",
+      "cover": "填满裁切",
+      "contain": "完整显示"
+    },
+    "download": "生成并下载"
+  },
+  "toast": {
+    "readFailed": "无法读取 {name}",
+    "unsupportedIgnored": "已忽略 {count} 个不支持的文件",
+    "supportedTypes": "支持 TIFF、JPEG、PNG 与 WebP。",
+    "chooseSupportedTypes": "请选择 TIFF、JPEG、PNG 或 WebP。",
+    "appliedAll": "已应用到全部图像",
+    "exportFailedFiles": "导出完成，{count} 个文件失败",
+    "splitComplete": "切分完成",
+    "generated": "已生成 {count} 张图像。",
+    "exportFailed": "导出失败",
+    "unsupportedFile": "不支持这个文件",
+    "noUsableImages": "没有可用的图像",
+    "firstTwoAdded": "已加入前两张图像",
+    "twoImageLimit": "排版画布最多放置两张图像。",
+    "addPhotoFirst": "请先加入照片",
+    "compositionGenerated": "排版图像已生成",
+    "compositionFailed": "生成失败"
+  },
+  "errors": {
+    "imageEncodeFailed": "图像编码失败",
+    "tiffImageMissing": "TIFF 文件中没有可读取的图像",
+    "canvasUnavailable": "浏览器无法创建图像画布",
+    "exportCanvasUnavailable": "浏览器无法创建导出画布",
+    "imageReadFailed": "无法读取图像",
+    "processingFailed": "处理失败",
+    "noImagesGenerated": "没有成功生成的图像",
+    "archiveFailed": "无法生成压缩包",
+    "decodeFailed": "图像解码失败",
+    "compositionFailed": "无法生成排版图像"
+  }
+}
