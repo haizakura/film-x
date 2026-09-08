@@ -6,6 +6,7 @@ import type { CompositionSettings } from '~/types/composition'
 const MAX_PADDING = 220
 const MAX_GAP = 160
 const settings = defineModel<CompositionSettings>({ required: true })
+const { t } = useI18n()
 const advancedPadding = ref(false)
 
 const clampSpacing = (value: number | string, maximum: number) => {
@@ -31,13 +32,29 @@ const gapModel = spacingModel(
   (value) => (settings.value.gap = value),
   MAX_GAP
 )
-const paddingControls = [
-  { key: 'top', label: '上', name: '上边距' },
-  { key: 'right', label: '右', name: '右边距' },
-  { key: 'bottom', label: '下', name: '下边距' },
-  { key: 'left', label: '左', name: '左边距' }
-] as const
-const updatePadding = (key: (typeof paddingControls)[number]['key'], event: Event) => {
+const paddingControls = computed(() => [
+  {
+    key: 'top' as const,
+    label: t('composition.spacing.top'),
+    name: t('composition.spacing.topPadding')
+  },
+  {
+    key: 'right' as const,
+    label: t('composition.spacing.right'),
+    name: t('composition.spacing.rightPadding')
+  },
+  {
+    key: 'bottom' as const,
+    label: t('composition.spacing.bottom'),
+    name: t('composition.spacing.bottomPadding')
+  },
+  {
+    key: 'left' as const,
+    label: t('composition.spacing.left'),
+    name: t('composition.spacing.leftPadding')
+  }
+])
+const updatePadding = (key: 'top' | 'right' | 'bottom' | 'left', event: Event) => {
   settings.value.padding[key] = clampSpacing((event.target as HTMLInputElement).value, MAX_PADDING)
 }
 const isMixedPadding = computed(() => {
@@ -50,10 +67,14 @@ const isMixedPadding = computed(() => {
   <div class="space-y-5 border-b border-border p-5">
     <div>
       <div class="flex items-center justify-between gap-3 text-xs">
-        <span class="font-medium">外边距</span>
+        <span class="font-medium">{{ t('composition.spacing.padding') }}</span>
         <label class="flex items-center gap-2 text-[10px] text-muted-foreground">
-          独立设置
-          <Switch v-model="advancedPadding" size="sm" aria-label="分别设置四边外边距">
+          {{ t('composition.spacing.individual') }}
+          <Switch
+            v-model="advancedPadding"
+            size="sm"
+            :aria-label="t('composition.spacing.individualLabel')"
+          >
             <template #thumb="{ checked }">
               <Check v-if="checked" class="size-2 stroke-3" aria-hidden="true" />
             </template>
@@ -69,12 +90,12 @@ const isMixedPadding = computed(() => {
           min="0"
           :max="MAX_PADDING"
           step="4"
-          aria-label="统一外边距"
+          :aria-label="t('composition.spacing.uniform')"
         />
         <label
           class="flex shrink-0 items-center gap-1 rounded-md border border-border bg-card px-2"
         >
-          <span class="sr-only">输入统一外边距</span>
+          <span class="sr-only">{{ t('composition.spacing.uniformInput') }}</span>
           <input
             v-model.number="paddingModel"
             class="w-12 bg-transparent py-1.5 text-right font-mono text-[10px] outline-none"
@@ -82,7 +103,7 @@ const isMixedPadding = computed(() => {
             min="0"
             :max="MAX_PADDING"
             step="1"
-            aria-label="输入统一外边距"
+            :aria-label="t('composition.spacing.uniformInput')"
           />
           <span class="font-mono text-[9px] text-muted-foreground/70">px</span>
         </label>
@@ -93,21 +114,27 @@ const isMixedPadding = computed(() => {
         class="mt-4 flex items-center justify-between gap-3 rounded-md bg-muted px-3 py-2.5"
       >
         <p class="font-mono text-[9px] leading-relaxed text-muted-foreground">
-          上 {{ settings.padding.top }} · 右 {{ settings.padding.right }} · 下
-          {{ settings.padding.bottom }} · 左 {{ settings.padding.left }} px
+          {{
+            t('composition.spacing.summary', {
+              top: settings.padding.top,
+              right: settings.padding.right,
+              bottom: settings.padding.bottom,
+              left: settings.padding.left
+            })
+          }}
         </p>
         <button
           class="shrink-0 text-[10px] font-medium text-foreground/80 hover:text-foreground"
           @click="advancedPadding = true"
         >
-          展开编辑
+          {{ t('composition.spacing.expand') }}
         </button>
       </div>
 
       <div v-else class="mt-4 grid grid-cols-2 gap-2">
         <label
           v-for="control in paddingControls"
-          :key="control.name"
+          :key="control.key"
           class="flex items-center gap-2 rounded-md border border-border bg-card px-2.5"
         >
           <span class="w-4 text-[10px] text-muted-foreground">{{ control.label }}</span>
@@ -128,7 +155,7 @@ const isMixedPadding = computed(() => {
 
     <div>
       <div class="mb-3 flex items-center justify-between text-xs">
-        <span class="font-medium">画面间距</span>
+        <span class="font-medium">{{ t('composition.spacing.gap') }}</span>
       </div>
       <div class="flex items-center gap-3">
         <input
@@ -138,12 +165,12 @@ const isMixedPadding = computed(() => {
           min="0"
           :max="MAX_GAP"
           step="4"
-          aria-label="画面间距"
+          :aria-label="t('composition.spacing.gap')"
         />
         <label
           class="flex shrink-0 items-center gap-1 rounded-md border border-border bg-card px-2"
         >
-          <span class="sr-only">输入画面间距</span>
+          <span class="sr-only">{{ t('composition.spacing.gapInput') }}</span>
           <input
             v-model.number="gapModel"
             class="w-12 bg-transparent py-1.5 text-right font-mono text-[10px] outline-none"
@@ -151,7 +178,7 @@ const isMixedPadding = computed(() => {
             min="0"
             :max="MAX_GAP"
             step="1"
-            aria-label="输入画面间距"
+            :aria-label="t('composition.spacing.gapInput')"
           />
           <span class="font-mono text-[9px] text-muted-foreground/70">px</span>
         </label>
@@ -168,7 +195,7 @@ const isMixedPadding = computed(() => {
         "
         @click="settings.fit = 'cover'"
       >
-        填满裁切
+        {{ t('composition.spacing.cover') }}
       </button>
       <button
         class="rounded-md py-2 text-[11px]"
@@ -179,7 +206,7 @@ const isMixedPadding = computed(() => {
         "
         @click="settings.fit = 'contain'"
       >
-        完整显示
+        {{ t('composition.spacing.contain') }}
       </button>
     </div>
   </div>

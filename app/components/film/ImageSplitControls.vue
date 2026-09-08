@@ -3,6 +3,7 @@ import { LoaderCircle, ScanSearch } from '@lucide/vue'
 import type { AnalysisStatus, SplitSettings } from '~/types/image'
 
 const props = defineProps<{ settings: SplitSettings; analysisStatus: AnalysisStatus }>()
+const { t } = useI18n()
 const emit = defineEmits<{
   'update:settings': [settings: SplitSettings]
   detect: []
@@ -19,7 +20,7 @@ const updateNumber = (key: 'center' | 'gap', event: Event) => {
 <template>
   <div class="border-b border-border px-5 py-5">
     <div class="flex items-center justify-between">
-      <p class="eyebrow">切分</p>
+      <p class="eyebrow">{{ t('split.heading') }}</p>
       <button
         type="button"
         class="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground disabled:cursor-wait disabled:opacity-60"
@@ -37,15 +38,15 @@ const updateNumber = (key: 'center' | 'gap', event: Event) => {
         />
         {{
           analysisStatus === 'analyzing' || analysisStatus === 'pending'
-            ? '正在自动识别'
-            : '重新识别'
+            ? t('split.detecting')
+            : t('split.detectAgain')
         }}
       </button>
     </div>
     <div class="mt-5 space-y-6">
       <label class="block">
         <span class="mb-3 flex items-center justify-between text-xs">
-          <span class="font-medium">分割位置</span>
+          <span class="font-medium">{{ t('split.position') }}</span>
           <output class="font-mono text-[10px] text-muted-foreground"
             >{{ (settings.center * 100).toFixed(1) }}%</output
           >
@@ -63,7 +64,7 @@ const updateNumber = (key: 'center' | 'gap', event: Event) => {
 
       <label class="block">
         <span class="mb-3 flex items-center justify-between text-xs">
-          <span class="font-medium">移除中缝</span>
+          <span class="font-medium">{{ t('split.removeGap') }}</span>
           <output class="font-mono text-[10px] text-muted-foreground"
             >{{ (settings.gap * 100).toFixed(1) }}%</output
           >

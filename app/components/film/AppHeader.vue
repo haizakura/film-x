@@ -4,20 +4,35 @@ import { Button } from '@/components/ui/button'
 
 const route = useRoute()
 const colorMode = useColorMode()
+const { t } = useI18n()
 
-const tools = [
-  { label: '半格切分', description: '一分为二', icon: ScanLine, to: '/' },
-  { label: '排版拼图', description: '双片成章', icon: PanelsTopLeft, to: '/compose' }
-]
-
+const tools = computed(() => [
+  {
+    label: t('header.splitter'),
+    description: t('header.splitterTagline'),
+    icon: ScanLine,
+    to: '/'
+  },
+  {
+    label: t('header.composer'),
+    description: t('header.composerTagline'),
+    icon: PanelsTopLeft,
+    to: '/compose'
+  }
+])
 const isActive = (to: string) => route.path === to
 const themeIcon = computed(() => {
   if (colorMode.preference === 'system') return MonitorCog
   return colorMode.value === 'dark' ? Moon : Sun
 })
 const themeLabel = computed(() => {
-  if (colorMode.preference === 'system') return '主题：跟随系统'
-  return colorMode.preference === 'dark' ? '主题：深色' : '主题：浅色'
+  const theme =
+    colorMode.preference === 'system'
+      ? t('header.theme.system')
+      : colorMode.preference === 'dark'
+        ? t('header.theme.dark')
+        : t('header.theme.light')
+  return t('header.themeLabel', { theme })
 })
 
 const cycleTheme = () => {
@@ -35,7 +50,7 @@ const cycleTheme = () => {
     <div
       class="mx-auto flex max-w-420 flex-wrap items-center gap-x-5 px-4 sm:px-6 lg:flex-nowrap lg:px-8"
     >
-      <NuxtLink to="/" class="flex h-16 shrink-0 items-center gap-3" aria-label="Film X 首页">
+      <NuxtLink to="/" class="flex h-16 shrink-0 items-center gap-3" :aria-label="t('header.home')">
         <div class="brand-mark" aria-hidden="true">
           <span />
           <span />
@@ -44,7 +59,7 @@ const cycleTheme = () => {
           <p
             class="font-mono text-[9px] leading-none tracking-[0.24em] text-muted-foreground uppercase"
           >
-            Local film lab
+            {{ t('header.brandTagline') }}
           </p>
           <h1 class="mt-1 text-[18px] leading-none font-semibold tracking-[-0.03em]">Film X</h1>
         </div>
@@ -52,7 +67,7 @@ const cycleTheme = () => {
 
       <nav
         class="order-3 flex w-full items-stretch gap-1 overflow-x-auto border-t border-border py-2 lg:order-0 lg:w-auto lg:flex-1 lg:justify-center lg:border-t-0 lg:py-0"
-        aria-label="图像工具"
+        :aria-label="t('header.toolsLabel')"
       >
         <NuxtLink
           v-for="tool in tools"
@@ -80,15 +95,16 @@ const cycleTheme = () => {
       <div class="ml-auto flex h-16 shrink-0 items-center gap-1.5">
         <div class="mr-1 hidden items-center gap-2 text-[11px] text-muted-foreground xl:flex">
           <ShieldCheck class="size-3.5 text-primary" />
-          图像仅在本地处理
+          {{ t('header.localOnly') }}
         </div>
+        <FilmLanguageMenu />
         <ClientOnly>
           <Button
             type="button"
             variant="ghost"
             size="icon-sm"
             :aria-label="themeLabel"
-            :title="`${themeLabel}，点击切换`"
+            :title="t('header.themeSwitchTitle', { label: themeLabel })"
             @click="cycleTheme"
           >
             <component :is="themeIcon" />

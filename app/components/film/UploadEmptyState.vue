@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ScanLine } from '@lucide/vue'
 
+const { t } = useI18n()
+
 defineProps<{
   fileInputId: string
   isDragging: boolean
@@ -16,15 +18,15 @@ const emit = defineEmits<{ pick: [] }>()
         class="mb-4 flex items-center gap-2 font-mono text-xs tracking-[0.2em] text-primary uppercase"
       >
         <span class="h-px w-7 bg-primary" />
-        Tool 01 · Splitter
+        {{ t('emptyState.eyebrow') }}
       </p>
       <h2
         class="text-4xl leading-[1.08] font-semibold tracking-[-0.045em] text-balance sm:text-6xl"
       >
-        一张扫描，<br />还原两次快门。
+        {{ t('emptyState.headlineFirst') }}<br />{{ t('emptyState.headlineSecond') }}
       </h2>
       <p class="mt-6 max-w-xl text-base leading-7 text-muted-foreground sm:text-lg">
-        自动识别两幅半格照片之间的中缝。你可以逐张校准分割线、分别旋转，再一次导出整卷照片。
+        {{ t('emptyState.description') }}
       </p>
     </section>
 
@@ -47,8 +49,8 @@ const emit = defineEmits<{ pick: [] }>()
         >
           <ScanLine class="size-6 text-primary" />
         </span>
-        <span class="text-lg font-semibold">拖入扫描图像</span>
-        <span class="mt-2 text-sm text-muted-foreground">或点击选择单张 / 多张文件</span>
+        <span class="text-lg font-semibold">{{ t('emptyState.dropTitle') }}</span>
+        <span class="mt-2 text-sm text-muted-foreground">{{ t('emptyState.dropHint') }}</span>
         <span
           class="mt-5 rounded-full bg-muted px-3 py-1 font-mono text-[10px] tracking-wider text-muted-foreground uppercase"
         >
@@ -58,9 +60,15 @@ const emit = defineEmits<{ pick: [] }>()
     </label>
 
     <div class="mt-7 grid gap-4 text-sm text-muted-foreground sm:grid-cols-3">
-      <p class="flex items-center gap-2"><span class="step-index">01</span> 原尺寸画质输出</p>
-      <p class="flex items-center gap-2"><span class="step-index">02</span> 左右画面独立旋转</p>
-      <p class="flex items-center gap-2"><span class="step-index">03</span> 整卷 ZIP 批量下载</p>
+      <p class="flex items-center gap-2">
+        <span class="step-index">01</span> {{ t('emptyState.featureQuality') }}
+      </p>
+      <p class="flex items-center gap-2">
+        <span class="step-index">02</span> {{ t('emptyState.featureRotation') }}
+      </p>
+      <p class="flex items-center gap-2">
+        <span class="step-index">03</span> {{ t('emptyState.featureBatch') }}
+      </p>
     </div>
   </main>
 </template>

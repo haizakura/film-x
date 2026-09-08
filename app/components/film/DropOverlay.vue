@@ -8,7 +8,7 @@ const props = withDefaults(
     mode?: 'viewport' | 'container'
   }>(),
   {
-    title: '松开以添加扫描图像',
+    title: undefined,
     description: undefined,
     mode: 'viewport'
   }

@@ -1,3 +1,5 @@
+import { AppError } from '~/utils/errors'
+
 export const canvasToBlob = (
   canvas: HTMLCanvasElement,
   format: 'jpeg' | 'png' | 'webp',
@@ -5,7 +7,7 @@ export const canvasToBlob = (
 ) =>
   new Promise<Blob>((resolve, reject) => {
     canvas.toBlob(
-      (blob) => (blob ? resolve(blob) : reject(new Error('图像编码失败'))),
+      (blob) => (blob ? resolve(blob) : reject(new AppError('imageEncodeFailed'))),
       `image/${format}`,
       format === 'png' ? undefined : quality
     )

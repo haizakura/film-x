@@ -13,6 +13,7 @@ defineProps<{
   exportProgress: number
   exportLabel: string
 }>()
+const { t } = useI18n()
 
 const emit = defineEmits<{
   'update:format': [format: ExportFormat]
@@ -27,9 +28,9 @@ const formats: ExportFormat[] = ['jpeg', 'png', 'webp', 'tiff']
 <template>
   <div class="border-b border-border px-5 py-5">
     <div class="flex items-center justify-between">
-      <p class="eyebrow">输出</p>
+      <p class="eyebrow">{{ t('export.heading') }}</p>
       <span v-if="completedCount" class="font-mono text-[9px] text-primary">
-        {{ completedCount }}/{{ totalCount }} DONE
+        {{ t('export.completed', { completed: completedCount, total: totalCount }) }}
       </span>
     </div>
     <FilmOutputFormatSelector
@@ -41,7 +42,7 @@ const formats: ExportFormat[] = ['jpeg', 'png', 'webp', 'tiff']
 
     <label v-if="format === 'jpeg' || format === 'webp'" class="mt-5 block">
       <span class="mb-3 flex items-center justify-between text-xs">
-        <span class="font-medium">输出质量</span>
+        <span class="font-medium">{{ t('export.quality') }}</span>
         <output class="font-mono text-[10px] text-muted-foreground"
           >{{ Math.round(quality * 100) }}%</output
         >
@@ -57,10 +58,8 @@ const formats: ExportFormat[] = ['jpeg', 'png', 'webp', 'tiff']
       />
     </label>
     <p v-else class="mt-4 text-[11px] leading-5 text-muted-foreground">
-      <template v-if="format === 'tiff'">
-        TIF 使用未压缩 RGBA 像素输出，避免再次有损编码，文件体积会很大。
-      </template>
-      <template v-else>PNG 无损输出，文件体积会明显大于 JPEG。</template>
+      <template v-if="format === 'tiff'">{{ t('export.tiffNote') }}</template>
+      <template v-else>{{ t('export.pngNote') }}</template>
     </p>
   </div>
 
@@ -84,7 +83,7 @@ const formats: ExportFormat[] = ['jpeg', 'png', 'webp', 'tiff']
     >
       <Loader2 v-if="exporting" class="animate-spin" />
       <PackageOpen v-else />
-      {{ totalCount > 1 ? `切分全部 ${totalCount} 张` : '切分并下载' }}
+      {{ totalCount > 1 ? t('export.splitAll', { count: totalCount }) : t('export.splitDownload') }}
     </Button>
     <Button
       v-if="totalCount > 1"
@@ -95,7 +94,7 @@ const formats: ExportFormat[] = ['jpeg', 'png', 'webp', 'tiff']
       :disabled="exporting"
       @click="emit('export-current')"
     >
-      仅导出当前图像
+      {{ t('export.currentOnly') }}
     </Button>
   </div>
 </template>

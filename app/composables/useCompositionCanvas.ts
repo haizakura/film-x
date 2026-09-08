@@ -7,6 +7,7 @@ import type {
   CompositionSettings
 } from '~/types/composition'
 import { canvasToBlob, downloadBlob } from '~/utils/download'
+import { errorMessageKey } from '~/utils/errors'
 
 const isLightColor = (hex: string) => {
   const value = hex.replace('#', '')
@@ -84,8 +85,8 @@ const drawPlacedImage = (
 const drawPlaceholder = (
   context: CanvasRenderingContext2D,
   frame: CompositionGeometry['frames'][number],
-  index: number,
-  background: string
+  background: string,
+  label: string
 ) => {
   const light = isLightColor(background)
   context.save()
@@ -99,7 +100,7 @@ const drawPlaceholder = (
   context.font = '500 28px SFMono-Regular, monospace'
   context.textAlign = 'center'
   context.textBaseline = 'middle'
-  context.fillText(`FRAME 0${index + 1}`, frame.x + frame.width / 2, frame.y + frame.height / 2)
+  context.fillText(label, frame.x + frame.width / 2, frame.y + frame.height / 2)
   context.restore()
 }
 
@@ -108,6 +109,8 @@ export const useCompositionCanvas = (
   geometry: MaybeRefOrGetter<CompositionGeometry>,
   settings: MaybeRefOrGetter<CompositionSettings>
 ) => {
+  const { t, locale } = useI18n()
+  const translateError = useTranslatedError()
   const canvas = ref<HTMLCanvasElement>()
   let animationFrame: number | undefined
 
@@ -135,7 +138,14 @@ export const useCompositionCanvas = (
       context.shadowBlur = 30
       context.shadowOffsetY = 12
       if (entry) drawPlacedImage(context, entry.decoded, frame, currentSettings)
-      else drawPlaceholder(context, frame, index, currentSettings.background)
+      else {
+        drawPlaceholder(
+          context,
+          frame,
+          currentSettings.background,
+          t('composition.frame', { number: `0${index + 1}` })
+        )
+      }
       context.restore()
     })
   }
@@ -153,7 +163,7 @@ export const useCompositionCanvas = (
     const currentImages = toValue(images)
     const currentSettings = toValue(settings)
     if (!target || !currentImages.some(Boolean)) {
-      toast.warning('请先加入照片')
+      toast.warning(t('toast.addPhotoFirst'))
       return
     }
 
@@ -165,10 +175,13 @@ export const useCompositionCanvas = (
       )
       const extension = currentSettings.outputFormat === 'jpeg' ? 'jpg' : 'png'
       downloadBlob(blob, `film-x-layout.${extension}`)
-      toast.success('排版图像已生成')
+      toast.success(t('toast.compositionGenerated'))
     } catch (error) {
-      toast.error('生成失败', {
-        description: error instanceof Error ? error.message : '无法生成排版图像'
+      toast.error(t('toast.compositionFailed'), {
+        description: translateError(
+          errorMessageKey(error, 'errors.compositionFailed'),
+          'errors.compositionFailed'
+        )
       })
     }
   }
@@ -180,7 +193,8 @@ export const useCompositionCanvas = (
       toValue(geometry),
       currentSettings.background,
       currentSettings.pattern,
-      currentSettings.fit
+      currentSettings.fit,
+      locale.value
     ]
   }, scheduleDraw)
 
