@@ -68,7 +68,7 @@ mise exec -- pnpm build
 - `app/assets/css`：全局主题、颜色和基础控件样式。
 - `public`：favicon 等公开静态资源。
 
-半格切分工作流复用了 [Full2Half](https://github.com/haizakura/full2half) 的 GPL-3.0-only 源码，并在 Film X 的统一页面结构与主题系统中重新组织。
+半格切分工作流复用了个人项目 [Full2Half](https://github.com/haizakura/full2half) 的源码，并在 Film X 的统一页面结构与主题系统中重新组织。
 
 ## 图像处理说明
 
@@ -78,4 +78,4 @@ mise exec -- pnpm build
 
 ## 许可证
 
-本项目采用 [GNU General Public License v3.0](LICENSE)（GPL-3.0-only）许可。
+本项目采用 [Apache License 2.0](LICENSE)（Apache-2.0）许可。

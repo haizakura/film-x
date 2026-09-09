@@ -67,7 +67,7 @@ mise exec -- pnpm build
 - `app/assets/css`: Global theme, colors, and base control styles.
 - `public`: Public static assets such as the favicon.
 
-The half-frame splitting workflow reuses GPL-3.0-only source code from [Full2Half](https://github.com/haizakura/full2half), reorganized within Film X's unified page structure and theme system.
+The half-frame splitting workflow reuses source code from the personal project [Full2Half](https://github.com/haizakura/full2half), reorganized within Film X's unified page structure and theme system.
 
 ## Image Processing Notes
 
@@ -77,4 +77,4 @@ The half-frame splitting workflow reuses GPL-3.0-only source code from [Full2Hal
 
 ## License
 
-This project is licensed under the [GNU General Public License v3.0](LICENSE) (GPL-3.0-only).
+This project is licensed under the [Apache License 2.0](LICENSE) (Apache-2.0).
