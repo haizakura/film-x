@@ -1,10 +1,13 @@
 import type { DecodedImage } from '~/types/image'
 
+export const MAX_COMPOSITION_CANVAS_SIDE = 8000
+
 export type CompositionPattern = 'none' | 'grid' | 'dots'
 export type CompositionFitMode = 'cover' | 'contain'
 export type CompositionOutputFormat = 'jpeg' | 'png'
 export type CompositionRatioMode = 'preset' | 'custom' | 'auto'
 export type CompositionLayoutDirection = 'horizontal' | 'vertical'
+export type CompositionCanvasSizeAnchor = 'width' | 'height'
 
 export interface CompositionImage {
   name: string
@@ -23,6 +26,9 @@ export interface CompositionSettings {
   ratio: number
   customRatioWidth: number
   customRatioHeight: number
+  canvasWidth: number
+  canvasHeight: number
+  canvasSizeAnchor: CompositionCanvasSizeAnchor
   layoutDirection: CompositionLayoutDirection
   background: string
   pattern: CompositionPattern

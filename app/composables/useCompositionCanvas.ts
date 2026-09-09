@@ -1,6 +1,7 @@
 import type { MaybeRefOrGetter } from 'vue'
 import { toast } from 'vue-sonner'
 
+import { MAX_COMPOSITION_CANVAS_SIDE } from '~/types/composition'
 import type {
   CompositionGeometry,
   CompositionImage,
@@ -16,6 +17,12 @@ const isLightColor = (hex: string) => {
   const blue = Number.parseInt(value.slice(4, 6), 16)
   return red * 0.299 + green * 0.587 + blue * 0.114 > 145
 }
+
+const hasSupportedCanvasDimensions = (geometry: CompositionGeometry) =>
+  [geometry.width, geometry.height].every(
+    (dimension) =>
+      Number.isSafeInteger(dimension) && dimension >= 1 && dimension <= MAX_COMPOSITION_CANVAS_SIDE
+  )
 
 const drawPattern = (
   context: CanvasRenderingContext2D,
@@ -120,6 +127,7 @@ export const useCompositionCanvas = (
     const currentGeometry = toValue(geometry)
     const currentSettings = toValue(settings)
     const currentImages = toValue(images)
+    if (!hasSupportedCanvasDimensions(currentGeometry)) return
 
     target.width = currentGeometry.width
     target.height = currentGeometry.height
