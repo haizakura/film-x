@@ -70,9 +70,6 @@ defineExpose({ download })
           <ArrowUpDown v-else class="size-3.5" aria-hidden="true" />
           {{ t('composition.swap') }}
         </button>
-        <span class="font-mono text-[9px] text-white/35">
-          {{ geometry.width }} × {{ geometry.height }} PX
-        </span>
       </div>
     </div>
 

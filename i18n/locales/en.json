@@ -118,6 +118,14 @@
       "customHeight": "Custom ratio height",
       "autoHint": "Adjust the export dimensions automatically from the image ratio and current spacing."
     },
+    "size": {
+      "heading": "Canvas size",
+      "width": "Width",
+      "height": "Height",
+      "widthInput": "Enter canvas width",
+      "heightInput": "Enter canvas height",
+      "maxHint": "Longest side: {size} px max"
+    },
     "layout": {
       "heading": "Frame layout",
       "horizontal": "Side by side",
