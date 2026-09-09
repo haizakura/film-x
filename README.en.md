@@ -12,12 +12,14 @@ A collection of film image processing tools that run locally in your browser. Im
 - Automatically detects the split position and gutter width of each scanned image, with manual fine-tuning available.
 - Each side can be rotated independently, and the current settings can be applied to all images.
 - Export as JPEG, PNG, WebP, or TIF, with batch results bundled into a ZIP download.
+- JPEG and WebP exports support adjustable output quality.
 
 ### Layout Composer
 
 - Place up to two images and compose them into a single output image; supports click-to-select and drag-and-drop import of TIFF, JPEG, PNG, and WebP.
 - Supports side-by-side and stacked layouts, as well as swapping the image order.
 - The canvas can use a preset ratio, a custom ratio, or a ratio computed automatically from the images and spacing.
+- Canvas width or height can be entered directly; the longest side is limited to 8000 px.
 - Outer margins and the gap between images can be adjusted with sliders or typed in directly; outer margins support either a uniform value or independent top, right, bottom, and left values.
 - Choose between fill (crop) and fit (show the entire image), enter a hex RGB background color, and pick a solid, checkerboard, or dotted background pattern.
 - Export as JPEG or PNG.
@@ -26,6 +28,7 @@ The horizontal menu at the top of the page switches between the two tools. Each 
 
 ## Interface and Theme
 
+- The interface supports Simplified Chinese and English, with a language switcher in the top-right corner. On first visit, Nuxt i18n detects the browser language and falls back to English when it is not supported.
 - Follows the system light / dark appearance by default; you can also cycle through modes manually from the top-right corner of the page.
 - The interface follows shadcn/ui's default neutral theme and adapts its semantic color tokens to light and dark modes.
 - Both modes have their own text, border, overlay, and interaction-state colors. The image preview workbench always stays dark to make photo edges easier to judge.
@@ -33,6 +36,8 @@ The horizontal menu at the top of the page switches between the two tools. Each 
 ## Tech Stack
 
 App framework and UI: Nuxt 4 + Vue 3 + shadcn-vue + Reka UI + Tailwind CSS
+
+Localization and theme: `@nuxtjs/i18n` + `@nuxtjs/color-mode`
 
 Imaging and compression: UTIF + fflate
 
@@ -55,6 +60,13 @@ The development server runs at `http://localhost:3000` by default.
 ```bash
 mise exec -- pnpm check
 mise exec -- pnpm build
+```
+
+`check` runs formatting checks, Oxlint, and Nuxt type checking in sequence. To generate a static site or preview the build output, use:
+
+```bash
+mise exec -- pnpm generate
+mise exec -- pnpm preview
 ```
 
 ## Project Structure

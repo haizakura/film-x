@@ -12,12 +12,14 @@
 - 自动识别每张扫描图像的分割位置与中缝宽度，并允许手动微调。
 - 两侧画面可分别旋转，也可将当前设置应用到全部图像。
 - 支持导出 JPEG、PNG、WebP 与 TIF，并将批量结果打包为 ZIP 下载。
+- JPEG 与 WebP 导出支持调整输出质量。
 
 ### 排版拼图
 
 - 最多放置两张图像并排版为一张成品图，支持点击选择和拖拽导入 TIFF、JPEG、PNG 与 WebP。
 - 支持左右、上下两种布局，以及交换画面顺序。
 - 画布可使用预设比例、自定义比例或根据图像与间距自动计算比例。
+- 可直接输入画布宽度或高度，最长边限制为 8000 px。
 - 外边距和画面间距均可滑动或直接输入；外边距支持统一设置和上、右、下、左独立设置。
 - 支持填满裁切或完整显示，并可输入十六进制 RGB 背景色、选择纯色、方格或圆点底纹。
 - 支持导出 JPEG 或 PNG。
@@ -34,6 +36,8 @@
 ## 技术栈
 
 应用框架与界面：Nuxt 4 + Vue 3 + shadcn-vue + Reka UI + Tailwind CSS
+
+语言与主题：`@nuxtjs/i18n` + `@nuxtjs/color-mode`
 
 图像与压缩：UTIF + fflate
 
@@ -56,6 +60,13 @@ mise exec -- pnpm dev
 ```bash
 mise exec -- pnpm check
 mise exec -- pnpm build
+```
+
+`check` 会依次执行格式检查、Oxlint 和 Nuxt 类型检查。需要生成静态站点或预览构建结果时，可使用：
+
+```bash
+mise exec -- pnpm generate
+mise exec -- pnpm preview
 ```
 
 ## 代码结构
