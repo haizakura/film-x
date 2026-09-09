@@ -1,7 +1,8 @@
 <script setup lang="ts">
 const { images, rendering, hasImages, placeFile, placeDroppedFiles, removeImage, swapImages } =
   useCompositionImages()
-const { settings, geometry, aspectStyle } = useCompositionSettings(images)
+const { settings, geometry, aspectStyle, updateCanvasWidth, updateCanvasHeight } =
+  useCompositionSettings(images)
 const workspace = ref<{ download: () => Promise<void> }>()
 
 const download = () => workspace.value?.download()
@@ -21,6 +22,13 @@ const download = () => workspace.value?.download()
       @remove="removeImage"
       @swap="swapImages"
     />
-    <FilmCompositionControls v-model="settings" :has-images="hasImages" @download="download" />
+    <FilmCompositionControls
+      v-model="settings"
+      :has-images="hasImages"
+      :geometry="geometry"
+      @download="download"
+      @canvas-width="updateCanvasWidth"
+      @canvas-height="updateCanvasHeight"
+    />
   </main>
 </template>

@@ -3,8 +3,8 @@ import { Check } from '@lucide/vue'
 import { Switch } from '@/components/ui/switch'
 import type { CompositionSettings } from '~/types/composition'
 
-const MAX_PADDING = 220
-const MAX_GAP = 160
+const MAX_PADDING = 440
+const MAX_GAP = 320
 const settings = defineModel<CompositionSettings>({ required: true })
 const { t } = useI18n()
 const advancedPadding = ref(false)

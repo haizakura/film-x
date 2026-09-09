@@ -118,6 +118,14 @@
       "customHeight": "自定义比例高度",
       "autoHint": "根据图像比例与当前间距自动调整导出尺寸。"
     },
+    "size": {
+      "heading": "画布大小",
+      "width": "宽度",
+      "height": "高度",
+      "widthInput": "输入画布宽度",
+      "heightInput": "输入画布高度",
+      "maxHint": "最长边最大 {size} px"
+    },
     "layout": {
       "heading": "画面布局",
       "horizontal": "左右",
