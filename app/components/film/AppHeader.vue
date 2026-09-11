@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { MonitorCog, Moon, PanelsTopLeft, ScanLine, ShieldCheck, Sun } from '@lucide/vue'
+import { MonitorCog, Moon, PanelsTopLeft, ScanLine, Sun } from '@lucide/vue'
 import { Button } from '@/components/ui/button'
 
 const route = useRoute()
@@ -93,10 +93,6 @@ const cycleTheme = () => {
       </nav>
 
       <div class="ml-auto flex h-16 shrink-0 items-center gap-1.5">
-        <div class="mr-1 hidden items-center gap-2 text-[11px] text-muted-foreground xl:flex">
-          <ShieldCheck class="size-3.5 text-primary" />
-          {{ t('header.localOnly') }}
-        </div>
         <FilmLanguageMenu />
         <ClientOnly>
           <Button
@@ -107,9 +103,24 @@ const cycleTheme = () => {
             :title="t('header.themeSwitchTitle', { label: themeLabel })"
             @click="cycleTheme"
           >
-            <component :is="themeIcon" />
+            <component :is="themeIcon" class="size-5" />
           </Button>
         </ClientOnly>
+        <Button as-child variant="ghost" size="icon-sm">
+          <a
+            href="https://github.com/haizakura/film-x"
+            target="_blank"
+            rel="noopener noreferrer"
+            :aria-label="t('header.github')"
+            :title="t('header.github')"
+          >
+            <svg class="size-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path
+                d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.49.5.092.683-.217.683-.483 0-.237-.009-1.026-.013-1.86-2.782.604-3.369-1.18-3.369-1.18-.455-1.157-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.004.07 1.532 1.03 1.532 1.03.892 1.529 2.341 1.087 2.91.831.091-.646.349-1.087.635-1.337-2.221-.253-4.555-1.11-4.555-4.943 0-1.092.39-1.985 1.029-2.685-.103-.253-.446-1.272.098-2.65 0 0 .84-.269 2.75 1.026A9.56 9.56 0 0 1 12 6.756c.85.004 1.705.115 2.504.337 1.909-1.295 2.748-1.026 2.748-1.026.546 1.378.203 2.397.1 2.65.64.7 1.028 1.593 1.028 2.685 0 3.842-2.338 4.687-4.566 4.935.359.31.678.92.678 1.855 0 1.34-.012 2.42-.012 2.75 0 .268.18.58.688.482A10.001 10.001 0 0 0 22 12c0-5.523-4.477-10-10-10Z"
+              />
+            </svg>
+          </a>
+        </Button>
       </div>
     </div>
   </header>

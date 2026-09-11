@@ -21,7 +21,7 @@
     "splitterTagline": "One scan, two frames",
     "composer": "Film composer",
     "composerTagline": "Two frames, one image",
-    "localOnly": "Images stay on this device",
+    "github": "View Film X on GitHub",
     "themeLabel": "Theme: {theme}",
     "themeSwitchTitle": "{label}; click to switch",
     "theme": {
@@ -29,6 +29,9 @@
       "light": "Light",
       "dark": "Dark"
     }
+  },
+  "footer": {
+    "localOnly": "Images stay on this device"
   },
   "emptyState": {
     "eyebrow": "Tool 01 · Splitter",

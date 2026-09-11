@@ -21,7 +21,7 @@
     "splitterTagline": "一分为二",
     "composer": "排版拼图",
     "composerTagline": "双片成章",
-    "localOnly": "图像仅在本地处理",
+    "github": "在 GitHub 上查看 Film X",
     "themeLabel": "主题：{theme}",
     "themeSwitchTitle": "{label}，点击切换",
     "theme": {
@@ -29,6 +29,9 @@
       "light": "浅色",
       "dark": "深色"
     }
+  },
+  "footer": {
+    "localOnly": "图像仅在本地处理"
   },
   "emptyState": {
     "eyebrow": "工具 01 · 切分",

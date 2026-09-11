@@ -79,7 +79,7 @@ onBeforeUnmount(clearCloseTimer)
         @pointerenter="openMenu"
         @pointerleave="closeMenuSoon"
       >
-        <Languages />
+        <Languages class="size-5" />
       </Button>
     </DropdownMenuTrigger>
 
