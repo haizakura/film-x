@@ -68,24 +68,26 @@ const drawPattern = (
 
 const drawPlacedImage = (
   context: CanvasRenderingContext2D,
-  image: CompositionImage['decoded'],
+  image: CompositionImage,
   frame: CompositionGeometry['frames'][number],
   settings: CompositionSettings
 ) => {
   const scale =
     settings.fit === 'cover'
-      ? Math.max(frame.width / image.width, frame.height / image.height)
-      : Math.min(frame.width / image.width, frame.height / image.height)
-  const renderWidth = image.width * scale
-  const renderHeight = image.height * scale
-  const renderX = frame.x + (frame.width - renderWidth) / 2
-  const renderY = frame.y + (frame.height - renderHeight) / 2
+      ? Math.max(frame.width / image.decoded.width, frame.height / image.decoded.height)
+      : Math.min(frame.width / image.decoded.width, frame.height / image.decoded.height)
+  const transform =
+    settings.canvasSizeMode === 'manual' ? image.transform : { scale: 1, offsetX: 0, offsetY: 0 }
+  const renderWidth = image.decoded.width * scale * transform.scale
+  const renderHeight = image.decoded.height * scale * transform.scale
+  const renderX = frame.x + (frame.width - renderWidth) / 2 + transform.offsetX
+  const renderY = frame.y + (frame.height - renderHeight) / 2 + transform.offsetY
 
   context.save()
   context.beginPath()
   context.rect(frame.x, frame.y, frame.width, frame.height)
   context.clip()
-  context.drawImage(image.source, renderX, renderY, renderWidth, renderHeight)
+  context.drawImage(image.decoded.source, renderX, renderY, renderWidth, renderHeight)
   context.restore()
 }
 
@@ -145,7 +147,7 @@ export const useCompositionCanvas = (
       context.shadowColor = 'rgba(0,0,0,.18)'
       context.shadowBlur = 30
       context.shadowOffsetY = 12
-      if (entry) drawPlacedImage(context, entry.decoded, frame, currentSettings)
+      if (entry) drawPlacedImage(context, entry, frame, currentSettings)
       else {
         drawPlaceholder(
           context,
@@ -202,6 +204,7 @@ export const useCompositionCanvas = (
       currentSettings.background,
       currentSettings.pattern,
       currentSettings.fit,
+      currentSettings.canvasSizeMode,
       locale.value
     ]
   }, scheduleDraw)

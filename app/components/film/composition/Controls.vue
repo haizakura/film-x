@@ -1,12 +1,24 @@
 <script setup lang="ts">
-import type { CompositionGeometry, CompositionSettings } from '~/types/composition'
+import type {
+  CompositionCanvasSizeMode,
+  CompositionGeometry,
+  CompositionImage,
+  CompositionSettings
+} from '~/types/composition'
 
-defineProps<{ hasImages: boolean; geometry: CompositionGeometry }>()
+defineProps<{
+  hasImages: boolean
+  images: Array<CompositionImage | undefined>
+  geometry: CompositionGeometry
+}>()
 const settings = defineModel<CompositionSettings>({ required: true })
 const emit = defineEmits<{
   download: []
+  'canvas-size-mode': [value: CompositionCanvasSizeMode]
   'canvas-width': [value: string]
   'canvas-height': [value: string]
+  'image-scale': [index: number, value: number]
+  'reset-image': [index: number]
 }>()
 </script>
 
@@ -16,8 +28,17 @@ const emit = defineEmits<{
       <FilmCompositionRatioControls v-model="settings" />
       <FilmCompositionCanvasSizeControls
         :geometry="geometry"
+        :mode="settings.canvasSizeMode"
+        @update:mode="emit('canvas-size-mode', $event)"
         @update:width="emit('canvas-width', $event)"
         @update:height="emit('canvas-height', $event)"
+      />
+      <FilmCompositionImageTransformControls
+        v-if="settings.canvasSizeMode === 'manual'"
+        :enabled="settings.canvasSizeMode === 'manual'"
+        :images="images"
+        @scale="emit('image-scale', $event.index, $event.value)"
+        @reset="emit('reset-image', $event)"
       />
       <FilmCompositionLayoutControls v-model="settings" />
       <FilmCompositionBackgroundControls v-model="settings" />
@@ -30,23 +51,3 @@ const emit = defineEmits<{
     </div>
   </aside>
 </template>
-
-<style scoped>
-.controls-scroll {
-  scrollbar-width: thin;
-  scrollbar-color: color-mix(in srgb, var(--muted-foreground) 58%, transparent) transparent;
-}
-
-.controls-scroll::-webkit-scrollbar {
-  width: 6px;
-}
-
-.controls-scroll::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.controls-scroll::-webkit-scrollbar-thumb {
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--muted-foreground) 58%, transparent);
-}
-</style>

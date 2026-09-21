@@ -1,5 +1,5 @@
 import { toast } from 'vue-sonner'
-import type { CompositionImage } from '~/types/composition'
+import type { CompositionImage, CompositionImageTransform } from '~/types/composition'
 import { errorMessageKey } from '~/utils/errors'
 import { decodeImage, partitionSupportedImages } from '~/utils/image'
 
@@ -56,7 +56,11 @@ export const useCompositionImages = () => {
           continue
         }
         next[index]?.decoded.dispose()
-        next[index] = { name: file.name, decoded }
+        next[index] = {
+          name: file.name,
+          decoded,
+          transform: { scale: 1, offsetX: 0, offsetY: 0 }
+        }
         changed = true
       }
       if (changed) images.value = next
@@ -114,6 +118,22 @@ export const useCompositionImages = () => {
     images.value = [images.value[1], images.value[0]]
   }
 
+  const updateImageTransform = (index: number, transform: Partial<CompositionImageTransform>) => {
+    const image = images.value[index]
+    if (!image) return
+
+    const next = [...images.value]
+    next[index] = {
+      ...image,
+      transform: { ...image.transform, ...transform }
+    }
+    images.value = next
+  }
+
+  const resetImageTransform = (index: number) => {
+    updateImageTransform(index, { scale: 1, offsetX: 0, offsetY: 0 })
+  }
+
   onBeforeUnmount(() => {
     disposed = true
     decodeVersions.forEach((version, index) => {
@@ -122,5 +142,15 @@ export const useCompositionImages = () => {
     images.value.forEach((entry) => entry?.decoded.dispose())
   })
 
-  return { images, rendering, hasImages, placeFile, placeDroppedFiles, removeImage, swapImages }
+  return {
+    images,
+    rendering,
+    hasImages,
+    placeFile,
+    placeDroppedFiles,
+    removeImage,
+    swapImages,
+    updateImageTransform,
+    resetImageTransform
+  }
 }

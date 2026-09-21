@@ -123,11 +123,22 @@
     },
     "size": {
       "heading": "画布大小",
+      "auto": "自动",
+      "manual": "手动",
       "width": "宽度",
       "height": "高度",
       "widthInput": "输入画布宽度",
       "heightInput": "输入画布高度",
+      "autoHint": "短边按半格图片的长边与对应外边距自动计算；切换手动后保留当前数值。",
       "maxHint": "最长边最大 {size} px"
+    },
+    "transform": {
+      "heading": "图片调整",
+      "frame": "画面 {number}",
+      "scale": "缩放",
+      "scaleInput": "输入缩放倍数",
+      "reset": "重置",
+      "autoHint": "切换为手动画布大小后，可缩放或拖动图片调整画面。"
     },
     "layout": {
       "heading": "画面布局",
