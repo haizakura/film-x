@@ -19,7 +19,7 @@ const selectPresetRatio = (value: number) => {
 
 <template>
   <div class="border-b border-border p-5">
-    <p class="eyebrow">{{ t('composition.ratio.heading') }}</p>
+    <p class="text-xs font-medium">{{ t('composition.ratio.heading') }}</p>
     <div class="mt-4 grid grid-cols-3 gap-1 rounded-lg bg-muted p-1">
       <button
         v-for="option in ratios"

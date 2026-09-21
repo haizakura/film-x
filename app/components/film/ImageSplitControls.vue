@@ -20,7 +20,7 @@ const updateNumber = (key: 'center' | 'gap', event: Event) => {
 <template>
   <div class="border-b border-border px-5 py-5">
     <div class="flex items-center justify-between">
-      <p class="eyebrow">{{ t('split.heading') }}</p>
+      <p class="text-xs font-medium">{{ t('split.heading') }}</p>
       <button
         type="button"
         class="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground disabled:cursor-wait disabled:opacity-60"

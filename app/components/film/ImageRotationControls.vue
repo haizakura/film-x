@@ -25,7 +25,7 @@ const rotationLabel = (rotation: Rotation) =>
 
 <template>
   <div class="border-b border-border px-5 py-5">
-    <p class="eyebrow">{{ t('rotation.heading') }}</p>
+    <p class="text-xs font-medium">{{ t('rotation.heading') }}</p>
     <div class="mt-4 space-y-3">
       <div
         v-for="side in sides"

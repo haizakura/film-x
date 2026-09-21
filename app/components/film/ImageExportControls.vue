@@ -28,7 +28,7 @@ const formats: ExportFormat[] = ['jpeg', 'png', 'webp', 'tiff']
 <template>
   <div class="border-b border-border px-5 py-5">
     <div class="flex items-center justify-between">
-      <p class="eyebrow">{{ t('export.heading') }}</p>
+      <p class="text-xs font-medium">{{ t('export.heading') }}</p>
       <span v-if="completedCount" class="font-mono text-[9px] text-primary">
         {{ t('export.completed', { completed: completedCount, total: totalCount }) }}
       </span>

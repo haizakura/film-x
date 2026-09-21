@@ -41,7 +41,7 @@ watch(
 
 <template>
   <div class="border-b border-border p-5">
-    <p class="eyebrow">{{ t('composition.background.heading') }}</p>
+    <p class="text-xs font-medium">{{ t('composition.background.heading') }}</p>
     <div class="mt-4 flex items-center gap-2">
       <label class="shrink-0">
         <span class="sr-only">{{ t('composition.background.color') }}</span>
