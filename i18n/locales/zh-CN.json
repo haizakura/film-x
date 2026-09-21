@@ -153,6 +153,20 @@
       "grid": "方格",
       "dots": "圆点"
     },
+    "sprocket": {
+      "heading": "胶片齿孔",
+      "enabled": "添加",
+      "enabledLabel": "添加胶片齿孔",
+      "placement": "添加位置",
+      "topBottom": "上下",
+      "leftRight": "左右",
+      "width": "齿孔带宽度",
+      "widthInput": "输入齿孔带宽度",
+      "color": "齿孔颜色",
+      "background": "跟随背景",
+      "black": "黑色",
+      "sizeHint": "齿孔带位于画布外侧，其宽度不计入画布尺寸。"
+    },
     "spacing": {
       "padding": "外边距",
       "individual": "独立设置",

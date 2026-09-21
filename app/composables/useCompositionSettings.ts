@@ -1,4 +1,4 @@
-import { MAX_COMPOSITION_CANVAS_SIDE } from '~/types/composition'
+import { getCompositionOutputGeometry, MAX_COMPOSITION_CANVAS_SIDE } from '~/types/composition'
 import type { ShallowRef } from 'vue'
 
 import type {
@@ -37,6 +37,12 @@ export const useCompositionSettings = (images: ShallowRef<Array<CompositionImage
     layoutDirection: 'horizontal',
     background: '#E9E4DA',
     pattern: 'none',
+    sprocket: {
+      enabled: false,
+      placement: 'top-bottom',
+      color: 'background',
+      width: 96
+    },
     fit: 'cover',
     padding: { top: 112, right: 112, bottom: 112, left: 112 },
     gap: 48,
@@ -215,9 +221,10 @@ export const useCompositionSettings = (images: ShallowRef<Array<CompositionImage
     return calculateGeometry(largestSafeCanvasSize(canvasSize))
   })
 
-  const aspectStyle = computed(() => ({
-    aspectRatio: `${geometry.value.width} / ${geometry.value.height}`
-  }))
+  const aspectStyle = computed(() => {
+    const outputGeometry = getCompositionOutputGeometry(geometry.value, settings.value.sprocket)
+    return { aspectRatio: `${outputGeometry.width} / ${outputGeometry.height}` }
+  })
 
   const updateCanvasWidth = (value: number | string) => {
     const nextWidth = normalizeCanvasDimension(value)

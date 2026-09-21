@@ -20,7 +20,7 @@ const updateHeight = (event: Event) =>
 
 <template>
   <div class="border-b border-border p-5">
-    <p class="eyebrow">{{ t('composition.size.heading') }}</p>
+    <p class="text-xs font-medium">{{ t('composition.size.heading') }}</p>
     <div class="mt-4 grid grid-cols-2 gap-1 rounded-lg bg-muted p-1">
       <button
         class="rounded-md py-2 text-[11px] transition"

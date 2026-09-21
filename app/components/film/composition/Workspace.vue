@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ArrowLeftRight, ArrowUpDown, LoaderCircle } from '@lucide/vue'
+import { getCompositionOutputGeometry } from '~/types/composition'
 import type {
   CompositionGeometry,
   CompositionImage,
@@ -51,9 +52,14 @@ const canvasPoint = (event: PointerEvent) => {
   if (!target) return
   const bounds = target.getBoundingClientRect()
   if (!bounds.width || !bounds.height) return
+  const outputGeometry = getCompositionOutputGeometry(props.geometry, props.settings.sprocket)
   return {
-    x: ((event.clientX - bounds.left) * props.geometry.width) / bounds.width,
-    y: ((event.clientY - bounds.top) * props.geometry.height) / bounds.height
+    x:
+      ((event.clientX - bounds.left) * outputGeometry.width) / bounds.width -
+      outputGeometry.contentOffsetX,
+    y:
+      ((event.clientY - bounds.top) * outputGeometry.height) / bounds.height -
+      outputGeometry.contentOffsetY
   }
 }
 
@@ -140,12 +146,15 @@ defineExpose({ download })
       >
         <canvas
           ref="canvas"
-          class="block max-h-full max-w-full bg-white shadow-2xl shadow-black/50"
-          :class="
+          class="block max-h-full max-w-full shadow-2xl shadow-black/50"
+          :class="[
+            settings.outputFormat === 'png' && settings.sprocket.enabled
+              ? 'composition-canvas-transparency'
+              : '',
             settings.canvasSizeMode === 'manual' && images.some(Boolean)
               ? 'touch-none cursor-grab active:cursor-grabbing'
               : ''
-          "
+          ]"
           @pointerdown="handleCanvasPointerDown"
           @pointermove="handleCanvasPointerMove"
           @pointerup="finishCanvasPointerDrag"
@@ -194,5 +203,20 @@ defineExpose({ download })
 canvas {
   width: auto;
   height: auto;
+}
+
+.composition-canvas-transparency {
+  background-color: #e4e2dc;
+  background-image:
+    linear-gradient(45deg, rgb(0 0 0 / 9%) 25%, transparent 25%),
+    linear-gradient(-45deg, rgb(0 0 0 / 9%) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgb(0 0 0 / 9%) 75%),
+    linear-gradient(-45deg, transparent 75%, rgb(0 0 0 / 9%) 75%);
+  background-position:
+    0 0,
+    0 8px,
+    8px -8px,
+    -8px 0;
+  background-size: 16px 16px;
 }
 </style>

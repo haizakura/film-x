@@ -1,7 +1,12 @@
 import type { MaybeRefOrGetter } from 'vue'
 import { toast } from 'vue-sonner'
 
-import { MAX_COMPOSITION_CANVAS_SIDE } from '~/types/composition'
+import {
+  getCompositionOutputGeometry,
+  MAX_COMPOSITION_CANVAS_SIDE,
+  MAX_COMPOSITION_SPROCKET_WIDTH,
+  MIN_COMPOSITION_SPROCKET_WIDTH
+} from '~/types/composition'
 import type {
   CompositionGeometry,
   CompositionImage,
@@ -18,11 +23,72 @@ const isLightColor = (hex: string) => {
   return red * 0.299 + green * 0.587 + blue * 0.114 > 145
 }
 
-const hasSupportedCanvasDimensions = (geometry: CompositionGeometry) =>
+const getSprocketBandColor = (settings: CompositionSettings) =>
+  settings.sprocket.color === 'background' ? settings.background : '#000000'
+
+const getSprocketJpegHoleColor = (settings: CompositionSettings) =>
+  settings.sprocket.color === 'background' ? '#000000' : '#ffffff'
+
+const hasSupportedCanvasDimensions = (geometry: Pick<CompositionGeometry, 'width' | 'height'>) =>
   [geometry.width, geometry.height].every(
     (dimension) =>
-      Number.isSafeInteger(dimension) && dimension >= 1 && dimension <= MAX_COMPOSITION_CANVAS_SIDE
+      Number.isSafeInteger(dimension) &&
+      dimension >= 1 &&
+      dimension <= MAX_COMPOSITION_CANVAS_SIDE + MAX_COMPOSITION_SPROCKET_WIDTH * 2
   )
+
+const drawSprocketHoles = (
+  context: CanvasRenderingContext2D,
+  output: ReturnType<typeof getCompositionOutputGeometry>,
+  settings: CompositionSettings
+) => {
+  if (!settings.sprocket.enabled) return
+
+  const { placement } = settings.sprocket
+  const bandWidth = Math.min(
+    MAX_COMPOSITION_SPROCKET_WIDTH,
+    Math.max(MIN_COMPOSITION_SPROCKET_WIDTH, Math.round(settings.sprocket.width))
+  )
+  const longSide = placement === 'top-bottom' ? output.width : output.height
+  const holeLength = Math.min(80, Math.max(18, Math.round(bandWidth * 0.62)))
+  const holeThickness = Math.max(12, Math.round(bandWidth * 0.54))
+  const pitch = Math.max(holeLength + 20, Math.round(bandWidth * 1.8))
+  const initialOffset = (longSide % pitch) / 2
+  const crossOffset = (bandWidth - holeThickness) / 2
+
+  context.save()
+  if (settings.outputFormat === 'png') {
+    context.fillStyle = '#000000'
+    context.globalCompositeOperation = 'destination-out'
+  } else {
+    context.fillStyle = getSprocketJpegHoleColor(settings)
+  }
+  for (let offset = initialOffset; offset < longSide; offset += pitch) {
+    const length = Math.min(holeLength, longSide - offset)
+    context.beginPath()
+    if (placement === 'top-bottom') {
+      context.roundRect(offset, crossOffset, length, holeThickness, Math.min(8, holeThickness / 4))
+      context.roundRect(
+        offset,
+        output.height - bandWidth + crossOffset,
+        length,
+        holeThickness,
+        Math.min(8, holeThickness / 4)
+      )
+    } else {
+      context.roundRect(crossOffset, offset, holeThickness, length, Math.min(8, holeThickness / 4))
+      context.roundRect(
+        output.width - bandWidth + crossOffset,
+        offset,
+        holeThickness,
+        length,
+        Math.min(8, holeThickness / 4)
+      )
+    }
+    context.fill()
+  }
+  context.restore()
+}
 
 const drawPattern = (
   context: CanvasRenderingContext2D,
@@ -129,13 +195,21 @@ export const useCompositionCanvas = (
     const currentGeometry = toValue(geometry)
     const currentSettings = toValue(settings)
     const currentImages = toValue(images)
-    if (!hasSupportedCanvasDimensions(currentGeometry)) return
+    const outputGeometry = getCompositionOutputGeometry(currentGeometry, currentSettings.sprocket)
+    if (!hasSupportedCanvasDimensions(outputGeometry)) return
 
-    target.width = currentGeometry.width
-    target.height = currentGeometry.height
+    target.width = outputGeometry.width
+    target.height = outputGeometry.height
     const context = target.getContext('2d')
     if (!context) return
 
+    if (currentSettings.sprocket.enabled) {
+      context.fillStyle = getSprocketBandColor(currentSettings)
+      context.fillRect(0, 0, outputGeometry.width, outputGeometry.height)
+    }
+
+    context.save()
+    context.translate(outputGeometry.contentOffsetX, outputGeometry.contentOffsetY)
     context.fillStyle = currentSettings.background
     context.fillRect(0, 0, currentGeometry.width, currentGeometry.height)
     drawPattern(context, currentGeometry.width, currentGeometry.height, currentSettings)
@@ -158,6 +232,8 @@ export const useCompositionCanvas = (
       }
       context.restore()
     })
+    context.restore()
+    drawSprocketHoles(context, outputGeometry, currentSettings)
   }
 
   const scheduleDraw = () => {
@@ -203,7 +279,12 @@ export const useCompositionCanvas = (
       toValue(geometry),
       currentSettings.background,
       currentSettings.pattern,
+      currentSettings.sprocket.enabled,
+      currentSettings.sprocket.placement,
+      currentSettings.sprocket.color,
+      currentSettings.sprocket.width,
       currentSettings.fit,
+      currentSettings.outputFormat,
       currentSettings.canvasSizeMode,
       locale.value
     ]

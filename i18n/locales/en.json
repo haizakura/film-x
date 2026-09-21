@@ -153,6 +153,20 @@
       "grid": "Grid",
       "dots": "Dots"
     },
+    "sprocket": {
+      "heading": "Film perforations",
+      "enabled": "Add",
+      "enabledLabel": "Add film perforations",
+      "placement": "Placement",
+      "topBottom": "Top and bottom",
+      "leftRight": "Left and right",
+      "width": "Perforation band width",
+      "widthInput": "Enter perforation band width",
+      "color": "Perforation color",
+      "background": "Match background",
+      "black": "Black",
+      "sizeHint": "Perforation bands sit outside the canvas, so their width is not included in its dimensions."
+    },
     "spacing": {
       "padding": "Outer margin",
       "individual": "Set separately",

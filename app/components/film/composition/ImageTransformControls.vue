@@ -43,7 +43,7 @@ const updateScale = (event: Event) => {
 <template>
   <div class="border-b border-border p-5" :class="{ 'opacity-60': !enabled }">
     <div class="flex items-center justify-between gap-3">
-      <p class="eyebrow">{{ t('composition.transform.heading') }}</p>
+      <p class="text-xs font-medium">{{ t('composition.transform.heading') }}</p>
       <button
         class="inline-flex items-center gap-1 text-[10px] text-muted-foreground transition hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
         type="button"
