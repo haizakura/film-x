@@ -42,6 +42,7 @@ const emit = defineEmits<{
       />
       <FilmCompositionLayoutControls v-model="settings" />
       <FilmCompositionBackgroundControls v-model="settings" />
+      <FilmCompositionSprocketControls v-model="settings" />
       <FilmCompositionSpacingControls v-model="settings" />
       <FilmCompositionExportControls
         v-model="settings"
