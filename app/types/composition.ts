@@ -8,10 +8,18 @@ export type CompositionOutputFormat = 'jpeg' | 'png'
 export type CompositionRatioMode = 'preset' | 'custom' | 'auto'
 export type CompositionLayoutDirection = 'horizontal' | 'vertical'
 export type CompositionCanvasSizeAnchor = 'width' | 'height'
+export type CompositionCanvasSizeMode = 'auto' | 'manual'
+
+export interface CompositionImageTransform {
+  scale: number
+  offsetX: number
+  offsetY: number
+}
 
 export interface CompositionImage {
   name: string
   decoded: DecodedImage
+  transform: CompositionImageTransform
 }
 
 export interface CompositionPadding {
@@ -29,6 +37,7 @@ export interface CompositionSettings {
   canvasWidth: number
   canvasHeight: number
   canvasSizeAnchor: CompositionCanvasSizeAnchor
+  canvasSizeMode: CompositionCanvasSizeMode
   layoutDirection: CompositionLayoutDirection
   background: string
   pattern: CompositionPattern

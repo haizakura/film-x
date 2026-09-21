@@ -123,11 +123,22 @@
     },
     "size": {
       "heading": "Canvas size",
+      "auto": "Auto",
+      "manual": "Manual",
       "width": "Width",
       "height": "Height",
       "widthInput": "Enter canvas width",
       "heightInput": "Enter canvas height",
+      "autoHint": "The short edge follows the half-frame image's long edge and its corresponding outer margins. Switching to manual keeps these values.",
       "maxHint": "Longest side: {size} px max"
+    },
+    "transform": {
+      "heading": "Image adjustment",
+      "frame": "Frame {number}",
+      "scale": "Scale",
+      "scaleInput": "Enter scale value",
+      "reset": "Reset",
+      "autoHint": "Switch to a manual canvas size to scale or drag an image into position."
     },
     "layout": {
       "heading": "Frame layout",

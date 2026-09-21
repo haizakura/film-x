@@ -2,12 +2,15 @@ import { MAX_COMPOSITION_CANVAS_SIDE } from '~/types/composition'
 import type { ShallowRef } from 'vue'
 
 import type {
+  CompositionCanvasSizeAnchor,
+  CompositionCanvasSizeMode,
   CompositionGeometry,
   CompositionImage,
   CompositionSettings
 } from '~/types/composition'
 
 const CANVAS_WIDTH = 2400
+const DEFAULT_AUTO_FRAME_LONG_SIDE = 1596
 const DEFAULT_FRAME_RATIO = 2 / 3
 const MIN_RATIO = 0.2
 const MAX_RATIO = 5
@@ -30,6 +33,7 @@ export const useCompositionSettings = (images: ShallowRef<Array<CompositionImage
     canvasWidth: CANVAS_WIDTH,
     canvasHeight: Math.round(CANVAS_WIDTH / (4 / 5)),
     canvasSizeAnchor: 'width',
+    canvasSizeMode: 'auto',
     layoutDirection: 'horizontal',
     background: '#E9E4DA',
     pattern: 'none',
@@ -56,9 +60,19 @@ export const useCompositionSettings = (images: ShallowRef<Array<CompositionImage
     return loadedRatios.reduce((sum, value) => sum + value, 0) / loadedRatios.length
   })
 
-  const calculateGeometry = (canvasSize: number): CompositionGeometry => {
+  const frameLongSide = computed(() => {
+    const loadedLongSides = images.value.flatMap((entry) =>
+      entry ? [Math.max(entry.decoded.width, entry.decoded.height)] : []
+    )
+    return loadedLongSides.length ? Math.max(...loadedLongSides) : DEFAULT_AUTO_FRAME_LONG_SIDE
+  })
+
+  const calculateGeometry = (
+    canvasSize: number,
+    canvasSizeAnchor = settings.value.canvasSizeAnchor
+  ): CompositionGeometry => {
     const { top, right, bottom, left } = settings.value.padding
-    const { canvasSizeAnchor, gap, layoutDirection, ratioMode } = settings.value
+    const { gap, layoutDirection, ratioMode } = settings.value
     const horizontal = layoutDirection === 'horizontal'
 
     if (ratioMode === 'auto') {
@@ -115,6 +129,37 @@ export const useCompositionSettings = (images: ShallowRef<Array<CompositionImage
     return { width, height, frames }
   }
 
+  const calculateAutomaticGeometry = (longSide: number): CompositionGeometry => {
+    const { top, right, bottom, left } = settings.value.padding
+    const { gap, layoutDirection, ratioMode } = settings.value
+    const horizontal = layoutDirection === 'horizontal'
+
+    if (ratioMode !== 'auto') {
+      const selectedRatio = ratioMode === 'custom' ? customRatio.value : settings.value.ratio
+      const canvasSizeAnchor: CompositionCanvasSizeAnchor = selectedRatio <= 1 ? 'width' : 'height'
+      const padding = canvasSizeAnchor === 'width' ? left + right : top + bottom
+      return calculateGeometry(longSide + padding, canvasSizeAnchor)
+    }
+
+    const frameWidth = horizontal ? longSide * commonFrameRatio.value : longSide
+    const frameHeight = horizontal ? longSide : longSide / commonFrameRatio.value
+    const width = Math.max(
+      1,
+      Math.round(horizontal ? left + right + frameWidth * 2 + gap : left + right + frameWidth)
+    )
+    const height = Math.max(
+      1,
+      Math.round(horizontal ? top + bottom + frameHeight : top + bottom + frameHeight * 2 + gap)
+    )
+    const frames = [0, 1].map((index) => ({
+      x: horizontal ? left + index * (frameWidth + gap) : left,
+      y: horizontal ? top : top + index * (frameHeight + gap),
+      width: frameWidth,
+      height: frameHeight
+    }))
+    return { width, height, frames }
+  }
+
   const isWithinCanvasLimit = (geometry: CompositionGeometry) =>
     Math.max(geometry.width, geometry.height) <= MAX_COMPOSITION_CANVAS_SIDE
 
@@ -138,7 +183,31 @@ export const useCompositionSettings = (images: ShallowRef<Array<CompositionImage
     return largestSafeSize
   }
 
+  const largestSafeAutomaticGeometry = () => {
+    const requestedLongSide = frameLongSide.value
+    const requestedGeometry = calculateAutomaticGeometry(requestedLongSide)
+    if (isWithinCanvasLimit(requestedGeometry)) return requestedGeometry
+
+    let minimum = 1
+    let maximum = requestedLongSide
+    let largestSafeLongSide = 1
+
+    while (minimum <= maximum) {
+      const candidate = Math.floor((minimum + maximum) / 2)
+      if (isWithinCanvasLimit(calculateAutomaticGeometry(candidate))) {
+        largestSafeLongSide = candidate
+        minimum = candidate + 1
+      } else {
+        maximum = candidate - 1
+      }
+    }
+
+    return calculateAutomaticGeometry(largestSafeLongSide)
+  }
+
   const geometry = computed<CompositionGeometry>(() => {
+    if (settings.value.canvasSizeMode === 'auto') return largestSafeAutomaticGeometry()
+
     const canvasSize =
       settings.value.canvasSizeAnchor === 'width'
         ? settings.value.canvasWidth
@@ -153,6 +222,7 @@ export const useCompositionSettings = (images: ShallowRef<Array<CompositionImage
   const updateCanvasWidth = (value: number | string) => {
     const nextWidth = normalizeCanvasDimension(value)
     if (nextWidth === undefined) return
+    settings.value.canvasSizeMode = 'manual'
     settings.value.canvasSizeAnchor = 'width'
     settings.value.canvasWidth = largestSafeCanvasSize(nextWidth)
   }
@@ -160,9 +230,31 @@ export const useCompositionSettings = (images: ShallowRef<Array<CompositionImage
   const updateCanvasHeight = (value: number | string) => {
     const nextHeight = normalizeCanvasDimension(value)
     if (nextHeight === undefined) return
+    settings.value.canvasSizeMode = 'manual'
     settings.value.canvasSizeAnchor = 'height'
     settings.value.canvasHeight = largestSafeCanvasSize(nextHeight)
   }
 
-  return { settings, geometry, aspectStyle, updateCanvasWidth, updateCanvasHeight }
+  const setCanvasSizeMode = (mode: CompositionCanvasSizeMode) => {
+    if (mode === settings.value.canvasSizeMode) return
+
+    if (mode === 'manual') {
+      const automaticGeometry = largestSafeAutomaticGeometry()
+      settings.value.canvasWidth = automaticGeometry.width
+      settings.value.canvasHeight = automaticGeometry.height
+      settings.value.canvasSizeAnchor =
+        automaticGeometry.width <= automaticGeometry.height ? 'width' : 'height'
+    }
+
+    settings.value.canvasSizeMode = mode
+  }
+
+  return {
+    settings,
+    geometry,
+    aspectStyle,
+    updateCanvasWidth,
+    updateCanvasHeight,
+    setCanvasSizeMode
+  }
 }

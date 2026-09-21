@@ -20,6 +20,7 @@ const emit = defineEmits<{
   'drop-files': [files: File[]]
   remove: [index: number]
   swap: []
+  'move-image': [index: number, offsetX: number, offsetY: number]
 }>()
 
 const { canvas, download } = useCompositionCanvas(
@@ -34,6 +35,63 @@ const { isDragging, handleDragEnter, handleDragOver, handleDragLeave, handleDrop
 const handleSlotFiles = (index: number, files: File[]) => {
   const file = files[0]
   if (file) emit('files', index, file)
+}
+
+let pointerDrag:
+  | {
+      pointerId: number
+      index: number
+      x: number
+      y: number
+    }
+  | undefined
+
+const canvasPoint = (event: PointerEvent) => {
+  const target = canvas.value
+  if (!target) return
+  const bounds = target.getBoundingClientRect()
+  if (!bounds.width || !bounds.height) return
+  return {
+    x: ((event.clientX - bounds.left) * props.geometry.width) / bounds.width,
+    y: ((event.clientY - bounds.top) * props.geometry.height) / bounds.height
+  }
+}
+
+const handleCanvasPointerDown = (event: PointerEvent) => {
+  if (props.settings.canvasSizeMode !== 'manual' || event.button !== 0) return
+  const point = canvasPoint(event)
+  if (!point) return
+  const index = props.geometry.frames.findIndex(
+    (frame, frameIndex) =>
+      props.images[frameIndex] &&
+      point.x >= frame.x &&
+      point.x <= frame.x + frame.width &&
+      point.y >= frame.y &&
+      point.y <= frame.y + frame.height
+  )
+  if (index < 0) return
+
+  pointerDrag = { pointerId: event.pointerId, index, ...point }
+  const target = event.currentTarget as HTMLCanvasElement
+  target.setPointerCapture(event.pointerId)
+  event.preventDefault()
+}
+
+const handleCanvasPointerMove = (event: PointerEvent) => {
+  if (!pointerDrag || pointerDrag.pointerId !== event.pointerId) return
+  const point = canvasPoint(event)
+  if (!point) return
+
+  emit('move-image', pointerDrag.index, point.x - pointerDrag.x, point.y - pointerDrag.y)
+  pointerDrag.x = point.x
+  pointerDrag.y = point.y
+}
+
+const finishCanvasPointerDrag = (event: PointerEvent) => {
+  if (!pointerDrag || pointerDrag.pointerId !== event.pointerId) return
+  const target = event.currentTarget as HTMLCanvasElement
+  if (target.hasPointerCapture(event.pointerId)) target.releasePointerCapture(event.pointerId)
+  pointerDrag = undefined
 }
 
 defineExpose({ download })
@@ -83,6 +141,15 @@ defineExpose({ download })
         <canvas
           ref="canvas"
           class="block max-h-full max-w-full bg-white shadow-2xl shadow-black/50"
+          :class="
+            settings.canvasSizeMode === 'manual' && images.some(Boolean)
+              ? 'touch-none cursor-grab active:cursor-grabbing'
+              : ''
+          "
+          @pointerdown="handleCanvasPointerDown"
+          @pointermove="handleCanvasPointerMove"
+          @pointerup="finishCanvasPointerDrag"
+          @pointercancel="finishCanvasPointerDrag"
         />
         <div
           v-if="rendering"
