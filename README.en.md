@@ -24,6 +24,8 @@ A collection of film image processing tools that run locally in your browser. Im
 - In manual canvas mode, select an image to scale it with a slider or numeric input, then drag it directly on the canvas to reposition it.
 - Outer margins and the gap between images can be adjusted with sliders or typed in directly; outer margins support either a uniform value or independent top, right, bottom, and left values.
 - Choose between fill (crop) and fit (show the entire image), enter a hex RGB background color, and pick a solid, checkerboard, or dotted background pattern.
+- Optionally add 24–240 px film perforation bands outside the canvas, with top-and-bottom or left-and-right placement and either a matching background or black color; band width is excluded from the canvas dimensions.
+- PNG export keeps the perforation cutouts transparent and shows them against a checkerboard in the workbench. For JPEG, matching-background bands use black cutouts, while black bands use white cutouts.
 - Export as JPEG or PNG.
 
 The horizontal menu at the top of the page switches between the two tools. Each tool page keeps its working state, so imported images are not lost when you switch away and come back.
