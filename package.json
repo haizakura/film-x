@@ -23,16 +23,16 @@
     "check": "pnpm format:check && pnpm lint && pnpm typecheck"
   },
   "dependencies": {
-    "@lucide/vue": "^1.38.0",
+    "@lucide/vue": "^1.47.0",
     "@nuxtjs/i18n": "^10.6.0",
     "@vueuse/core": "^14.4.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "fflate": "^0.8.2",
-    "nuxt": "^4.0.0",
+    "fflate": "^0.8.3",
+    "nuxt": "^4.5.2",
     "reka-ui": "^2.10.4",
     "shadcn-nuxt": "^2.8.2",
-    "tailwind-merge": "^3.6.0",
+    "tailwind-merge": "^3.7.0",
     "utif": "^3.1.0",
     "vue": "latest",
     "vue-router": "latest",
@@ -41,7 +41,7 @@
   "devDependencies": {
     "@nuxtjs/color-mode": "^4.0.1",
     "@tailwindcss/vite": "^4.3.3",
-    "@types/utif": "^3.0.3",
+    "@types/utif": "^3.0.6",
     "oxfmt": "latest",
     "oxlint": "latest",
     "tailwindcss": "^4.3.3",
@@ -49,5 +49,5 @@
     "typescript": "^5.9.3",
     "vue-tsc": "latest"
   },
-  "packageManager": "pnpm@11.26.0"
+  "packageManager": "pnpm@12.5.1"
 }
