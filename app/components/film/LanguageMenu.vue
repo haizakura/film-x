@@ -11,7 +11,7 @@ import {
 } from 'reka-ui'
 import { Button } from '@/components/ui/button'
 
-type AppLocale = 'zh-CN' | 'en'
+type AppLocale = 'zh-CN' | 'en' | 'ja'
 
 const { locale, setLocale, t } = useI18n()
 const open = ref(false)
@@ -20,7 +20,8 @@ let closeTimer: ReturnType<typeof setTimeout> | undefined
 
 const languageOptions: Array<{ value: AppLocale; label: string }> = [
   { value: 'zh-CN', label: '简体中文' },
-  { value: 'en', label: 'English' }
+  { value: 'en', label: 'English' },
+  { value: 'ja', label: '日本語' }
 ]
 
 const clearCloseTimer = () => {
@@ -52,7 +53,7 @@ const handleTriggerClick = () => {
 }
 
 const updateLanguage = (value: unknown) => {
-  if (value === 'zh-CN' || value === 'en') void setLocale(value)
+  if (value === 'zh-CN' || value === 'en' || value === 'ja') void setLocale(value)
 }
 
 const handleOpenAutoFocus = (event: Event) => {
