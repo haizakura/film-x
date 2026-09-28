@@ -1,0 +1,223 @@
+{
+  "meta": {
+    "siteDescription": "ブラウザー内でフィルムのスキャン画像を分割・合成。処理はすべてお使いの端末で完結します。",
+    "splitterTitle": "ハーフサイズフィルム分割",
+    "splitterDescription": "ハーフサイズフィルムのスキャン画像からコマ間の隙間を自動検出。ブラウザー内で分割・回転・一括書き出しができます。",
+    "composerTitle": "ハーフサイズフィルム合成",
+    "composerDescription": "2枚のハーフサイズ写真を1枚の画像に合成。キャンバス、余白、配置、背景パターンを自由に設定できます。"
+  },
+  "language": {
+    "label": "言語"
+  },
+  "notifications": {
+    "label": "通知",
+    "close": "通知を閉じる"
+  },
+  "header": {
+    "home": "Film X ホーム",
+    "brandTagline": "ローカルフィルムラボ",
+    "toolsLabel": "画像ツール",
+    "splitter": "ハーフサイズ分割",
+    "splitterTagline": "1枚のスキャンを2コマに",
+    "composer": "フィルム合成",
+    "composerTagline": "2コマを1枚の画像に",
+    "github": "GitHub で Film X を見る",
+    "themeLabel": "テーマ：{theme}",
+    "themeSwitchTitle": "{label}・クリックで切り替え",
+    "theme": {
+      "system": "システム設定",
+      "light": "ライト",
+      "dark": "ダーク"
+    }
+  },
+  "footer": {
+    "localOnly": "画像はこの端末内でのみ処理されます"
+  },
+  "emptyState": {
+    "eyebrow": "ツール 01 · 分割",
+    "headlineFirst": "一枚のスキャンから、",
+    "headlineSecond": "二つの瞬間を。",
+    "description": "2枚のハーフサイズ写真の間にある隙間を自動検出。分割位置を微調整し、各コマを回転して、フィルム1本分をまとめて書き出せます。",
+    "dropTitle": "スキャン画像をここにドロップ",
+    "dropHint": "またはクリックしてファイルを選択（複数可）",
+    "featureQuality": "元の解像度で出力",
+    "featureRotation": "コマごとに回転",
+    "featureBatch": "ZIP で一括ダウンロード"
+  },
+  "drop": {
+    "scanTitle": "ドロップしてスキャン画像を追加",
+    "compositionTitle": "ドロップしてキャンバスに追加",
+    "compositionDescription": "最初の2枚のみ使用します"
+  },
+  "queue": {
+    "title": "今回のスキャン",
+    "summary": "{count} ファイル · {size}",
+    "add": "画像を追加",
+    "clear": "リストを空にする",
+    "listLabel": "画像リスト。上下の矢印キーで選択できます",
+    "remove": "画像 {name} を削除",
+    "delete": "画像を削除",
+    "cancel": "キャンセル",
+    "confirmClearTitle": "リストを空にしますか？",
+    "confirmRemoveTitle": "この画像を削除しますか？",
+    "confirmClearDescription": "今回のスキャンから全 {count} 枚の画像を削除します。この操作は取り消せません。",
+    "confirmRemoveDescription": "今回のスキャンから「{name}」を削除します。この操作は取り消せません。",
+    "status": {
+      "done": "完了",
+      "error": "失敗",
+      "processing": "処理中",
+      "pending": "自動検出待ち",
+      "analyzing": "中央線を検出中",
+      "analyzed": "検出済み · {size}"
+    }
+  },
+  "preview": {
+    "loading": "スキャン画像を読み込み中",
+    "frame": "コマ {number}",
+    "unavailable": "この画像はプレビューできません",
+    "splitPosition": "分割位置"
+  },
+  "split": {
+    "heading": "分割",
+    "detecting": "自動検出中",
+    "detectAgain": "再検出",
+    "position": "分割位置",
+    "removeGap": "中央の隙間を除去"
+  },
+  "rotation": {
+    "heading": "向き",
+    "frame": "コマ {number}",
+    "original": "元の向き",
+    "counterClockwise": "コマ {number} を左回りに回転",
+    "clockwise": "コマ {number} を右回りに回転"
+  },
+  "export": {
+    "heading": "書き出し",
+    "completed": "{completed}/{total} 完了",
+    "quality": "出力画質",
+    "tiffNote": "TIF は非圧縮の RGBA ピクセルで出力します。再度の非可逆圧縮を避けられますが、ファイルサイズは大きくなります。",
+    "pngNote": "PNG は可逆圧縮のため、ファイルサイズは JPEG よりかなり大きくなります。",
+    "splitAll": "全 {count} 枚を分割",
+    "splitDownload": "分割してダウンロード",
+    "currentOnly": "現在の画像のみ書き出す",
+    "applyAll": "設定をすべてに適用",
+    "reset": "現在の設定をリセット",
+    "processing": "{name} を処理中",
+    "packing": "ZIP を作成中"
+  },
+  "composition": {
+    "eyebrow": "ツール 02 · 合成",
+    "title": "ハーフサイズフィルム合成",
+    "swap": "位置を入れ替え",
+    "frame": "コマ {number}",
+    "selectFrame": "コマ {number} を選択",
+    "removeFrame": "コマ {number} を削除",
+    "replaceHint": "クリックで差し替え · ドラッグ＆ドロップ対応",
+    "ratio": {
+      "heading": "キャンバスの比率",
+      "auto": "自動",
+      "custom": "カスタム",
+      "customWidth": "カスタム比率の幅",
+      "customHeight": "カスタム比率の高さ",
+      "autoHint": "画像の比率と現在の余白・間隔に合わせて、書き出しサイズを自動調整します。"
+    },
+    "size": {
+      "heading": "キャンバスのサイズ",
+      "auto": "自動",
+      "manual": "手動",
+      "width": "幅",
+      "height": "高さ",
+      "widthInput": "キャンバスの幅を入力",
+      "heightInput": "キャンバスの高さを入力",
+      "autoHint": "短辺はハーフサイズ画像の長辺と対応する外側の余白から自動計算します。手動に切り替えても現在の値を保持します。",
+      "maxHint": "長辺の上限：{size} px"
+    },
+    "transform": {
+      "heading": "画像の調整",
+      "frame": "コマ {number}",
+      "scale": "拡大・縮小",
+      "scaleInput": "拡大率を入力",
+      "reset": "リセット",
+      "autoHint": "キャンバスのサイズを手動にすると、画像の拡大・縮小やドラッグによる位置調整ができます。"
+    },
+    "layout": {
+      "heading": "コマの配置",
+      "horizontal": "横並び",
+      "vertical": "縦並び"
+    },
+    "background": {
+      "heading": "背景とパターン",
+      "color": "背景色を選択",
+      "hex": "背景色の RGB 値（16進数）",
+      "solid": "単色",
+      "grid": "格子",
+      "dots": "ドット"
+    },
+    "sprocket": {
+      "heading": "パーフォレーション",
+      "enabled": "追加",
+      "enabledLabel": "フィルムのパーフォレーションを追加",
+      "placement": "配置位置",
+      "topBottom": "上下",
+      "leftRight": "左右",
+      "width": "帯の幅",
+      "widthInput": "パーフォレーション帯の幅を入力",
+      "color": "帯の色",
+      "background": "背景に合わせる",
+      "black": "黒",
+      "sizeHint": "パーフォレーション帯はキャンバスの外側に配置されるため、その幅はキャンバスのサイズに含まれません。"
+    },
+    "spacing": {
+      "padding": "外側の余白",
+      "individual": "個別に設定",
+      "individualLabel": "外側の余白を各辺ごとに設定",
+      "uniform": "均等な余白",
+      "uniformInput": "全辺共通の余白を入力",
+      "summary": "上 {top} · 右 {right} · 下 {bottom} · 左 {left} px",
+      "expand": "各辺を編集",
+      "top": "上",
+      "right": "右",
+      "bottom": "下",
+      "left": "左",
+      "topPadding": "上の余白",
+      "rightPadding": "右の余白",
+      "bottomPadding": "下の余白",
+      "leftPadding": "左の余白",
+      "gap": "コマの間隔",
+      "gapInput": "コマの間隔を入力",
+      "cover": "枠に合わせて切り抜き",
+      "contain": "画像全体を表示"
+    },
+    "download": "生成してダウンロード"
+  },
+  "toast": {
+    "readFailed": "{name} を読み込めませんでした",
+    "unsupportedIgnored": "未対応のファイル {count} 件をスキップしました",
+    "supportedTypes": "TIFF、JPEG、PNG、WebP に対応しています。",
+    "chooseSupportedTypes": "TIFF、JPEG、PNG、WebP のいずれかを選択してください。",
+    "appliedAll": "すべての画像に設定を適用しました",
+    "exportFailedFiles": "書き出し完了：{count} 件のファイルを書き出せませんでした",
+    "splitComplete": "分割が完了しました",
+    "generated": "{count} 枚の画像を生成しました。",
+    "exportFailed": "書き出しに失敗しました",
+    "unsupportedFile": "未対応のファイルです",
+    "noUsableImages": "使用できる画像がありません",
+    "firstTwoAdded": "最初の2枚を追加しました",
+    "twoImageLimit": "合成キャンバスに配置できる画像は2枚までです。",
+    "addPhotoFirst": "先に写真を追加してください",
+    "compositionGenerated": "合成画像を生成しました",
+    "compositionFailed": "生成に失敗しました"
+  },
+  "errors": {
+    "imageEncodeFailed": "画像のエンコードに失敗しました",
+    "tiffImageMissing": "TIFF ファイルに読み込める画像がありません",
+    "canvasUnavailable": "ブラウザーで画像用キャンバスを作成できませんでした",
+    "exportCanvasUnavailable": "ブラウザーで書き出し用キャンバスを作成できませんでした",
+    "imageReadFailed": "画像を読み込めませんでした",
+    "processingFailed": "処理に失敗しました",
+    "noImagesGenerated": "画像を生成できませんでした",
+    "archiveFailed": "ZIP ファイルを作成できませんでした",
+    "decodeFailed": "画像のデコードに失敗しました",
+    "compositionFailed": "合成画像を生成できませんでした"
+  }
+}

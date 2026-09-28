@@ -1,6 +1,6 @@
 # Film X
 
-English | [中文](README.md)
+English | [中文](README.md) | [日本語](README.ja.md)
 
 A collection of film image processing tools that run locally in your browser. Image decoding, editing, and export all happen on your device; nothing is uploaded to a server.
 
@@ -32,7 +32,7 @@ The horizontal menu at the top of the page switches between the two tools. Each 
 
 ## Interface and Theme
 
-- The interface supports Simplified Chinese and English, with a language switcher in the top-right corner. On first visit, Nuxt i18n detects the browser language and falls back to English when it is not supported.
+- The interface supports Simplified Chinese, English, and Japanese, with a language switcher in the top-right corner. On first visit, Nuxt i18n detects the browser language and falls back to English when it is not supported.
 - Follows the system light / dark appearance by default; you can also cycle through modes manually from the top-right corner of the page.
 - The interface follows shadcn/ui's default neutral theme and adapts its semantic color tokens to light and dark modes.
 - Both modes have their own text, border, overlay, and interaction-state colors. The image preview workbench always stays dark to make photo edges easier to judge.
