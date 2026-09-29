@@ -14,4 +14,13 @@ node_modules
 !.vscode/settings.json
 !.vscode/extensions.json
 
-sample
+# sample data
+sample/
+
+# Codex
+AGENTS.local.md
+AGENTS.override.md
+
+#Claude
+CLAUDE.local.md
+CLAUDE.override.md
