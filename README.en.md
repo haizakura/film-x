@@ -24,7 +24,9 @@ A collection of film image processing tools that run locally in your browser. Im
 - In manual canvas mode, select an image to scale it with a slider or numeric input, then drag it directly on the canvas to reposition it.
 - Outer margins and the gap between images can be adjusted with sliders or typed in directly; outer margins support either a uniform value or independent top, right, bottom, and left values.
 - Choose between fill (crop) and fit (show the entire image), enter a hex RGB background color, and pick a solid, checkerboard, or dotted background pattern.
-- Optionally add 24–240 px film perforation bands outside the canvas, with top-and-bottom or left-and-right placement and either a matching background or black color; band width is excluded from the canvas dimensions.
+- Optionally add 24–240 px film perforation bands outside the canvas, with top-and-bottom or left-and-right placement and either a matching background or black color. Perforations are rounded-corner, densely pitched holes with 135-film-like proportions, placed toward the inner side of the band so an outer strip stays free for edge text; band width is excluded from the canvas dimensions.
+- Optionally print up to 48 characters of edge text repeatedly along the outer edges of both bands, staggered between the two (reading bottom to top for left-and-right placement), in an amber, white, or black preset or any hex color.
+- Optionally turn on Film texture (off by default) to add deterministic film grain to the background canvas and perforation bands, but not to the photos themselves. Perforations get soft, slightly irregular edges with subtle light and shade variation, and PNG perforation cutouts stay transparent.
 - PNG export keeps the perforation cutouts transparent and shows them against a checkerboard in the workbench. For JPEG, matching-background bands use black cutouts, while black bands use white cutouts.
 - Export as JPEG or PNG.
 

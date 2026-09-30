@@ -128,7 +128,9 @@ TIFF 输入在浏览器中转为 8 位 RGBA。导出 TIFF 时走像素裁切和 
 - 支持左右或上下布局、交换位置、预设/自定义/自动比例。
 - 支持自动或手动画布尺寸、独立外边距、画面间距、cover 或 contain。
 - 支持纯色、方格、圆点背景；手动模式可缩放并拖动图像。
-- 可选上下或左右胶片齿孔带，宽度限制为 24 至 240 px。
+- 可选上下或左右胶片齿孔带，宽度限制为 24 至 240 px 且不计入画布尺寸；齿孔采用圆角并按 135 胶片比例密排，偏向带内侧，外侧留出边缘文字空位。
+- 可选边缘文字（最多 48 个字符），沿两侧齿孔带外缘交错重复印制，左右放置时自下向上阅读；颜色可选琥珀、白、黑预设或任意十六进制颜色。
+- 可选“胶片质感”开关（默认关闭）：为背景画布和齿孔带加入确定性胶片颗粒（不作用于照片本身），齿孔边缘柔和且略不规则，带细微明暗变化；PNG 齿孔镂空保持透明。
 - 输出 JPEG 或 PNG；PNG 齿孔内部保持透明。
 
 ### 6.2 数据流与约束
@@ -141,7 +143,7 @@ FilmCompositionEditor
        '- useCompositionCanvas：按设置和 geometry 绘制并下载
 ~~~
 
-CompositionSettings 是拼图设置的单一来源，CompositionGeometry 是派生出的画布和画框几何信息。自动和手动尺寸都须遵守 MAX_COMPOSITION_CANVAS_SIDE（8000 px）。齿孔带在主画布外扩展最终输出尺寸，因此须通过 getCompositionOutputGeometry 计算，不能只修改显示尺寸。
+CompositionSettings 是拼图设置的单一来源，CompositionGeometry 是派生出的画布和画框几何信息。自动和手动尺寸都须遵守 MAX_COMPOSITION_CANVAS_SIDE（8000 px）。齿孔带在主画布外扩展最终输出尺寸，因此须通过 getCompositionOutputGeometry 计算，不能只修改显示尺寸。齿孔几何、边缘文字与颗粒纹理绘制集中在 app/utils/filmSprocket.ts 与 app/utils/filmTexture.ts；颗粒使用固定种子的伪随机数与缓存的小尺寸噪声贴图平铺，不对整幅画布读取像素，以免抬高大画布内存峰值。
 
 拼图异步加载以槽位版本号阻止旧解码结果覆盖新选择。替换、移除或卸载时必须释放旧 DecodedImage。手动模式才允许 Canvas 内拖动图片；工作区只上报拖动增量，编辑器负责更新共享状态。
 
