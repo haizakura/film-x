@@ -3,6 +3,7 @@ import type { DecodedImage } from '~/types/image'
 export const MAX_COMPOSITION_CANVAS_SIDE = 8000
 export const MIN_COMPOSITION_SPROCKET_WIDTH = 24
 export const MAX_COMPOSITION_SPROCKET_WIDTH = 240
+export const MAX_COMPOSITION_SPROCKET_TEXT_LENGTH = 48
 
 export type CompositionPattern = 'none' | 'grid' | 'dots'
 export type CompositionFitMode = 'cover' | 'contain'
@@ -13,6 +14,14 @@ export type CompositionCanvasSizeAnchor = 'width' | 'height'
 export type CompositionCanvasSizeMode = 'auto' | 'manual'
 export type CompositionSprocketPlacement = 'top-bottom' | 'left-right'
 export type CompositionSprocketColor = 'background' | 'black'
+export type CompositionSprocketTextColorPreset = 'amber' | 'white' | 'black'
+
+export const COMPOSITION_SPROCKET_TEXT_COLORS: Record<CompositionSprocketTextColorPreset, string> =
+  {
+    amber: '#DFA25F',
+    white: '#F2EEE6',
+    black: '#161616'
+  }
 
 export interface CompositionImageTransform {
   scale: number
@@ -38,6 +47,8 @@ export interface CompositionSprocket {
   placement: CompositionSprocketPlacement
   color: CompositionSprocketColor
   width: number
+  text: string
+  textColor: string
 }
 
 export interface CompositionSettings {
@@ -53,6 +64,7 @@ export interface CompositionSettings {
   background: string
   pattern: CompositionPattern
   sprocket: CompositionSprocket
+  filmTexture: boolean
   fit: CompositionFitMode
   padding: CompositionPadding
   gap: number
@@ -80,6 +92,12 @@ export interface CompositionOutputGeometry {
   contentOffsetY: number
 }
 
+export const clampCompositionSprocketWidth = (width: number) =>
+  Math.min(
+    MAX_COMPOSITION_SPROCKET_WIDTH,
+    Math.max(MIN_COMPOSITION_SPROCKET_WIDTH, Math.round(width))
+  )
+
 export const getCompositionOutputGeometry = (
   geometry: CompositionGeometry,
   sprocket: CompositionSprocket
@@ -93,10 +111,7 @@ export const getCompositionOutputGeometry = (
     }
   }
 
-  const width = Math.min(
-    MAX_COMPOSITION_SPROCKET_WIDTH,
-    Math.max(MIN_COMPOSITION_SPROCKET_WIDTH, Math.round(sprocket.width))
-  )
+  const width = clampCompositionSprocketWidth(sprocket.width)
 
   return sprocket.placement === 'top-bottom'
     ? {

@@ -4,29 +4,24 @@ import { toast } from 'vue-sonner'
 import {
   getCompositionOutputGeometry,
   MAX_COMPOSITION_CANVAS_SIDE,
-  MAX_COMPOSITION_SPROCKET_WIDTH,
-  MIN_COMPOSITION_SPROCKET_WIDTH
+  MAX_COMPOSITION_SPROCKET_WIDTH
 } from '~/types/composition'
 import type {
   CompositionGeometry,
   CompositionImage,
   CompositionSettings
 } from '~/types/composition'
+import { isLightColor } from '~/utils/color'
 import { canvasToBlob, downloadBlob } from '~/utils/download'
 import { errorMessageKey } from '~/utils/errors'
-
-const isLightColor = (hex: string) => {
-  const value = hex.replace('#', '')
-  const red = Number.parseInt(value.slice(0, 2), 16)
-  const green = Number.parseInt(value.slice(2, 4), 16)
-  const blue = Number.parseInt(value.slice(4, 6), 16)
-  return red * 0.299 + green * 0.587 + blue * 0.114 > 145
-}
+import { drawSprocketHoles, drawSprocketText } from '~/utils/filmSprocket'
+import { createFilmGrainTiles, drawFilmGrain, releaseFilmGrainTiles } from '~/utils/filmTexture'
+import type { FilmGrainTiles } from '~/utils/filmTexture'
 
 const getSprocketBandColor = (settings: CompositionSettings) =>
   settings.sprocket.color === 'background' ? settings.background : '#000000'
 
-const getSprocketJpegHoleColor = (settings: CompositionSettings) =>
+const getSprocketHoleColor = (settings: CompositionSettings) =>
   settings.sprocket.color === 'background' ? '#000000' : '#ffffff'
 
 const hasSupportedCanvasDimensions = (geometry: Pick<CompositionGeometry, 'width' | 'height'>) =>
@@ -36,59 +31,6 @@ const hasSupportedCanvasDimensions = (geometry: Pick<CompositionGeometry, 'width
       dimension >= 1 &&
       dimension <= MAX_COMPOSITION_CANVAS_SIDE + MAX_COMPOSITION_SPROCKET_WIDTH * 2
   )
-
-const drawSprocketHoles = (
-  context: CanvasRenderingContext2D,
-  output: ReturnType<typeof getCompositionOutputGeometry>,
-  settings: CompositionSettings
-) => {
-  if (!settings.sprocket.enabled) return
-
-  const { placement } = settings.sprocket
-  const bandWidth = Math.min(
-    MAX_COMPOSITION_SPROCKET_WIDTH,
-    Math.max(MIN_COMPOSITION_SPROCKET_WIDTH, Math.round(settings.sprocket.width))
-  )
-  const longSide = placement === 'top-bottom' ? output.width : output.height
-  const holeLength = Math.min(80, Math.max(18, Math.round(bandWidth * 0.62)))
-  const holeThickness = Math.max(12, Math.round(bandWidth * 0.54))
-  const pitch = Math.max(holeLength + 20, Math.round(bandWidth * 1.8))
-  const initialOffset = (longSide % pitch) / 2
-  const crossOffset = (bandWidth - holeThickness) / 2
-
-  context.save()
-  if (settings.outputFormat === 'png') {
-    context.fillStyle = '#000000'
-    context.globalCompositeOperation = 'destination-out'
-  } else {
-    context.fillStyle = getSprocketJpegHoleColor(settings)
-  }
-  for (let offset = initialOffset; offset < longSide; offset += pitch) {
-    const length = Math.min(holeLength, longSide - offset)
-    context.beginPath()
-    if (placement === 'top-bottom') {
-      context.roundRect(offset, crossOffset, length, holeThickness, Math.min(8, holeThickness / 4))
-      context.roundRect(
-        offset,
-        output.height - bandWidth + crossOffset,
-        length,
-        holeThickness,
-        Math.min(8, holeThickness / 4)
-      )
-    } else {
-      context.roundRect(crossOffset, offset, holeThickness, length, Math.min(8, holeThickness / 4))
-      context.roundRect(
-        output.width - bandWidth + crossOffset,
-        offset,
-        holeThickness,
-        length,
-        Math.min(8, holeThickness / 4)
-      )
-    }
-    context.fill()
-  }
-  context.restore()
-}
 
 const drawPattern = (
   context: CanvasRenderingContext2D,
@@ -188,6 +130,7 @@ export const useCompositionCanvas = (
   const translateError = useTranslatedError()
   const canvas = ref<HTMLCanvasElement>()
   let animationFrame: number | undefined
+  let grainTiles: FilmGrainTiles | undefined
 
   const drawCanvas = () => {
     const target = canvas.value
@@ -206,6 +149,7 @@ export const useCompositionCanvas = (
     if (currentSettings.sprocket.enabled) {
       context.fillStyle = getSprocketBandColor(currentSettings)
       context.fillRect(0, 0, outputGeometry.width, outputGeometry.height)
+      drawSprocketText(context, outputGeometry, currentSettings.sprocket)
     }
 
     context.save()
@@ -213,7 +157,17 @@ export const useCompositionCanvas = (
     context.fillStyle = currentSettings.background
     context.fillRect(0, 0, currentGeometry.width, currentGeometry.height)
     drawPattern(context, currentGeometry.width, currentGeometry.height, currentSettings)
+    context.restore()
 
+    if (currentSettings.filmTexture) {
+      grainTiles ??= createFilmGrainTiles()
+      if (grainTiles) {
+        drawFilmGrain(context, grainTiles, outputGeometry.width, outputGeometry.height)
+      }
+    }
+
+    context.save()
+    context.translate(outputGeometry.contentOffsetX, outputGeometry.contentOffsetY)
     currentImages.forEach((entry, index) => {
       const frame = currentGeometry.frames[index]
       if (!frame) return
@@ -233,7 +187,14 @@ export const useCompositionCanvas = (
       context.restore()
     })
     context.restore()
-    drawSprocketHoles(context, outputGeometry, currentSettings)
+
+    if (currentSettings.sprocket.enabled) {
+      drawSprocketHoles(context, outputGeometry, currentSettings.sprocket, {
+        holeColor: getSprocketHoleColor(currentSettings),
+        transparent: currentSettings.outputFormat === 'png',
+        textured: currentSettings.filmTexture
+      })
+    }
   }
 
   const scheduleDraw = () => {
@@ -283,6 +244,9 @@ export const useCompositionCanvas = (
       currentSettings.sprocket.placement,
       currentSettings.sprocket.color,
       currentSettings.sprocket.width,
+      currentSettings.sprocket.text,
+      currentSettings.sprocket.textColor,
+      currentSettings.filmTexture,
       currentSettings.fit,
       currentSettings.outputFormat,
       currentSettings.canvasSizeMode,
@@ -293,6 +257,8 @@ export const useCompositionCanvas = (
   onMounted(drawCanvas)
   onBeforeUnmount(() => {
     if (animationFrame !== undefined) cancelAnimationFrame(animationFrame)
+    if (grainTiles) releaseFilmGrainTiles(grainTiles)
+    grainTiles = undefined
   })
 
   return { canvas, download }
