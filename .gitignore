@@ -1,5 +1,6 @@
 .nuxt
 .output
+dist
 node_modules
 .pnpm-store
 .data
@@ -14,4 +15,32 @@ node_modules
 !.vscode/settings.json
 !.vscode/extensions.json
 
-sample
+# sample data
+sample/
+
+# Codex
+AGENTS.local.md
+AGENTS.override.md
+# Re-include level by level: Git cannot re-include files inside an excluded directory.
+.codex/*
+!.codex/docs/
+.codex/docs/*
+!.codex/docs/project-overview.md
+!.codex/rules/
+.codex/rules/*
+!.codex/rules/development-guidelines.md
+!.codex/skills/
+.codex/skills/*
+!.codex/skills/commit-creation-en/
+!.codex/skills/commit-creation-zh/
+
+# Claude
+CLAUDE.local.md
+CLAUDE.override.md
+# Override global excludes of .claude; docs, rules and skills are symlinks, so no trailing slash.
+!.claude/
+.claude/*
+!.claude/docs
+!.claude/rules
+!.claude/skills
+!.claude/settings.json
