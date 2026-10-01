@@ -1,4 +1,8 @@
-import { getCompositionOutputGeometry, MAX_COMPOSITION_CANVAS_SIDE } from '~/types/composition'
+import {
+  COMPOSITION_SPROCKET_TEXT_COLORS,
+  getCompositionOutputGeometry,
+  MAX_COMPOSITION_CANVAS_SIDE
+} from '~/types/composition'
 import type { ShallowRef } from 'vue'
 
 import type {
@@ -41,8 +45,11 @@ export const useCompositionSettings = (images: ShallowRef<Array<CompositionImage
       enabled: false,
       placement: 'top-bottom',
       color: 'background',
-      width: 96
+      width: 96,
+      text: '',
+      textColor: COMPOSITION_SPROCKET_TEXT_COLORS.amber
     },
+    filmTexture: false,
     fit: 'cover',
     padding: { top: 112, right: 112, bottom: 112, left: 112 },
     gap: 48,

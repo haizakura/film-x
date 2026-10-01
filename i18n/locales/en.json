@@ -162,10 +162,27 @@
       "leftRight": "Left and right",
       "width": "Perforation band width",
       "widthInput": "Enter perforation band width",
-      "color": "Perforation color",
+      "color": "Perforation band color",
       "background": "Match background",
       "black": "Black",
+      "text": "Edge text",
+      "textInput": "Enter edge text printed beside the perforations",
+      "textPlaceholder": "e.g. FILM X 400  12",
+      "textColor": "Text color",
+      "textColorPicker": "Choose edge text color",
+      "textColorHex": "Edge text color hexadecimal RGB value",
+      "textColorPresets": "Edge text color presets",
+      "textColorAmber": "Amber",
+      "textColorWhite": "White",
+      "textColorBlack": "Black",
+      "textHint": "Printed repeatedly along the outer edges of both bands, staggered between them. Leave empty to hide it.",
       "sizeHint": "Perforation bands sit outside the canvas, so their width is not included in its dimensions."
+    },
+    "texture": {
+      "heading": "Film texture",
+      "enabled": "Enable",
+      "enabledLabel": "Enable film texture",
+      "hint": "Adds film grain to the background and perforation bands, and gives the perforations softer, less uniform edges with natural light and shade. Photos are left untouched."
     },
     "spacing": {
       "padding": "Outer margin",

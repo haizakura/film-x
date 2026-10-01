@@ -162,10 +162,27 @@
       "leftRight": "左右",
       "width": "齿孔带宽度",
       "widthInput": "输入齿孔带宽度",
-      "color": "齿孔颜色",
+      "color": "齿孔带颜色",
       "background": "跟随背景",
       "black": "黑色",
+      "text": "边缘文字",
+      "textInput": "输入印在齿孔外侧的边缘文字",
+      "textPlaceholder": "例如 FILM X 400  12",
+      "textColor": "文字颜色",
+      "textColorPicker": "选择边缘文字颜色",
+      "textColorHex": "边缘文字颜色十六进制 RGB 值",
+      "textColorPresets": "边缘文字颜色预设",
+      "textColorAmber": "琥珀色",
+      "textColorWhite": "白色",
+      "textColorBlack": "黑色",
+      "textHint": "文字会沿两侧齿孔带的外缘重复印制，两侧位置相互交错。留空则不显示。",
       "sizeHint": "齿孔带位于画布外侧，其宽度不计入画布尺寸。"
+    },
+    "texture": {
+      "heading": "胶片质感",
+      "enabled": "开启",
+      "enabledLabel": "开启胶片质感",
+      "hint": "为背景和齿孔带加入胶片颗粒，并让齿孔边缘更柔和、形状与明暗更自然；照片本身不受影响。"
     },
     "spacing": {
       "padding": "外边距",

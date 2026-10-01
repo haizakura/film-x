@@ -5,7 +5,6 @@ import type { CompositionPattern, CompositionSettings } from '~/types/compositio
 
 const settings = defineModel<CompositionSettings>({ required: true })
 const { t } = useI18n()
-const backgroundHexInput = ref(settings.value.background)
 
 const patterns = computed<Array<{ label: string; value: CompositionPattern; icon: Component }>>(
   () => [
@@ -14,61 +13,18 @@ const patterns = computed<Array<{ label: string; value: CompositionPattern; icon
     { label: t('composition.background.dots'), value: 'dots', icon: Grip }
   ]
 )
-
-const normalizeHexColor = (value: string) => {
-  const hex = value.trim().replace(/^#/, '')
-  return /^[\dA-Fa-f]{6}$/.test(hex) ? `#${hex.toUpperCase()}` : undefined
-}
-
-const updateBackgroundHex = () => {
-  const normalized = normalizeHexColor(backgroundHexInput.value)
-  if (normalized) settings.value.background = normalized
-}
-
-const commitBackgroundHex = () => {
-  const normalized = normalizeHexColor(backgroundHexInput.value)
-  backgroundHexInput.value = normalized || settings.value.background.toUpperCase()
-  if (normalized) settings.value.background = normalized
-}
-
-watch(
-  () => settings.value.background,
-  (value) => {
-    backgroundHexInput.value = value.toUpperCase()
-  }
-)
 </script>
 
 <template>
   <div class="border-b border-border p-5">
     <p class="text-xs font-medium">{{ t('composition.background.heading') }}</p>
-    <div class="mt-4 flex items-center gap-2">
-      <label class="shrink-0">
-        <span class="sr-only">{{ t('composition.background.color') }}</span>
-        <input
-          v-model="settings.background"
-          type="color"
-          class="size-9 rounded-md border border-border bg-transparent p-0.5"
-          :aria-label="t('composition.background.color')"
-        />
-      </label>
-      <label class="min-w-0 flex-1">
-        <span class="sr-only">{{ t('composition.background.hex') }}</span>
-        <input
-          v-model="backgroundHexInput"
-          class="w-full rounded-md border border-border bg-card px-3 py-2 font-mono text-xs uppercase outline-none transition focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-          type="text"
-          maxlength="7"
-          autocomplete="off"
-          spellcheck="false"
-          :aria-label="t('composition.background.hex')"
-          placeholder="#E9E4DA"
-          @input="updateBackgroundHex"
-          @blur="commitBackgroundHex"
-          @keydown.enter="commitBackgroundHex"
-        />
-      </label>
-    </div>
+    <FilmCompositionColorField
+      v-model="settings.background"
+      class="mt-4"
+      :picker-label="t('composition.background.color')"
+      :hex-label="t('composition.background.hex')"
+      placeholder="#E9E4DA"
+    />
     <div class="mt-4 grid grid-cols-3 gap-2">
       <button
         v-for="option in patterns"

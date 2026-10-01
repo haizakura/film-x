@@ -165,7 +165,24 @@
       "color": "帯の色",
       "background": "背景に合わせる",
       "black": "黒",
+      "text": "エッジ文字",
+      "textInput": "パーフォレーションの外側に印字するエッジ文字を入力",
+      "textPlaceholder": "例：FILM X 400  12",
+      "textColor": "文字色",
+      "textColorPicker": "エッジ文字の色を選択",
+      "textColorHex": "エッジ文字色の RGB 値（16進数）",
+      "textColorPresets": "エッジ文字色のプリセット",
+      "textColorAmber": "アンバー",
+      "textColorWhite": "白",
+      "textColorBlack": "黒",
+      "textHint": "両側の帯の外縁に沿って、互い違いの位置に繰り返し印字されます。空欄にすると表示されません。",
       "sizeHint": "パーフォレーション帯はキャンバスの外側に配置されるため、その幅はキャンバスのサイズに含まれません。"
+    },
+    "texture": {
+      "heading": "フィルムの質感",
+      "enabled": "有効",
+      "enabledLabel": "フィルムの質感を有効にする",
+      "hint": "背景とパーフォレーションの帯にフィルムの粒子を加え、穴の縁をやわらかく、形と明暗を自然にします。写真そのものには影響しません。"
     },
     "spacing": {
       "padding": "外側の余白",
