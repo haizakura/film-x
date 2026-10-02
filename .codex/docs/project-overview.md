@@ -83,7 +83,7 @@ mise.toml                         Node.js 版本
 | 路由 | 入口 | 作用 |
 | --- | --- | --- |
 | / | app/pages/index.vue | 批量半格胶片切分 |
-| /compose | app/pages/compose.vue | 最多两张图的胶片排版拼图 |
+| /compose | app/pages/compose.vue | 单张或两张半格/全画幅图像的胶片排版拼图 |
 
 国际化当前仅支持 en 与 zh-CN。默认语言和回退语言均为 en；首次访问会根据浏览器语言选择，并把选择写入 Cookie。页面标题、描述、Toast、可访问性标签和普通界面文字都以语言包为来源。
 
@@ -124,9 +124,11 @@ TIFF 输入在浏览器中转为 8 位 RGBA。导出 TIFF 时走像素裁切和 
 
 ### 6.1 用户能力
 
-- 最多导入两张 TIFF、JPEG、PNG 或 WebP 图像，并支持拖放。
-- 支持左右或上下布局、交换位置、预设/自定义/自动比例。
+- 通过“胶片画幅”面板选择半格或全画幅、单张或两张，共四种组合（默认两张半格）；图像槽位数量随模式变化，支持点击选择和拖放导入 TIFF、JPEG、PNG 或 WebP，拖入文件超出槽位数量时只使用前面的文件。
+- 切换画幅会套用推荐布局方向（半格左右、全画幅上下）；两张时仍可改为左右或上下并交换位置。单张时隐藏布局方向、画面间距、交换按钮和图片调整中的画面选择；第二张图像只是被隐藏而不删除，切回两张即可恢复，若仅第二个槽位有图则会移入可见槽位。
+- 支持预设/自定义/自动比例。
 - 支持自动或手动画布尺寸、独立外边距、画面间距、cover 或 contain。
+- 自动尺寸在未导入图像时采用画幅默认值（半格 2:3 竖幅、长边 1596 px；全画幅 3:2 横幅、长边 2394 px），导入后按图像实际尺寸与比例计算。预设或自定义比例下，单张按原始像素尺寸（缩放 1×）取画布，cover 取使图片一边恰好铺满画框的较小画布，contain 取较大者；两张时短边等于图片长边加对应外边距。自动比例下每个画框的长边等于图像长边（横图对齐宽度、竖图对齐高度）。
 - 支持纯色、方格、圆点背景；手动模式可缩放并拖动图像。
 - 可选上下或左右胶片齿孔带，宽度限制为 24 至 240 px 且不计入画布尺寸；齿孔采用圆角并按 135 胶片比例密排，偏向带内侧，外侧留出边缘文字空位。
 - 可选边缘文字（最多 48 个字符），沿两侧齿孔带外缘交错重复印制，左右放置时自下向上阅读；颜色可选琥珀、白、黑预设或任意十六进制颜色。
@@ -137,13 +139,15 @@ TIFF 输入在浏览器中转为 8 位 RGBA。导出 TIFF 时走像素裁切和 
 
 ~~~text
 FilmCompositionEditor
-  |- useCompositionImages：两个槽位、验证、解码任务版本保护、释放旧资源
-  |- useCompositionSettings：设置为单一来源，派生画布 geometry
+  |- useCompositionImages：固定两个槽位、验证、解码任务版本保护、释放旧资源
+  |- useCompositionSettings：设置为单一来源，由 frameFormat/frameCount 派生 activeImages 与画布 geometry
   '- FilmCompositionWorkspace
        '- useCompositionCanvas：按设置和 geometry 绘制并下载
 ~~~
 
-CompositionSettings 是拼图设置的单一来源，CompositionGeometry 是派生出的画布和画框几何信息。自动和手动尺寸都须遵守 MAX_COMPOSITION_CANVAS_SIDE（8000 px）。齿孔带在主画布外扩展最终输出尺寸，因此须通过 getCompositionOutputGeometry 计算，不能只修改显示尺寸。齿孔几何、边缘文字与颗粒纹理绘制集中在 app/utils/filmSprocket.ts 与 app/utils/filmTexture.ts；颗粒使用固定种子的伪随机数与缓存的小尺寸噪声贴图平铺，不对整幅画布读取像素，以免抬高大画布内存峰值。
+useCompositionImages 始终保存固定的两个槽位（MAX_COMPOSITION_FRAMES），只有前 frameCount 个槽位参与布局：切换为单张只隐藏第二个槽位而不释放其图像，切回两张即可恢复；仅第二个槽位有图时，编辑器会先交换槽位再切换。编辑器因此把 activeImages（前 frameCount 项）交给工作区和控制面板，拖放分配也只在活动槽位内进行。useCompositionSettings 由 frameFormat 与 frameCount 派生 activeImages、画框网格和 geometry；切换画幅时同步套用推荐布局方向。app/types/composition.ts 中的 COMPOSITION_FRAME_FORMATS 是各画幅默认比例、长边和推荐布局方向的唯一来源，空画框和自动尺寸的默认值都取自这里，不要在组件或 composable 中重复这些数字。
+
+CompositionSettings（含 frameFormat 与 frameCount）是拼图设置的单一来源，CompositionGeometry 是派生出的画布和画框几何信息。自动和手动尺寸都须遵守 MAX_COMPOSITION_CANVAS_SIDE（8000 px）。齿孔带在主画布外扩展最终输出尺寸，因此须通过 getCompositionOutputGeometry 计算，不能只修改显示尺寸。齿孔几何、边缘文字与颗粒纹理绘制集中在 app/utils/filmSprocket.ts 与 app/utils/filmTexture.ts；颗粒使用固定种子的伪随机数与缓存的小尺寸噪声贴图平铺，不对整幅画布读取像素，以免抬高大画布内存峰值。
 
 拼图异步加载以槽位版本号阻止旧解码结果覆盖新选择。替换、移除或卸载时必须释放旧 DecodedImage。手动模式才允许 Canvas 内拖动图片；工作区只上报拖动增量，编辑器负责更新共享状态。
 
