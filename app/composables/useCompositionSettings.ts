@@ -1,4 +1,5 @@
 import {
+  COMPOSITION_FRAME_FORMATS,
   COMPOSITION_SPROCKET_TEXT_COLORS,
   getCompositionOutputGeometry,
   MAX_COMPOSITION_CANVAS_SIDE
@@ -8,14 +9,15 @@ import type { ShallowRef } from 'vue'
 import type {
   CompositionCanvasSizeAnchor,
   CompositionCanvasSizeMode,
+  CompositionFrame,
+  CompositionFrameCount,
+  CompositionFrameFormat,
   CompositionGeometry,
   CompositionImage,
   CompositionSettings
 } from '~/types/composition'
 
 const CANVAS_WIDTH = 2400
-const DEFAULT_AUTO_FRAME_LONG_SIDE = 1596
-const DEFAULT_FRAME_RATIO = 2 / 3
 const MIN_RATIO = 0.2
 const MAX_RATIO = 5
 
@@ -30,6 +32,8 @@ const normalizeCanvasDimension = (value: number | string) => {
 
 export const useCompositionSettings = (images: ShallowRef<Array<CompositionImage | undefined>>) => {
   const settings = ref<CompositionSettings>({
+    frameFormat: 'half',
+    frameCount: 2,
     ratioMode: 'preset',
     ratio: 4 / 5,
     customRatioWidth: 4,
@@ -38,7 +42,7 @@ export const useCompositionSettings = (images: ShallowRef<Array<CompositionImage
     canvasHeight: Math.round(CANVAS_WIDTH / (4 / 5)),
     canvasSizeAnchor: 'width',
     canvasSizeMode: 'auto',
-    layoutDirection: 'horizontal',
+    layoutDirection: COMPOSITION_FRAME_FORMATS.half.layoutDirection,
     background: '#E9E4DA',
     pattern: 'none',
     sprocket: {
@@ -57,6 +61,10 @@ export const useCompositionSettings = (images: ShallowRef<Array<CompositionImage
     outputQuality: 0.92
   })
 
+  // Slots beyond the current frame count keep their image but stay out of the layout.
+  const activeImages = computed(() => images.value.slice(0, settings.value.frameCount))
+  const frameFormatSpec = computed(() => COMPOSITION_FRAME_FORMATS[settings.value.frameFormat])
+
   const customRatio = computed(() => {
     const width = Number(settings.value.customRatioWidth)
     const height = Number(settings.value.customRatioHeight)
@@ -65,112 +73,108 @@ export const useCompositionSettings = (images: ShallowRef<Array<CompositionImage
       : 1
   })
 
+  const selectedRatio = computed(() =>
+    settings.value.ratioMode === 'custom' ? customRatio.value : settings.value.ratio
+  )
+
   const commonFrameRatio = computed(() => {
-    const loadedRatios = images.value.flatMap((entry) =>
+    const loadedRatios = activeImages.value.flatMap((entry) =>
       entry ? [clampRatio(entry.decoded.width / entry.decoded.height)] : []
     )
-    if (!loadedRatios.length) return DEFAULT_FRAME_RATIO
+    if (!loadedRatios.length) return frameFormatSpec.value.ratio
     return loadedRatios.reduce((sum, value) => sum + value, 0) / loadedRatios.length
   })
 
   const frameLongSide = computed(() => {
-    const loadedLongSides = images.value.flatMap((entry) =>
+    const loadedLongSides = activeImages.value.flatMap((entry) =>
       entry ? [Math.max(entry.decoded.width, entry.decoded.height)] : []
     )
-    return loadedLongSides.length ? Math.max(...loadedLongSides) : DEFAULT_AUTO_FRAME_LONG_SIDE
+    return loadedLongSides.length ? Math.max(...loadedLongSides) : frameFormatSpec.value.longSide
   })
+
+  const getFrameGrid = () => {
+    const { frameCount, gap, layoutDirection } = settings.value
+    const columns = layoutDirection === 'horizontal' ? frameCount : 1
+    const rows = layoutDirection === 'horizontal' ? 1 : frameCount
+    return { columns, rows, gapX: (columns - 1) * gap, gapY: (rows - 1) * gap }
+  }
+
+  const layoutFrames = (frameWidth: number, frameHeight: number): CompositionFrame[] => {
+    const { frameCount, gap, layoutDirection, padding } = settings.value
+    const horizontal = layoutDirection === 'horizontal'
+    return Array.from({ length: frameCount }, (_, index) => ({
+      x: padding.left + (horizontal ? index * (frameWidth + gap) : 0),
+      y: padding.top + (horizontal ? 0 : index * (frameHeight + gap)),
+      width: frameWidth,
+      height: frameHeight
+    }))
+  }
+
+  const geometryFromFrameSize = (frameWidth: number, frameHeight: number): CompositionGeometry => {
+    const { top, right, bottom, left } = settings.value.padding
+    const { columns, rows, gapX, gapY } = getFrameGrid()
+    return {
+      width: Math.max(1, Math.round(left + right + frameWidth * columns + gapX)),
+      height: Math.max(1, Math.round(top + bottom + frameHeight * rows + gapY)),
+      frames: layoutFrames(frameWidth, frameHeight)
+    }
+  }
 
   const calculateGeometry = (
     canvasSize: number,
     canvasSizeAnchor = settings.value.canvasSizeAnchor
   ): CompositionGeometry => {
     const { top, right, bottom, left } = settings.value.padding
-    const { gap, layoutDirection, ratioMode } = settings.value
-    const horizontal = layoutDirection === 'horizontal'
+    const { columns, rows, gapX, gapY } = getFrameGrid()
 
-    if (ratioMode === 'auto') {
+    if (settings.value.ratioMode === 'auto') {
       const frameWidth =
         canvasSizeAnchor === 'width'
-          ? Math.max(1, (canvasSize - left - right - (horizontal ? gap : 0)) / (horizontal ? 2 : 1))
-          : Math.max(
-              1,
-              ((canvasSize - top - bottom - (horizontal ? 0 : gap)) / (horizontal ? 1 : 2)) *
-                commonFrameRatio.value
-            )
+          ? Math.max(1, (canvasSize - left - right - gapX) / columns)
+          : Math.max(1, ((canvasSize - top - bottom - gapY) / rows) * commonFrameRatio.value)
       const frameHeight =
         canvasSizeAnchor === 'height'
-          ? Math.max(1, (canvasSize - top - bottom - (horizontal ? 0 : gap)) / (horizontal ? 1 : 2))
+          ? Math.max(1, (canvasSize - top - bottom - gapY) / rows)
           : Math.max(1, frameWidth / commonFrameRatio.value)
-      const width = Math.max(
-        1,
-        Math.round(horizontal ? left + right + frameWidth * 2 + gap : left + right + frameWidth)
-      )
-      const height = Math.max(
-        1,
-        Math.round(horizontal ? top + bottom + frameHeight : top + bottom + frameHeight * 2 + gap)
-      )
-      const frames = [0, 1].map((index) => ({
-        x: horizontal ? left + index * (frameWidth + gap) : left,
-        y: horizontal ? top : top + index * (frameHeight + gap),
-        width: frameWidth,
-        height: frameHeight
-      }))
-      return { width, height, frames }
+      return geometryFromFrameSize(frameWidth, frameHeight)
     }
 
-    const selectedRatio = ratioMode === 'custom' ? customRatio.value : settings.value.ratio
     const width = Math.max(
       1,
-      Math.round(canvasSizeAnchor === 'width' ? canvasSize : canvasSize * selectedRatio)
+      Math.round(canvasSizeAnchor === 'width' ? canvasSize : canvasSize * selectedRatio.value)
     )
     const height = Math.max(
       1,
-      Math.round(canvasSizeAnchor === 'height' ? canvasSize : canvasSize / selectedRatio)
+      Math.round(canvasSizeAnchor === 'height' ? canvasSize : canvasSize / selectedRatio.value)
     )
-    const frameWidth = horizontal
-      ? Math.max(1, (width - left - right - gap) / 2)
-      : Math.max(1, width - left - right)
-    const frameHeight = horizontal
-      ? Math.max(1, height - top - bottom)
-      : Math.max(1, (height - top - bottom - gap) / 2)
-    const frames = [0, 1].map((index) => ({
-      x: horizontal ? left + index * (frameWidth + gap) : left,
-      y: horizontal ? top : top + index * (frameHeight + gap),
-      width: frameWidth,
-      height: frameHeight
-    }))
-    return { width, height, frames }
+    const frameWidth = Math.max(1, (width - left - right - gapX) / columns)
+    const frameHeight = Math.max(1, (height - top - bottom - gapY) / rows)
+    return { width, height, frames: layoutFrames(frameWidth, frameHeight) }
   }
 
   const calculateAutomaticGeometry = (longSide: number): CompositionGeometry => {
     const { top, right, bottom, left } = settings.value.padding
-    const { gap, layoutDirection, ratioMode } = settings.value
-    const horizontal = layoutDirection === 'horizontal'
+    const frameRatio = commonFrameRatio.value
+    // Frame size that shows an image of this long side at its native pixel size.
+    const nativeWidth = frameRatio >= 1 ? longSide : longSide * frameRatio
+    const nativeHeight = frameRatio >= 1 ? longSide / frameRatio : longSide
 
-    if (ratioMode !== 'auto') {
-      const selectedRatio = ratioMode === 'custom' ? customRatio.value : settings.value.ratio
-      const canvasSizeAnchor: CompositionCanvasSizeAnchor = selectedRatio <= 1 ? 'width' : 'height'
-      const padding = canvasSizeAnchor === 'width' ? left + right : top + bottom
-      return calculateGeometry(longSide + padding, canvasSizeAnchor)
+    if (settings.value.ratioMode === 'auto') {
+      return geometryFromFrameSize(nativeWidth, nativeHeight)
     }
 
-    const frameWidth = horizontal ? longSide * commonFrameRatio.value : longSide
-    const frameHeight = horizontal ? longSide : longSide / commonFrameRatio.value
-    const width = Math.max(
-      1,
-      Math.round(horizontal ? left + right + frameWidth * 2 + gap : left + right + frameWidth)
-    )
-    const height = Math.max(
-      1,
-      Math.round(horizontal ? top + bottom + frameHeight : top + bottom + frameHeight * 2 + gap)
-    )
-    const frames = [0, 1].map((index) => ({
-      x: horizontal ? left + index * (frameWidth + gap) : left,
-      y: horizontal ? top : top + index * (frameHeight + gap),
-      width: frameWidth,
-      height: frameHeight
-    }))
-    return { width, height, frames }
+    if (settings.value.frameCount === 1) {
+      // Match one native image side to the frame, picking the side that keeps scale 1 for the fit.
+      const widthBased = calculateGeometry(nativeWidth + left + right, 'width')
+      const heightBased = calculateGeometry(nativeHeight + top + bottom, 'height')
+      const widthBasedIsSmaller = widthBased.width <= heightBased.width
+      return widthBasedIsSmaller === (settings.value.fit === 'cover') ? widthBased : heightBased
+    }
+
+    const canvasSizeAnchor: CompositionCanvasSizeAnchor =
+      selectedRatio.value <= 1 ? 'width' : 'height'
+    const padding = canvasSizeAnchor === 'width' ? left + right : top + bottom
+    return calculateGeometry(longSide + padding, canvasSizeAnchor)
   }
 
   const isWithinCanvasLimit = (geometry: CompositionGeometry) =>
@@ -263,12 +267,25 @@ export const useCompositionSettings = (images: ShallowRef<Array<CompositionImage
     settings.value.canvasSizeMode = mode
   }
 
+  const setFrameFormat = (format: CompositionFrameFormat) => {
+    if (format === settings.value.frameFormat) return
+    settings.value.frameFormat = format
+    settings.value.layoutDirection = COMPOSITION_FRAME_FORMATS[format].layoutDirection
+  }
+
+  const setFrameCount = (count: CompositionFrameCount) => {
+    settings.value.frameCount = count
+  }
+
   return {
     settings,
+    activeImages,
     geometry,
     aspectStyle,
     updateCanvasWidth,
     updateCanvasHeight,
-    setCanvasSizeMode
+    setCanvasSizeMode,
+    setFrameFormat,
+    setFrameCount
   }
 }

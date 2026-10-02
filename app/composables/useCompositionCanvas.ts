@@ -168,9 +168,8 @@ export const useCompositionCanvas = (
 
     context.save()
     context.translate(outputGeometry.contentOffsetX, outputGeometry.contentOffsetY)
-    currentImages.forEach((entry, index) => {
-      const frame = currentGeometry.frames[index]
-      if (!frame) return
+    currentGeometry.frames.forEach((frame, index) => {
+      const entry = currentImages[index]
       context.save()
       context.shadowColor = 'rgba(0,0,0,.18)'
       context.shadowBlur = 30
