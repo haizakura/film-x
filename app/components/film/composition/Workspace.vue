@@ -122,6 +122,7 @@ defineExpose({ download })
       </div>
       <div class="flex items-center gap-2">
         <button
+          v-if="settings.frameCount > 1"
           class="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[11px] text-white/55 transition hover:bg-white/8 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
           :disabled="!images.some(Boolean)"
           @click="emit('swap')"
@@ -179,7 +180,11 @@ defineExpose({ download })
       v-if="isDragging"
       mode="container"
       :title="t('drop.compositionTitle')"
-      :description="t('drop.compositionDescription')"
+      :description="
+        settings.frameCount > 1
+          ? t('drop.compositionDescription')
+          : t('drop.compositionDescriptionSingle')
+      "
     />
   </section>
 </template>
