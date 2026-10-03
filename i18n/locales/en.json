@@ -3,8 +3,8 @@
     "siteDescription": "Split and compose film scan images locally in your browser.",
     "splitterTitle": "Half-frame film splitter",
     "splitterDescription": "Detect the center gap in half-frame film scans, then split, rotate, and batch export locally in your browser.",
-    "composerTitle": "Half-frame film composer",
-    "composerDescription": "Compose two half-frame photos into one image with custom canvas, spacing, layout, and patterns."
+    "composerTitle": "Film composer",
+    "composerDescription": "Compose one or two half-frame or full-frame film photos into a single image with custom canvas, spacing, layout, and patterns."
   },
   "language": {
     "label": "Language"
@@ -20,7 +20,7 @@
     "splitter": "Half-frame splitter",
     "splitterTagline": "One scan, two frames",
     "composer": "Film composer",
-    "composerTagline": "Two frames, one image",
+    "composerTagline": "One or two frames, one image",
     "github": "View Film X on GitHub",
     "themeLabel": "Theme: {theme}",
     "themeSwitchTitle": "{label}; click to switch",
@@ -47,7 +47,8 @@
   "drop": {
     "scanTitle": "Release to add scan images",
     "compositionTitle": "Release to add to the canvas",
-    "compositionDescription": "Only the first two images will be used"
+    "compositionDescription": "Only the first two images will be used",
+    "compositionDescriptionSingle": "Only the first image will be used"
   },
   "queue": {
     "title": "Current scan",
@@ -107,12 +108,22 @@
   },
   "composition": {
     "eyebrow": "Tool 02 · Composer",
-    "title": "Half-frame film composer",
+    "title": "Film composer",
     "swap": "Swap positions",
     "frame": "Frame {number}",
     "selectFrame": "Choose frame {number}",
     "removeFrame": "Remove frame {number}",
     "replaceHint": "Click to replace · drag and drop supported",
+    "frames": {
+      "heading": "Film format",
+      "format": "Choose film format",
+      "half": "Half-frame",
+      "full": "Full-frame",
+      "count": "Choose number of images",
+      "single": "Single",
+      "double": "Two",
+      "hint": "Switching format applies the recommended layout: side by side for half-frame, stacked for full-frame. When you switch to a single image, the second image is hidden for now; switch back to two to restore it."
+    },
     "ratio": {
       "heading": "Canvas ratio",
       "auto": "Auto",
@@ -129,7 +140,7 @@
       "height": "Height",
       "widthInput": "Enter canvas width",
       "heightInput": "Enter canvas height",
-      "autoHint": "The short edge follows the half-frame image's long edge and its corresponding outer margins. Switching to manual keeps these values.",
+      "autoHint": "Calculated automatically from the image size and outer margins: a single image keeps its original pixel size, and with two images the short edge follows the images' long edge. Switching to manual keeps these values.",
       "maxHint": "Longest side: {size} px max"
     },
     "transform": {
@@ -221,6 +232,8 @@
     "noUsableImages": "No usable images",
     "firstTwoAdded": "Added the first two images",
     "twoImageLimit": "The composition canvas can hold up to two images.",
+    "firstOneAdded": "Added the first image",
+    "oneImageLimit": "In single mode, the composition canvas holds only one image.",
     "addPhotoFirst": "Add a photo first",
     "compositionGenerated": "Composition generated",
     "compositionFailed": "Generation failed"

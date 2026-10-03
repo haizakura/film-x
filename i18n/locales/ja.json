@@ -3,8 +3,8 @@
     "siteDescription": "ブラウザー内でフィルムのスキャン画像を分割・合成。処理はすべてお使いの端末で完結します。",
     "splitterTitle": "ハーフサイズフィルム分割",
     "splitterDescription": "ハーフサイズフィルムのスキャン画像からコマ間の隙間を自動検出。ブラウザー内で分割・回転・一括書き出しができます。",
-    "composerTitle": "ハーフサイズフィルム合成",
-    "composerDescription": "2枚のハーフサイズ写真を1枚の画像に合成。キャンバス、余白、配置、背景パターンを自由に設定できます。"
+    "composerTitle": "フィルム合成",
+    "composerDescription": "1〜2枚のハーフサイズまたはフルサイズのフィルム写真を1枚の画像に合成。キャンバス、余白、配置、背景パターンを自由に設定できます。"
   },
   "language": {
     "label": "言語"
@@ -20,7 +20,7 @@
     "splitter": "ハーフサイズ分割",
     "splitterTagline": "1枚のスキャンを2コマに",
     "composer": "フィルム合成",
-    "composerTagline": "2コマを1枚の画像に",
+    "composerTagline": "1〜2コマを1枚の画像に",
     "github": "GitHub で Film X を見る",
     "themeLabel": "テーマ：{theme}",
     "themeSwitchTitle": "{label}・クリックで切り替え",
@@ -47,7 +47,8 @@
   "drop": {
     "scanTitle": "ドロップしてスキャン画像を追加",
     "compositionTitle": "ドロップしてキャンバスに追加",
-    "compositionDescription": "最初の2枚のみ使用します"
+    "compositionDescription": "最初の2枚のみ使用します",
+    "compositionDescriptionSingle": "最初の1枚のみ使用します"
   },
   "queue": {
     "title": "今回のスキャン",
@@ -107,12 +108,22 @@
   },
   "composition": {
     "eyebrow": "ツール 02 · 合成",
-    "title": "ハーフサイズフィルム合成",
+    "title": "フィルム合成",
     "swap": "位置を入れ替え",
     "frame": "コマ {number}",
     "selectFrame": "コマ {number} を選択",
     "removeFrame": "コマ {number} を削除",
     "replaceHint": "クリックで差し替え · ドラッグ＆ドロップ対応",
+    "frames": {
+      "heading": "フィルムサイズ",
+      "format": "フィルムサイズを選択",
+      "half": "ハーフサイズ",
+      "full": "フルサイズ",
+      "count": "画像の枚数を選択",
+      "single": "1枚",
+      "double": "2枚",
+      "hint": "サイズを切り替えると推奨の配置が適用されます。ハーフサイズは横並び、フルサイズは縦並びです。1枚に切り替えると2枚目の画像は一時的に非表示になり、2枚に戻すと復元されます。"
+    },
     "ratio": {
       "heading": "キャンバスの比率",
       "auto": "自動",
@@ -129,7 +140,7 @@
       "height": "高さ",
       "widthInput": "キャンバスの幅を入力",
       "heightInput": "キャンバスの高さを入力",
-      "autoHint": "短辺はハーフサイズ画像の長辺と対応する外側の余白から自動計算します。手動に切り替えても現在の値を保持します。",
+      "autoHint": "画像サイズと外側の余白から自動計算します。1枚のときは画像の元のピクセルサイズを保ち、2枚のときは短辺を画像の長辺に合わせます。手動に切り替えても現在の値を保持します。",
       "maxHint": "長辺の上限：{size} px"
     },
     "transform": {
@@ -221,6 +232,8 @@
     "noUsableImages": "使用できる画像がありません",
     "firstTwoAdded": "最初の2枚を追加しました",
     "twoImageLimit": "合成キャンバスに配置できる画像は2枚までです。",
+    "firstOneAdded": "最初の1枚を追加しました",
+    "oneImageLimit": "1枚モードでは、合成キャンバスに配置できる画像は1枚のみです。",
     "addPhotoFirst": "先に写真を追加してください",
     "compositionGenerated": "合成画像を生成しました",
     "compositionFailed": "生成に失敗しました"
