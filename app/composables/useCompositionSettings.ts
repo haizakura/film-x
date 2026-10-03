@@ -34,7 +34,7 @@ export const useCompositionSettings = (images: ShallowRef<Array<CompositionImage
   const settings = ref<CompositionSettings>({
     frameFormat: 'half',
     frameCount: 2,
-    ratioMode: 'preset',
+    ratioMode: 'auto',
     ratio: 4 / 5,
     customRatioWidth: 4,
     customRatioHeight: 5,
