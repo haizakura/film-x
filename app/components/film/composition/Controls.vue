@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import type {
   CompositionCanvasSizeMode,
+  CompositionFrameCount,
+  CompositionFrameFormat,
   CompositionGeometry,
   CompositionImage,
   CompositionSettings
@@ -14,6 +16,8 @@ defineProps<{
 const settings = defineModel<CompositionSettings>({ required: true })
 const emit = defineEmits<{
   download: []
+  'frame-format': [value: CompositionFrameFormat]
+  'frame-count': [value: CompositionFrameCount]
   'canvas-size-mode': [value: CompositionCanvasSizeMode]
   'canvas-width': [value: string]
   'canvas-height': [value: string]
@@ -25,6 +29,12 @@ const emit = defineEmits<{
 <template>
   <aside class="panel-surface min-h-0 overflow-hidden lg:flex lg:flex-col">
     <div class="controls-scroll min-h-0 lg:flex-1 lg:overflow-y-auto lg:overscroll-contain">
+      <FilmCompositionFrameControls
+        :format="settings.frameFormat"
+        :count="settings.frameCount"
+        @update:format="emit('frame-format', $event)"
+        @update:count="emit('frame-count', $event)"
+      />
       <FilmCompositionRatioControls v-model="settings" />
       <FilmCompositionCanvasSizeControls
         :geometry="geometry"
@@ -40,7 +50,7 @@ const emit = defineEmits<{
         @scale="emit('image-scale', $event.index, $event.value)"
         @reset="emit('reset-image', $event)"
       />
-      <FilmCompositionLayoutControls v-model="settings" />
+      <FilmCompositionLayoutControls v-if="settings.frameCount > 1" v-model="settings" />
       <FilmCompositionBackgroundControls v-model="settings" />
       <FilmCompositionSprocketControls v-model="settings" />
       <FilmCompositionTextureControls v-model="settings" />

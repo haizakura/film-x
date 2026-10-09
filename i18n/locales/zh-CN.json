@@ -3,8 +3,8 @@
     "siteDescription": "在浏览器本地完成胶片扫描图像的切分与排版。",
     "splitterTitle": "半格胶片切分",
     "splitterDescription": "自动识别半格胶片扫描中缝，在浏览器本地完成切分、旋转与批量导出。",
-    "composerTitle": "半格胶片排版拼图",
-    "composerDescription": "将两张半格胶片排版成单张图像，自定义画布、间距、布局与底纹。"
+    "composerTitle": "胶片排版拼图",
+    "composerDescription": "将一至两张半格或全画幅胶片排版成单张图像，自定义画布、间距、布局与底纹。"
   },
   "language": {
     "label": "语言"
@@ -20,7 +20,7 @@
     "splitter": "半格切分",
     "splitterTagline": "一分为二",
     "composer": "排版拼图",
-    "composerTagline": "双片成章",
+    "composerTagline": "单双成章",
     "github": "在 GitHub 上查看 Film X",
     "themeLabel": "主题：{theme}",
     "themeSwitchTitle": "{label}，点击切换",
@@ -47,7 +47,8 @@
   "drop": {
     "scanTitle": "松开以添加扫描图像",
     "compositionTitle": "松开以加入排版画布",
-    "compositionDescription": "最多读取前两张图像"
+    "compositionDescription": "最多读取前两张图像",
+    "compositionDescriptionSingle": "仅读取第一张图像"
   },
   "queue": {
     "title": "本次扫描",
@@ -107,12 +108,22 @@
   },
   "composition": {
     "eyebrow": "工具 02 · 排版",
-    "title": "半格胶片排版拼图",
+    "title": "胶片排版拼图",
     "swap": "交换位置",
     "frame": "画面 {number}",
     "selectFrame": "选择画面 {number}",
     "removeFrame": "移除画面 {number}",
     "replaceHint": "点击替换 · 支持拖拽",
+    "frames": {
+      "heading": "胶片画幅",
+      "format": "选择胶片画幅",
+      "half": "半格",
+      "full": "全画幅",
+      "count": "选择图像数量",
+      "single": "单张",
+      "double": "两张",
+      "hint": "切换画幅会套用推荐布局：半格左右排列，全画幅上下排列。切换为单张时第二张图像会暂时隐藏，切回两张即可恢复。"
+    },
     "ratio": {
       "heading": "画布比例",
       "auto": "自动",
@@ -129,7 +140,7 @@
       "height": "高度",
       "widthInput": "输入画布宽度",
       "heightInput": "输入画布高度",
-      "autoHint": "短边按半格图片的长边与对应外边距自动计算；切换手动后保留当前数值。",
+      "autoHint": "根据图片尺寸与外边距自动计算：单张时图片保持原始像素尺寸，两张时短边按图片的长边计算；切换手动后保留当前数值。",
       "maxHint": "最长边最大 {size} px"
     },
     "transform": {
@@ -221,6 +232,8 @@
     "noUsableImages": "没有可用的图像",
     "firstTwoAdded": "已加入前两张图像",
     "twoImageLimit": "排版画布最多放置两张图像。",
+    "firstOneAdded": "已加入第一张图像",
+    "oneImageLimit": "单张模式下排版画布只放置一张图像。",
     "addPhotoFirst": "请先加入照片",
     "compositionGenerated": "排版图像已生成",
     "compositionFailed": "生成失败"

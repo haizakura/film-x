@@ -1,6 +1,7 @@
 import type { DecodedImage } from '~/types/image'
 
 export const MAX_COMPOSITION_CANVAS_SIDE = 8000
+export const MAX_COMPOSITION_FRAMES = 2
 export const MIN_COMPOSITION_SPROCKET_WIDTH = 24
 export const MAX_COMPOSITION_SPROCKET_WIDTH = 240
 export const MAX_COMPOSITION_SPROCKET_TEXT_LENGTH = 48
@@ -10,6 +11,8 @@ export type CompositionFitMode = 'cover' | 'contain'
 export type CompositionOutputFormat = 'jpeg' | 'png'
 export type CompositionRatioMode = 'preset' | 'custom' | 'auto'
 export type CompositionLayoutDirection = 'horizontal' | 'vertical'
+export type CompositionFrameFormat = 'half' | 'full'
+export type CompositionFrameCount = 1 | 2
 export type CompositionCanvasSizeAnchor = 'width' | 'height'
 export type CompositionCanvasSizeMode = 'auto' | 'manual'
 export type CompositionSprocketPlacement = 'top-bottom' | 'left-right'
@@ -21,6 +24,22 @@ export const COMPOSITION_SPROCKET_TEXT_COLORS: Record<CompositionSprocketTextCol
     amber: '#DFA25F',
     white: '#F2EEE6',
     black: '#161616'
+  }
+
+export interface CompositionFrameFormatSpec {
+  ratio: number
+  longSide: number
+  layoutDirection: CompositionLayoutDirection
+}
+
+const HALF_FRAME_LONG_SIDE = 1596
+
+// Defaults used before any image is loaded. A 135 full frame (36 × 24 mm) has a long side
+// 1.5× that of a half frame (18 × 24 mm) scanned at the same density.
+export const COMPOSITION_FRAME_FORMATS: Record<CompositionFrameFormat, CompositionFrameFormatSpec> =
+  {
+    half: { ratio: 2 / 3, longSide: HALF_FRAME_LONG_SIDE, layoutDirection: 'horizontal' },
+    full: { ratio: 3 / 2, longSide: HALF_FRAME_LONG_SIDE * 1.5, layoutDirection: 'vertical' }
   }
 
 export interface CompositionImageTransform {
@@ -52,6 +71,8 @@ export interface CompositionSprocket {
 }
 
 export interface CompositionSettings {
+  frameFormat: CompositionFrameFormat
+  frameCount: CompositionFrameCount
   ratioMode: CompositionRatioMode
   ratio: number
   customRatioWidth: number

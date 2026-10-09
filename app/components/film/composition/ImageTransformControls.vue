@@ -56,7 +56,7 @@ const updateScale = (event: Event) => {
       </button>
     </div>
 
-    <div class="mt-4 grid grid-cols-2 gap-1 rounded-lg bg-muted p-1">
+    <div v-if="images.length > 1" class="mt-4 grid grid-cols-2 gap-1 rounded-lg bg-muted p-1">
       <button
         v-for="(_, index) in images"
         :key="index"

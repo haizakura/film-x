@@ -153,7 +153,7 @@ const isMixedPadding = computed(() => {
       </div>
     </div>
 
-    <div>
+    <div v-if="settings.frameCount > 1">
       <div class="mb-3 flex items-center justify-between text-xs">
         <span class="font-medium">{{ t('composition.spacing.gap') }}</span>
       </div>
