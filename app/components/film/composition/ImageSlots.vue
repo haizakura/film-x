@@ -15,9 +15,12 @@ const pickFile = (index: number) => document.getElementById(inputId(index))?.cli
 </script>
 
 <template>
-  <div class="grid gap-2 border-t border-white/8 bg-black/20 p-3 sm:grid-cols-2">
+  <div
+    class="grid gap-2 border-t border-white/8 bg-black/20 p-3"
+    :class="{ 'sm:grid-cols-2': images.length > 1 }"
+  >
     <div
-      v-for="(_, index) in 2"
+      v-for="(_, index) in images"
       :key="index"
       class="group flex min-w-0 items-center gap-3 rounded-lg border border-white/9 bg-white/4 p-2.5"
     >

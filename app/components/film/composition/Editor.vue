@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import type { CompositionFrameCount } from '~/types/composition'
+
 const {
   images,
   rendering,
-  hasImages,
   placeFile,
   placeDroppedFiles,
   removeImage,
@@ -12,15 +13,26 @@ const {
 } = useCompositionImages()
 const {
   settings,
+  activeImages,
   geometry,
   aspectStyle,
   updateCanvasWidth,
   updateCanvasHeight,
-  setCanvasSizeMode
+  setCanvasSizeMode,
+  setFrameFormat,
+  setFrameCount
 } = useCompositionSettings(images)
 const workspace = ref<{ download: () => Promise<void> }>()
+const hasImages = computed(() => activeImages.value.some(Boolean))
 
 const download = () => workspace.value?.download()
+const placeActiveDroppedFiles = (files: File[]) =>
+  placeDroppedFiles(files, settings.value.frameCount)
+const changeFrameCount = (count: CompositionFrameCount) => {
+  // Keep the only visible slot filled when the first slot is empty.
+  if (count === 1 && !images.value[0] && images.value[1]) swapImages()
+  setFrameCount(count)
+}
 const setImageScale = (index: number, scale: number) => updateImageTransform(index, { scale })
 const moveImageBy = (index: number, offsetX: number, offsetY: number) => {
   const transform = images.value[index]?.transform
@@ -38,13 +50,13 @@ const moveImageBy = (index: number, offsetX: number, offsetY: number) => {
   >
     <FilmCompositionWorkspace
       ref="workspace"
-      :images="images"
+      :images="activeImages"
       :geometry="geometry"
       :settings="settings"
       :aspect-style="aspectStyle"
       :rendering="rendering"
       @files="placeFile"
-      @drop-files="placeDroppedFiles"
+      @drop-files="placeActiveDroppedFiles"
       @remove="removeImage"
       @swap="swapImages"
       @move-image="moveImageBy"
@@ -52,9 +64,11 @@ const moveImageBy = (index: number, offsetX: number, offsetY: number) => {
     <FilmCompositionControls
       v-model="settings"
       :has-images="hasImages"
-      :images="images"
+      :images="activeImages"
       :geometry="geometry"
       @download="download"
+      @frame-format="setFrameFormat"
+      @frame-count="changeFrameCount"
       @canvas-size-mode="setCanvasSizeMode"
       @canvas-width="updateCanvasWidth"
       @canvas-height="updateCanvasHeight"
