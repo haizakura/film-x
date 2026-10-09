@@ -17,9 +17,10 @@
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "typecheck": "nuxt typecheck",
+    "test:pwa": "node --test tests/pwa-update.test.mjs",
     "lint": "oxlint .",
-    "format": "oxfmt --write app nuxt.config.ts package.json tsconfig.json .oxlintrc.json .oxfmtrc.json pnpm-workspace.yaml README.md",
-    "format:check": "oxfmt --check app nuxt.config.ts package.json tsconfig.json .oxlintrc.json .oxfmtrc.json pnpm-workspace.yaml README.md",
+    "format": "oxfmt --write app public/pwa-update-guard.js tests nuxt.config.ts package.json tsconfig.json .oxlintrc.json .oxfmtrc.json pnpm-workspace.yaml README.md",
+    "format:check": "oxfmt --check app public/pwa-update-guard.js tests nuxt.config.ts package.json tsconfig.json .oxlintrc.json .oxfmtrc.json pnpm-workspace.yaml README.md",
     "check": "pnpm format:check && pnpm lint && pnpm typecheck"
   },
   "dependencies": {
