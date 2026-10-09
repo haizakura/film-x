@@ -40,6 +40,14 @@ The horizontal menu at the top of the page switches between the two tools. Each 
 - Both modes have their own text, border, overlay, and interaction-state colors. The image preview workbench always stays dark to make photo edges easier to judge.
 - All scrollable areas use the same thin, rounded scrollbar treatment.
 
+## Installation and Offline Use (PWA)
+
+- In browsers that support installation, use the install entry in the address bar or browser menu to install Film X as an app. In iOS Safari, use Share → Add to Home Screen. Installation and offline features require HTTPS or localhost.
+- After the first online visit finishes caching the app resources, both tools can open offline, and you can switch interface languages. Image decoding, editing, and export still happen entirely on your device.
+- The app checks for updates on startup, when returning to the foreground, when connectivity returns, and every hour while running. New versions download in the background. An update applies automatically and refreshes the pages once every Film X window has no imported images and no decoding or export tasks.
+- If images or tasks are present, the app shows a pending update. Clear the images in every window and let tasks finish, or close all Film X windows, to allow the update to apply.
+- Images stay in memory only and cannot be recovered after a refresh or closing the page. Offline caching does not save imported images or editing work.
+
 ## Tech Stack
 
 App framework and UI: Nuxt 4 + Vue 3 + shadcn-vue + Reka UI + Tailwind CSS
@@ -47,6 +55,8 @@ App framework and UI: Nuxt 4 + Vue 3 + shadcn-vue + Reka UI + Tailwind CSS
 Localization and theme: `@nuxtjs/i18n` + `@nuxtjs/color-mode`
 
 Imaging and compression: UTIF + fflate
+
+Installation, offline support, and updates: `@vite-pwa/nuxt` + Workbox
 
 Linting and formatting: TypeScript + Oxlint + Oxfmt
 
@@ -66,8 +76,11 @@ The development server runs at `http://localhost:3000` by default.
 
 ```bash
 mise exec -- pnpm check
+mise exec -- pnpm test:pwa
 mise exec -- pnpm build
 ```
+
+`test:pwa` uses native Node regression tests to verify update activation conditions across idle, busy, unresponsive, and closed windows, scopes, retries, and concurrent messages.
 
 `check` runs formatting checks, Oxlint, and Nuxt type checking in sequence. To generate a static site or preview the build output, use:
 
@@ -75,6 +88,14 @@ mise exec -- pnpm build
 mise exec -- pnpm generate
 mise exec -- pnpm preview
 ```
+
+Development mode does not register a Service Worker. To test the production PWA, run `mise exec -- pnpm build` followed by `mise exec -- pnpm preview`, or run `mise exec -- pnpm generate` and serve `.output/public` with a static server. The test environment also requires HTTPS or localhost.
+
+## PWA Deployment
+
+- Deployment supports both the root path and subpaths configured with `NUXT_APP_BASE_URL`. Use the same base path for building and deployment.
+- Set `Cache-Control: no-cache` for `sw.js`, `pwa-update-guard.js`, `manifest.webmanifest`, and HTML so browsers revalidate updates promptly. Configure these response headers yourself on static hosting platforms.
+- Publish new static assets and the Service Worker in the same release, with assets published before the worker. Retain old hashed `_nuxt` assets during rolling deployments so windows running an older version can still load them.
 
 ## Project Structure
 
@@ -84,7 +105,7 @@ mise exec -- pnpm preview
 - `app/types`: Shared types such as image entries, split settings, and export formats.
 - `app/utils`: Image decoding, detection, cropping, rotation, and format conversion utilities.
 - `app/assets/css`: Global theme, colors, and base control styles.
-- `public`: Public static assets such as the favicon.
+- `public`: Public static assets, including the favicon, PWA icons, and the `pwa-update-guard.js` update guard.
 
 The half-frame splitting workflow reuses source code from the personal project [Full2Half](https://github.com/haizakura/full2half), reorganized within Film X's unified page structure and theme system.
 
