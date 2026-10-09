@@ -249,5 +249,8 @@
     "archiveFailed": "Could not create the archive",
     "decodeFailed": "Image decoding failed",
     "compositionFailed": "Could not generate the composition"
+  },
+  "pwa": {
+    "updateReady": "An update is ready. It will apply automatically when images are cleared and tasks finish in all Film X windows, or after you close and reopen the app."
   }
 }

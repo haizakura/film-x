@@ -12,6 +12,7 @@ const createSettings = (): SplitSettings => ({ ...DEFAULT_SETTINGS })
 export const useImageQueue = () => {
   const queue = ref<ImageQueueItem[]>([])
   const activeId = ref<string>()
+  usePwaUpdateBlocker('splitter-images', () => queue.value.length > 0)
 
   const activeItem = computed(() => queue.value.find((item) => item.id === activeId.value))
   const totalSize = computed(() => queue.value.reduce((sum, item) => sum + item.size, 0))

@@ -16,6 +16,9 @@ export const useCompositionImages = () => {
   )
   const renderingCount = ref(0)
   const rendering = computed(() => renderingCount.value > 0)
+  // Include inactive slots: switching back to two frames restores their images.
+  const hasImages = computed(() => images.value.some(Boolean))
+  usePwaUpdateBlocker('composer-images', () => hasImages.value || rendering.value)
   const decodeVersions = Array.from({ length: MAX_COMPOSITION_FRAMES }, () => 0)
   let disposed = false
 

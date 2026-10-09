@@ -7,6 +7,8 @@ import { baseName } from '~/utils/image'
 const FILE_INPUT_ID = 'scan-file-input'
 const { t } = useI18n()
 const translateError = useTranslatedError()
+const pendingExports = ref(0)
+usePwaUpdateBlocker('splitter-pending-export', () => pendingExports.value > 0)
 
 useSeoMeta({
   title: () => t('meta.splitterTitle'),
@@ -92,6 +94,7 @@ const waitForActivePreview = (items: ImageQueueItem[]) => {
 }
 
 const runExport = async (items: ImageQueueItem[], archiveName: string) => {
+  pendingExports.value += 1
   try {
     await waitForActivePreview(items)
     await analyzeItems([])
@@ -111,6 +114,8 @@ const runExport = async (items: ImageQueueItem[], archiveName: string) => {
         'errors.archiveFailed'
       )
     })
+  } finally {
+    pendingExports.value -= 1
   }
 }
 

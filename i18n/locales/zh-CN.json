@@ -249,5 +249,8 @@
     "archiveFailed": "无法生成压缩包",
     "decodeFailed": "图像解码失败",
     "compositionFailed": "无法生成排版图像"
+  },
+  "pwa": {
+    "updateReady": "新版本已就绪。所有 Film X 窗口清空图像并完成任务后将自动更新，也可关闭所有窗口后重新打开应用。"
   }
 }

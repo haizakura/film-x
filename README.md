@@ -42,6 +42,14 @@
 - 两种模式均使用独立的文字、边框、浮层与交互状态配色；图像预览工作台始终保持深色，便于判断照片边缘。
 - 所有滚动区域均使用统一的细窄圆角滚动条样式。
 
+## 安装与离线使用（PWA）
+
+- 在支持安装的浏览器中，可通过地址栏或浏览器菜单的安装入口将 Film X 安装为应用；iOS Safari 请使用“分享 → 添加到主屏幕”。安装与离线功能需要 HTTPS 或 localhost。
+- 首次在线访问并完成应用资源缓存后，两项工具均可离线打开，也可切换界面语言。图像解码、编辑和导出仍完全在本地完成。
+- 应用会在启动、回到前台、恢复联网时检查更新，运行期间每小时也会检查一次。新版本会在后台下载；当所有 Film X 窗口都没有导入的图片，且没有解码或导出任务时，会自动应用更新并刷新页面。
+- 有图片或任务时会显示待更新状态；清空所有窗口中的图片并等待任务结束，或关闭所有 Film X 窗口后，更新即可应用。
+- 图片仅保存在内存中，刷新或关闭页面后无法恢复。离线缓存不会保存导入的图片或编辑工作。
+
 ## 技术栈
 
 应用框架与界面：Nuxt 4 + Vue 3 + shadcn-vue + Reka UI + Tailwind CSS
@@ -49,6 +57,8 @@
 语言与主题：`@nuxtjs/i18n` + `@nuxtjs/color-mode`
 
 图像与压缩：UTIF + fflate
+
+安装、离线与更新：`@vite-pwa/nuxt` + Workbox
 
 代码检查与格式化：TypeScript + Oxlint + Oxfmt
 
@@ -68,8 +78,11 @@ mise exec -- pnpm dev
 
 ```bash
 mise exec -- pnpm check
+mise exec -- pnpm test:pwa
 mise exec -- pnpm build
 ```
+
+`test:pwa` 使用 Node 原生回归测试验证多窗口空闲、忙碌、无响应、关闭、作用域、重试及并发消息下的更新激活条件。
 
 `check` 会依次执行格式检查、Oxlint 和 Nuxt 类型检查。需要生成静态站点或预览构建结果时，可使用：
 
@@ -77,6 +90,14 @@ mise exec -- pnpm build
 mise exec -- pnpm generate
 mise exec -- pnpm preview
 ```
+
+开发模式不注册 Service Worker。测试生产 PWA 时，请先运行 `mise exec -- pnpm build`，再运行 `mise exec -- pnpm preview`；或运行 `mise exec -- pnpm generate`，通过静态服务器提供 `.output/public`。测试环境同样需要 HTTPS 或 localhost。
+
+## PWA 部署
+
+- 支持部署到根路径，也支持通过 `NUXT_APP_BASE_URL` 配置子路径；构建和部署时应使用一致的基础路径。
+- `sw.js`、`pwa-update-guard.js`、`manifest.webmanifest` 和 HTML 应设置 `Cache-Control: no-cache`，让浏览器及时重新验证更新。静态托管平台需自行配置这些响应头。
+- 新静态资源与 Service Worker 必须在同一批次发布，并先发布资源，再发布 worker。滚动发布期间保留旧的 `_nuxt` hash 资源，避免仍运行旧版本的窗口加载失败。
 
 ## 代码结构
 
@@ -86,7 +107,7 @@ mise exec -- pnpm preview
 - `app/types`：图像条目、切分设置与导出格式等共享类型。
 - `app/utils`：图像解码、检测、裁切、旋转及格式转换工具。
 - `app/assets/css`：全局主题、颜色和基础控件样式。
-- `public`：favicon 等公开静态资源。
+- `public`：favicon、PWA 图标与更新保护脚本 `pwa-update-guard.js` 等公开静态资源。
 
 半格切分工作流复用了个人项目 [Full2Half](https://github.com/haizakura/full2half) 的源码，并在 Film X 的统一页面结构与主题系统中重新组织。
 

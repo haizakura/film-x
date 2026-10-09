@@ -1,7 +1,59 @@
 import tailwindcss from '@tailwindcss/vite'
 
 export default defineNuxtConfig({
-  modules: ['shadcn-nuxt', '@nuxtjs/color-mode', '@nuxtjs/i18n'],
+  modules: ['shadcn-nuxt', '@nuxtjs/color-mode', '@nuxtjs/i18n', '@vite-pwa/nuxt'],
+  experimental: {
+    // PWA updates control reloads so in-memory image edits are never discarded.
+    checkOutdatedBuildInterval: false,
+    emitRouteChunkError: 'manual'
+  },
+  nitro: {
+    prerender: { routes: ['/', '/compose'] }
+  },
+  routeRules: {
+    '/': { headers: { 'cache-control': 'no-cache' } },
+    '/compose': { headers: { 'cache-control': 'no-cache' } },
+    '/sw.js': { headers: { 'cache-control': 'no-cache' } },
+    '/pwa-update-guard.js': { headers: { 'cache-control': 'no-cache' } },
+    '/manifest.webmanifest': { headers: { 'cache-control': 'no-cache' } }
+  },
+  pwa: {
+    registerType: 'prompt',
+    // Native registration coordinates safe automatic activation across all windows.
+    injectRegister: false,
+    client: { registerPlugin: false },
+    manifest: {
+      id: './',
+      name: 'Film X',
+      short_name: 'Film X',
+      description: 'Split and compose film scan images locally on your device.',
+      start_url: './',
+      scope: './',
+      display: 'standalone',
+      background_color: '#FFFFFF',
+      theme_color: '#FFFFFF',
+      icons: [
+        { src: 'icons/pwa-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+        { src: 'icons/pwa-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+        {
+          src: 'icons/pwa-maskable-512.png',
+          sizes: '512x512',
+          type: 'image/png',
+          purpose: 'maskable'
+        }
+      ]
+    },
+    workbox: {
+      globPatterns: ['**/*.{js,css,html,json,svg,png,ico,woff2}'],
+      globIgnores: ['**/200.html', '**/404.html'],
+      importScripts: ['pwa-update-guard.js'],
+      cleanupOutdatedCaches: true,
+      clientsClaim: true,
+      skipWaiting: false,
+      // Cache only the application; imported images never enter service worker caches.
+      navigateFallbackDenylist: [/^\/api\//]
+    }
+  },
   css: ['~/assets/css/main.css'],
   shadcn: {
     prefix: '',
@@ -34,7 +86,6 @@ export default defineNuxtConfig({
   app: {
     head: {
       titleTemplate: '%s · Film X',
-      link: [{ rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }],
       meta: [
         { name: 'theme-color', media: '(prefers-color-scheme: light)', content: '#FFFFFF' },
         { name: 'theme-color', media: '(prefers-color-scheme: dark)', content: '#0A0A0A' }
