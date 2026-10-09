@@ -10,6 +10,7 @@ export const useCompositionImages = () => {
   const renderingCount = ref(0)
   const rendering = computed(() => renderingCount.value > 0)
   const hasImages = computed(() => images.value.some(Boolean))
+  usePwaUpdateBlocker('composer-images', () => hasImages.value || rendering.value)
   const decodeVersions = [0, 0]
   let disposed = false
 

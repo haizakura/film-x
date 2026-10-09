@@ -129,6 +129,8 @@ export const useCompositionCanvas = (
   const { t, locale } = useI18n()
   const translateError = useTranslatedError()
   const canvas = ref<HTMLCanvasElement>()
+  const exporting = ref(false)
+  usePwaUpdateBlocker('composer-export', exporting)
   let animationFrame: number | undefined
   let grainTiles: FilmGrainTiles | undefined
 
@@ -206,6 +208,7 @@ export const useCompositionCanvas = (
   }
 
   const download = async () => {
+    if (exporting.value) return
     const target = canvas.value
     const currentImages = toValue(images)
     const currentSettings = toValue(settings)
@@ -215,6 +218,7 @@ export const useCompositionCanvas = (
     }
 
     try {
+      exporting.value = true
       const blob = await canvasToBlob(
         target,
         currentSettings.outputFormat,
@@ -230,6 +234,8 @@ export const useCompositionCanvas = (
           'errors.compositionFailed'
         )
       })
+    } finally {
+      exporting.value = false
     }
   }
 
