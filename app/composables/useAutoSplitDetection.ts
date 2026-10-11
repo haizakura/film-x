@@ -4,6 +4,8 @@ import { detectSplit } from '~/utils/splitDetection'
 
 export const useAutoSplitDetection = () => {
   const analyzingCount = ref(0)
+  const pendingJobs = ref(0)
+  usePwaUpdateBlocker('splitter-analysis', () => pendingJobs.value > 0)
 
   interface AnalysisJob {
     items: ImageQueueItem[]
@@ -62,8 +64,12 @@ export const useAutoSplitDetection = () => {
     while (jobs.length) {
       const job = jobs.shift()
       if (!job) continue
-      await runAnalysis(job.items, job.force)
-      job.resolve()
+      try {
+        await runAnalysis(job.items, job.force)
+      } finally {
+        pendingJobs.value -= 1
+        job.resolve()
+      }
     }
     // oxlint-enable no-await-in-loop
   }
@@ -72,6 +78,7 @@ export const useAutoSplitDetection = () => {
     if (!items.length) return worker ?? Promise.resolve()
     for (const item of items) item.analysisStatus = 'pending'
 
+    pendingJobs.value += 1
     const completed = new Promise<void>((resolve) => jobs.push({ items, force, resolve }))
     if (!worker) {
       worker = drainJobs().finally(() => {

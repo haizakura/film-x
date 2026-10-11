@@ -15,6 +15,8 @@ export const useImagePreview = (
 ) => {
   const decoded = shallowRef<DecodedImage>()
   const isLoading = ref(false)
+  const decodingCount = ref(0)
+  usePwaUpdateBlocker('splitter-preview', () => decodingCount.value > 0)
   let decodeToken = 0
 
   const loadActiveImage = async () => {
@@ -29,6 +31,7 @@ export const useImagePreview = (
     }
 
     isLoading.value = true
+    decodingCount.value += 1
     try {
       const image = await decodeImage(item.file)
       if (token !== decodeToken) {
@@ -45,6 +48,7 @@ export const useImagePreview = (
       item.error = message
       options.onError?.(item, message)
     } finally {
+      decodingCount.value -= 1
       if (token === decodeToken) isLoading.value = false
     }
   }

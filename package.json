@@ -1,6 +1,6 @@
 {
   "name": "film-x",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "description": "A local-first collection of tools for film photography",
   "license": "Apache-2.0",
@@ -17,9 +17,10 @@
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "typecheck": "nuxt typecheck",
+    "test:pwa": "node --test tests/pwa-update.test.mjs",
     "lint": "oxlint .",
-    "format": "oxfmt --write app nuxt.config.ts package.json tsconfig.json .oxlintrc.json .oxfmtrc.json pnpm-workspace.yaml README.md",
-    "format:check": "oxfmt --check app nuxt.config.ts package.json tsconfig.json .oxlintrc.json .oxfmtrc.json pnpm-workspace.yaml README.md",
+    "format": "oxfmt --write app public/pwa-update-guard.js tests nuxt.config.ts package.json tsconfig.json .oxlintrc.json .oxfmtrc.json pnpm-workspace.yaml README.md",
+    "format:check": "oxfmt --check app public/pwa-update-guard.js tests nuxt.config.ts package.json tsconfig.json .oxlintrc.json .oxfmtrc.json pnpm-workspace.yaml README.md",
     "check": "pnpm format:check && pnpm lint && pnpm typecheck"
   },
   "dependencies": {
@@ -42,6 +43,7 @@
     "@nuxtjs/color-mode": "^4.0.1",
     "@tailwindcss/vite": "^4.3.3",
     "@types/utif": "^3.0.6",
+    "@vite-pwa/nuxt": "^1.1.1",
     "oxfmt": "latest",
     "oxlint": "latest",
     "tailwindcss": "^4.3.3",

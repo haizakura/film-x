@@ -26,6 +26,7 @@ export const useImageExport = () => {
   const format = ref<ExportFormat>('jpeg')
   const quality = ref(0.94)
   const exporting = ref(false)
+  usePwaUpdateBlocker('splitter-export', exporting)
   const progress = ref(0)
   const progressState = ref<{ stage: 'processing'; name: string } | { stage: 'packing' }>()
   const progressLabel = computed(() => {
