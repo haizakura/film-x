@@ -1,6 +1,10 @@
 import tailwindcss from '@tailwindcss/vite'
+import { version } from './package.json'
 
 export default defineNuxtConfig({
+  appConfig: {
+    version
+  },
   modules: ['shadcn-nuxt', '@nuxtjs/color-mode', '@nuxtjs/i18n', '@vite-pwa/nuxt'],
   experimental: {
     // PWA updates control reloads so in-memory image edits are never discarded.
