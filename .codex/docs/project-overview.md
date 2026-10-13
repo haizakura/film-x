@@ -45,9 +45,11 @@ app/
   pages/
     index.vue                     路由 /：半格胶片切分工作流编排
     compose.vue                   路由 /compose：排版拼图入口
+    frame.vue                     路由 /frame：照片相框入口
   components/
     film/                         产品领域 UI：上传、队列、预览、控制、导航
     film/composition/             拼图编辑器、工作区和分项控制面板
+    film/frame/                   相框编辑器、工作区和分项控制面板
     ui/                           Button、Switch、Dialog、Progress、Sonner 等基础原语
   composables/                    响应式状态、异步任务、资源生命周期与 Canvas 逻辑
   types/                          图像与拼图的领域类型、联合类型、边界常量
@@ -76,7 +78,7 @@ mise.toml                         Node.js 版本
 
 ## 4. 全局壳、路由、语言与主题
 
-根组件 app/app.vue 渲染页头、保活页面、页脚和 Toast。NuxtPage 使用 max 为 4 的 keepalive 配置，使两个工具页面在站内切换后维持当前内存状态。
+根组件 app/app.vue 渲染页头、保活页面、页脚和 Toast。NuxtPage 使用 max 为 4 的 keepalive 配置，使三个工具页面在站内切换后维持当前内存状态。
 
 路由采用无语言前缀策略：
 
@@ -84,8 +86,9 @@ mise.toml                         Node.js 版本
 | --- | --- | --- |
 | / | app/pages/index.vue | 批量半格胶片切分 |
 | /compose | app/pages/compose.vue | 单张或两张半格/全画幅图像的胶片排版拼图 |
+| /frame | app/pages/frame.vue | 为单张照片添加相机品牌相框，读取 EXIF 填写拍摄信息 |
 
-国际化当前仅支持 en 与 zh-CN。默认语言和回退语言均为 en；首次访问会根据浏览器语言选择，并把选择写入 Cookie。页面标题、描述、Toast、可访问性标签和普通界面文字都以语言包为来源。
+国际化当前支持 en、zh-CN 与 ja。默认语言和回退语言均为 en；首次访问会根据浏览器语言选择，并把选择写入 Cookie。页面标题、描述、Toast、可访问性标签和普通界面文字都以语言包为来源。
 
 主题由 color-mode 管理，默认跟随系统；页头可在 system、light、dark 间循环。全局样式使用 neutral 语义颜色变量，普通界面应以 background、foreground、card、border、primary 等语义 token 适配明暗主题。图像工作台保持深色属于产品视觉的一部分。
 
@@ -151,7 +154,38 @@ CompositionSettings（含 frameFormat 与 frameCount）是拼图设置的单一�
 
 拼图异步加载以槽位版本号阻止旧解码结果覆盖新选择。替换、移除或卸载时必须释放旧 DecodedImage。手动模式才允许 Canvas 内拖动图片；工作区只上报拖动增量，编辑器负责更新共享状态。
 
-## 7. 资源、并发和错误处理模型
+## 7. 功能三：照片相框
+
+### 7.1 用户能力
+
+- 单张照片槽位，支持点击选择和拖放 TIFF、JPEG、PNG、WebP；适配任意画幅，兼容胶片扫描与数码照片。
+- 四种版式（白边、画廊、悬浮、信息条）作为预设套用边框、照片阴影、底板与显示内容，之后仍可逐项调整。
+- 八种照片阴影预设与强度；可选底板，底板上的相框另有独立阴影。
+- 导入时本地读取 EXIF 自动填写机型、镜头、曝光参数和日期，并按厂商匹配品牌；字段均可手动修改。
+- 照片来源分为数码与胶片；识别到扫描仪 EXIF 时自动切换为胶片模式且不填写扫描仪信息。
+- 品牌目录、内置 logo 图形、七种文字标样式、自定义 logo 图片；单色标志可重新着色。
+- 18 款随应用打包的 OFL 字体（仅拉丁子集）与三种系统中文字体；输出 JPEG 或 PNG，可选原尺寸或长边 4096/3000/2048 px。
+
+### 7.2 数据流与约束
+
+~~~text
+FilmFrameEditor
+  |- useFrameImage('frame-photo', { readExif })：单槽位、版本号保护、先读 EXIF 再串行解码、释放旧资源
+  |- useFrameImage('frame-logo')：自定义 logo 槽位，规则相同
+  |- useFrameSettings：FrameSettings 单一来源；版式、品牌、来源类型的自动/手动选择
+  |- useFrameMetadata：EXIF → 说明字段；记录用户编辑过的字段
+  '- FilmFrameWorkspace
+       '- useFrameCanvas：预览绘制（缓存降采样照片）、logo 资源解析、字体加载与导出
+~~~
+
+- 布局与绘制集中在 app/utils/photoFrame.ts：getFrameLayout 以照片宽高的几何平均（unit）为基准计算边框、文字与阴影尺寸，预览与导出共用同一绘制函数，只改变 scale。导出尺寸须经 getFrameScale 与 MAX_FRAME_CANVAS_SIDE（复用拼图的 8000 px 上限）计算，不放大原图。
+- 阴影只绘制阴影本身（形状置于画布外，用偏移把阴影带回），大半径阴影在降采样离屏 Canvas 上绘制再放大，临时 Canvas 绘制后立即释放；照片阴影裁切在相框内。
+- 字体 @font-face 由 app/assets/css/frame-fonts.css 引入 @fontsource 包的 latin 子集，只在相框页面加载。Canvas 绘制前用 document.fonts.load 确保字体就绪；未就绪时先用回退字体绘制并在加载后重绘。Canvas letterSpacing 兼容性不足，字距通过逐字符排版实现。
+- EXIF 读取在 app/utils/exif.ts，通过 Blob.slice 只读取元数据所在的少量字节，不整读大 TIFF；解析失败返回 undefined 而不抛错。字段格式化、扫描仪识别在 app/utils/frameMetadata.ts。
+- 品牌目录与 EXIF 匹配在 app/utils/cameraBrands.ts；logo SVG 位于 app/assets/frame-logos，经 import.meta.glob 按需加载为 data URL 并补写固有尺寸（Firefox 需要），来源与许可记录在同目录的 SOURCES.md。
+- 自动选择（品牌、来源类型）只在用户未手动选择时生效；用户编辑过的说明字段在换图时保留，“从 EXIF 填写”会强制覆盖并清除编辑标记。
+
+## 8. 资源、并发和错误处理模型
 
 图像处理的主要风险是高分辨率 TIFF 同时保留多个完整像素缓冲区。因此现有实现有意采用以下方式：
 
@@ -165,7 +199,7 @@ CompositionSettings（含 frameFormat 与 frameCount）是拼图设置的单一�
 
 可预期的图像处理失败以 AppErrorCode 和 errors.* 翻译键表达；交互层用 useTranslatedError 转换后通过 Toast 呈现。不要把底层异常原文直接作为用户提示。
 
-## 8. 质量与配置现状
+## 9. 质量与配置现状
 
 - Oxfmt：100 列、无分号、单引号、无尾随逗号。
 - Oxlint：correctness 为 error；suspicious 和 perf 为 warn。
