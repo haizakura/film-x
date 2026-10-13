@@ -41,7 +41,7 @@
 - 照片来源分为数码与胶片。识别到胶片扫描仪（如 Noritsu、Frontier、Coolscan、Flextight、Epson 等）写入的 EXIF 时会自动切换为胶片模式，不会把扫描仪当作相机填写；胶片模式以胶卷字段替代曝光参数，机型、镜头与胶卷填写一次即可沿用整卷。
 - 内置 40 个相机、胶片与手机品牌，可搜索选择，也可选择“自定义”输入任意文字。标志可使用内置图形（部分品牌提供多种）、文字标（经典斜体、罗马碑刻、几何细体、粗体、宽体、花体、等宽七种样式）、自定义图片（建议透明背景 PNG）或不显示；单色标志可保持原色、跟随文字颜色或自定义颜色。标语（例如 CREATE TO INSPIRE）可开关和编辑。
 - 内置 18 款 OFL 开源字体（Playfair Display、Bodoni Moda、Cormorant Garamond、DM Serif Display、Cinzel、Italiana、Jost、Josefin Sans、Montserrat、Syncopate、Michroma、Orbitron、Bebas Neue、IBM Plex Mono、Courier Prime、Great Vibes、Dancing Script、Caveat）的拉丁字符子集，随应用打包并可离线使用；另提供系统黑体、宋体与楷体用于中日文字。文字标与说明文字可分别设置字体、粗体、斜体、大写与字距，并可整体缩放文字和标志。
-- 导出 JPEG 或 PNG。输出尺寸可选原尺寸（照片按原始像素绘制，最长边不超过 8000 px）或长边 4096、3000、2048 px，不会放大原图。
+- 导出 JPEG 或 PNG。输出尺寸可选原尺寸（照片按原始像素绘制，最长边不超过 8000 px）或自定义长边（手动输入 256–8000 px），不会放大原图。
 
 页面顶部的横向菜单用于在三项工具之间切换。工具页面会保留工作状态，切换后返回不会丢失已导入的图像。
 
