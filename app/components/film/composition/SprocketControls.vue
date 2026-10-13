@@ -196,7 +196,7 @@ const textColorPresets = computed<
             />
           </div>
         </div>
-        <FilmCompositionColorField
+        <FilmColorField
           v-model="settings.sprocket.textColor"
           :picker-label="t('composition.sprocket.textColorPicker')"
           :hex-label="t('composition.sprocket.textColorHex')"
