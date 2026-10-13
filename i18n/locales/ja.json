@@ -417,6 +417,9 @@
     "export": {
       "size": "出力サイズ（長辺）",
       "original": "元のサイズ",
+      "custom": "カスタム",
+      "longSideInput": "カスタム出力の長辺（ピクセル）",
+      "customHint": "{min}〜{max} px。元の写真は拡大しません",
       "dimensions": "{width} × {height} px",
       "download": "生成してダウンロード",
       "exporting": "生成中"

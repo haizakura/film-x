@@ -11,6 +11,9 @@ export const MIN_FRAME_SCALE = 0.5
 export const MAX_FRAME_SCALE = 2
 export const MAX_FRAME_SHADOW_INTENSITY = 1.5
 export const MAX_FRAME_LETTER_SPACING = 0.8
+/** Bounds of a custom output long side, in pixels; the upper bound is the canvas budget. */
+export const MIN_FRAME_OUTPUT_SIDE = 256
+export const DEFAULT_FRAME_OUTPUT_SIDE = 4096
 // Layout used for the empty preview before a photo is imported (a 3:2 frame).
 export const FRAME_PLACEHOLDER_SIZE = { width: 3000, height: 2000 } as const
 
@@ -26,7 +29,7 @@ export type FrameShadowPreset =
   | 'directional'
   | 'hard'
 export type FrameOutputFormat = 'jpeg' | 'png'
-export type FrameOutputSize = 'original' | 4096 | 3000 | 2048
+export type FrameOutputSizeMode = 'original' | 'custom'
 export type FrameSourceType = 'digital' | 'film'
 export type FrameLogoStyle = 'mark' | 'wordmark' | 'custom' | 'none'
 export type FrameLogoColorMode = 'original' | 'text' | 'custom'
@@ -193,7 +196,9 @@ export interface FrameSettings {
   sourceType: FrameSourceType
   outputFormat: FrameOutputFormat
   outputQuality: number
-  outputSize: FrameOutputSize
+  outputSizeMode: FrameOutputSizeMode
+  /** Requested long side of the custom output; the photo is never upscaled past it. */
+  outputLongSide: number
 }
 
 export interface FramePhoto {

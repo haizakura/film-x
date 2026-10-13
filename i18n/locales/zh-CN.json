@@ -417,6 +417,9 @@
     "export": {
       "size": "输出尺寸（长边）",
       "original": "原尺寸",
+      "custom": "自定义",
+      "longSideInput": "自定义输出长边（像素）",
+      "customHint": "{min}–{max} px，不会放大原图",
       "dimensions": "{width} × {height} px",
       "download": "生成并下载",
       "exporting": "正在生成"

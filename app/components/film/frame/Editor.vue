@@ -24,10 +24,7 @@ watch(photo, (entry) => applyExif(entry?.exif))
 const outputSize = computed(() => {
   if (!photo.value) return undefined
   const layout = getFrameSceneLayout(photo.value, settings.value)
-  return getFrameCanvasSize(
-    layout,
-    getFrameScale(layout, getFrameOutputLimit(settings.value.outputSize))
-  )
+  return getFrameCanvasSize(layout, getFrameScale(layout, getFrameOutputLimit(settings.value)))
 })
 
 const download = () => workspace.value?.download()

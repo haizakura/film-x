@@ -417,6 +417,9 @@
     "export": {
       "size": "Output size (long side)",
       "original": "Original",
+      "custom": "Custom",
+      "longSideInput": "Custom output long side in pixels",
+      "customHint": "{min}–{max} px; the photo is never upscaled",
       "dimensions": "{width} × {height} px",
       "download": "Create and download",
       "exporting": "Creating"

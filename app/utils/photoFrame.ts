@@ -1,4 +1,10 @@
-import { FRAME_INFO_LINES, FRAME_SHADOW_PRESETS, FRAME_TEMPLATES } from '~/types/frame'
+import {
+  FRAME_INFO_LINES,
+  FRAME_SHADOW_PRESETS,
+  FRAME_TEMPLATES,
+  MAX_FRAME_CANVAS_SIDE,
+  MIN_FRAME_OUTPUT_SIDE
+} from '~/types/frame'
 import type {
   FrameInfoFields,
   FrameInfoLine,
@@ -86,6 +92,12 @@ export const getFrameLayout = (
     }
   }
 }
+
+/** Rounds a custom output long side into its allowed range; undefined when it is not a number. */
+export const clampFrameOutputSide = (value: number) =>
+  Number.isFinite(value)
+    ? Math.min(MAX_FRAME_CANVAS_SIDE, Math.max(MIN_FRAME_OUTPUT_SIDE, Math.round(value)))
+    : undefined
 
 /** Largest scale (never upscaling) that keeps the long side within the limit. */
 export const getFrameScale = (layout: FrameLayout, maxSide: number) =>

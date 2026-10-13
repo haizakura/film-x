@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { Download, LoaderCircle } from '@lucide/vue'
 import { Button } from '@/components/ui/button'
-import type { FrameOutputFormat, FrameOutputSize, FrameSettings } from '~/types/frame'
+import { MAX_FRAME_CANVAS_SIDE, MIN_FRAME_OUTPUT_SIDE } from '~/types/frame'
+import type { FrameOutputFormat, FrameOutputSizeMode, FrameSettings } from '~/types/frame'
 import type { ExportFormat } from '~/types/image'
+import { clampFrameOutputSide } from '~/utils/photoFrame'
 
 defineProps<{
   hasPhoto: boolean
@@ -14,12 +16,19 @@ const emit = defineEmits<{ download: [] }>()
 const { t } = useI18n()
 const formats: ExportFormat[] = ['jpeg', 'png']
 
-const sizeOptions = computed<Array<{ value: FrameOutputSize; label: string }>>(() => [
+const sizeOptions = computed<Array<{ value: FrameOutputSizeMode; label: string }>>(() => [
   { value: 'original', label: t('frame.export.original') },
-  { value: 4096, label: '4096' },
-  { value: 3000, label: '3000' },
-  { value: 2048, label: '2048' }
+  { value: 'custom', label: t('frame.export.custom') }
 ])
+
+// Committed on change so partial input such as "3" is not clamped while typing.
+const commitLongSide = (event: Event) => {
+  const input = event.target as HTMLInputElement
+  const value = clampFrameOutputSide(input.valueAsNumber)
+  if (value !== undefined) settings.value.outputLongSide = value
+  // Show the clamped value even when the model did not change.
+  input.value = String(settings.value.outputLongSide)
+}
 
 const updateFormat = (format: ExportFormat) => {
   settings.value.outputFormat = format as FrameOutputFormat
@@ -36,10 +45,36 @@ const updateFormat = (format: ExportFormat) => {
         </span>
       </div>
       <FilmFrameSegmented
-        v-model="settings.outputSize"
+        v-model="settings.outputSizeMode"
         :options="sizeOptions"
         :label="t('frame.export.size')"
       />
+      <div
+        v-if="settings.outputSizeMode === 'custom'"
+        class="flex items-center justify-between gap-3 text-[10px] text-muted-foreground"
+      >
+        <span>
+          {{
+            t('frame.export.customHint', { min: MIN_FRAME_OUTPUT_SIDE, max: MAX_FRAME_CANVAS_SIDE })
+          }}
+        </span>
+        <label
+          class="flex shrink-0 items-center gap-1 rounded-md border border-border bg-card px-2"
+        >
+          <input
+            :value="settings.outputLongSide"
+            class="w-14 bg-transparent py-1.5 text-right font-mono text-[10px] text-foreground outline-none"
+            type="number"
+            :min="MIN_FRAME_OUTPUT_SIDE"
+            :max="MAX_FRAME_CANVAS_SIDE"
+            step="1"
+            inputmode="numeric"
+            :aria-label="t('frame.export.longSideInput')"
+            @change="commitLongSide"
+          />
+          <span class="font-mono text-[9px] text-muted-foreground/70">px</span>
+        </label>
+      </div>
     </div>
     <FilmOutputFormatSelector
       :model-value="settings.outputFormat"

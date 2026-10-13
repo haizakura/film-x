@@ -1,4 +1,4 @@
-import { FRAME_TEMPLATES, FRAME_WORDMARK_PRESETS } from '~/types/frame'
+import { DEFAULT_FRAME_OUTPUT_SIDE, FRAME_TEMPLATES, FRAME_WORDMARK_PRESETS } from '~/types/frame'
 import type {
   CameraBrand,
   CameraBrandId,
@@ -72,7 +72,8 @@ const createDefaultSettings = (): FrameSettings => {
     sourceType: 'digital',
     outputFormat: 'jpeg',
     outputQuality: 0.92,
-    outputSize: 'original'
+    outputSizeMode: 'original',
+    outputLongSide: DEFAULT_FRAME_OUTPUT_SIDE
   }
 }
 

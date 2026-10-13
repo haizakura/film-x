@@ -1,6 +1,6 @@
 import { toast } from 'vue-sonner'
 import { FRAME_PLACEHOLDER_SIZE, FRAME_PREVIEW_SIDE, MAX_FRAME_CANVAS_SIDE } from '~/types/frame'
-import type { FrameInfoFields, FrameOutputSize, FrameSettings } from '~/types/frame'
+import type { FrameInfoFields, FrameSettings } from '~/types/frame'
 import type { DecodedImage } from '~/types/image'
 import type { FrameImageEntry } from '~/composables/useFrameImage'
 import { canvasToBlob, downloadBlob } from '~/utils/download'
@@ -11,6 +11,7 @@ import { loadFrameLogoImage } from '~/utils/frameLogos'
 import { baseName } from '~/utils/image'
 import {
   buildFrameCaption,
+  clampFrameOutputSide,
   drawFrame,
   getFrameCanvasSize,
   getFrameLayout,
@@ -26,8 +27,12 @@ interface FrameCanvasSources {
   fields: () => FrameInfoFields
 }
 
-export const getFrameOutputLimit = (size: FrameOutputSize) =>
-  size === 'original' ? MAX_FRAME_CANVAS_SIDE : Math.min(size, MAX_FRAME_CANVAS_SIDE)
+export const getFrameOutputLimit = (
+  settings: Pick<FrameSettings, 'outputSizeMode' | 'outputLongSide'>
+) =>
+  settings.outputSizeMode === 'custom'
+    ? (clampFrameOutputSide(settings.outputLongSide) ?? MAX_FRAME_CANVAS_SIDE)
+    : MAX_FRAME_CANVAS_SIDE
 
 /** Frame layout for the current photo, or the placeholder layout before one is imported. */
 export const getFrameSceneLayout = (photo: FrameImageEntry | undefined, settings: FrameSettings) =>
@@ -170,7 +175,7 @@ export const useFrameCanvas = (sources: FrameCanvasSources) => {
       if (sources.photo() !== photo) return
       const settings = sources.settings()
       const scene = createScene(photo, photo.decoded.source)
-      const scale = getFrameScale(scene.layout, getFrameOutputLimit(settings.outputSize))
+      const scale = getFrameScale(scene.layout, getFrameOutputLimit(settings))
       const size = getFrameCanvasSize(scene.layout, scale)
       output = document.createElement('canvas')
       output.width = size.width
