@@ -32,7 +32,18 @@ A collection of film image processing tools that run locally in your browser. Im
 - PNG export keeps the perforation cutouts transparent and shows them against a checkerboard in the workbench. For JPEG, matching-background bands use black cutouts, while black bands use white cutouts.
 - Export as JPEG or PNG.
 
-The horizontal menu at the top of the page switches between the two tools. Each tool page keeps its working state, so imported images are not lost when you switch away and come back.
+### Photo Frame
+
+- Add a frame to a single photo; click to choose or drag and drop TIFF, JPEG, PNG, and WebP. Any aspect ratio works (square, 6×4.5, 6×7, 3:2, half-frame portrait, XPan panoramic, and more), for both film scans and digital photos. Border, text, and shadow sizes scale from the geometric mean of the photo's width and height, so photos of different proportions look consistent.
+- Four layouts are provided: Border, Gallery, Float, and Info bar. A layout applies recommended borders, shadows, and displayed content, and you can still adjust the top, side, and bottom border widths, the frame color (with White, Ivory paper, Light grey, Charcoal, and Black presets), and the text color afterward.
+- Photo shadow offers eight presets: None, Contact, Soft, Lifted, Ambient, Deep, Angled, and Hard, with strength adjustable from 0–150%. You can turn on a backdrop so the frame sits on it like a print; the backdrop color, margin, and frame shadow are set separately.
+- On import, EXIF is read locally (for JPEG, PNG, WebP, and TIFF alike, only the small range of bytes holding the metadata is read) to fill in the camera model, lens, focal length, aperture, shutter speed, ISO, and date, and the brand is chosen automatically from the manufacturer. Every field can be edited by hand, edited fields are kept when you switch photos, and you can overwrite them at any time with "Fill from EXIF".
+- The photo source is either Digital or Film. When EXIF written by a film scanner (such as Noritsu, Frontier, Coolscan, Flextight, or Epson) is detected, the app switches to Film automatically and never fills in the scanner as the camera. Film mode replaces the exposure fields with film stock, and the camera, lens, and film only need to be entered once to carry over to the whole roll.
+- 40 camera, film, and phone brands are built in, with searchable selection or "Custom" for any text. The logo can be a built-in graphic (some brands offer several), a wordmark (seven styles: Classic italic, Roman, Geometric, Bold, Wide, Script, and Mono), a custom image (a PNG with a transparent background is recommended), or none; single-color logos can keep their original color, follow the text color, or use a custom color. The tagline (for example, CREATE TO INSPIRE) can be toggled and edited.
+- 18 OFL open-source fonts (Playfair Display, Bodoni Moda, Cormorant Garamond, DM Serif Display, Cinzel, Italiana, Jost, Josefin Sans, Montserrat, Syncopate, Michroma, Orbitron, Bebas Neue, IBM Plex Mono, Courier Prime, Great Vibes, Dancing Script, Caveat) are bundled as Latin subsets and work offline; system sans, serif, and Kai fonts are also offered for Chinese and Japanese text. The wordmark and caption each have their own font, bold, italic, capitals, and letter-spacing settings, and text and logo can be scaled together.
+- Export as JPEG or PNG. The output size can be Original (the photo is drawn at its original pixels, with the longest side capped at 8000 px) or Custom, where you type the long side (256–8000 px); the original photo is never upscaled.
+
+The horizontal menu at the top of the page switches between the three tools. Each tool page keeps its working state, so imported images are not lost when you switch away and come back.
 
 ## Interface and Theme
 
@@ -45,7 +56,7 @@ The horizontal menu at the top of the page switches between the two tools. Each 
 ## Installation and Offline Use (PWA)
 
 - In browsers that support installation, use the install entry in the address bar or browser menu to install Film X as an app. In iOS Safari, use Share → Add to Home Screen. Installation and offline features require HTTPS or localhost.
-- After the first online visit finishes caching the app resources, both tools can open offline, and you can switch interface languages. Image decoding, editing, and export still happen entirely on your device.
+- After the first online visit finishes caching the app resources, all three tools can open offline, and you can switch interface languages. Image decoding, editing, and export still happen entirely on your device.
 - The app checks for updates on startup, when returning to the foreground, when connectivity returns, and every hour while running. New versions download in the background. An update applies automatically and refreshes the pages once every Film X window has no imported images and no decoding or export tasks.
 - If images or tasks are present, the app shows a pending update. Clear the images in every window and let tasks finish, or close all Film X windows, to allow the update to apply.
 - Images stay in memory only and cannot be recovered after a refresh or closing the page. Offline caching does not save imported images or editing work.
@@ -57,6 +68,8 @@ App framework and UI: Nuxt 4 + Vue 3 + shadcn-vue + Reka UI + Tailwind CSS
 Localization and theme: `@nuxtjs/i18n` + `@nuxtjs/color-mode`
 
 Imaging and compression: UTIF + fflate
+
+Frame fonts: `@fontsource` (OFL open-source fonts, bundling Latin subsets only)
 
 Installation, offline support, and updates: `@vite-pwa/nuxt` + Workbox
 
@@ -101,12 +114,13 @@ Development mode does not register a Service Worker. To test the production PWA,
 
 ## Project Structure
 
-- `app/pages`: The half-frame splitter and layout composer pages, along with their respective workflow orchestration.
+- `app/pages`: The half-frame splitter, layout composer, and photo frame pages, along with their respective workflow orchestration.
 - `app/components/film`: Shared upload, image queue, preview, parameter control, and export components.
 - `app/composables`: File queue, auto-detection, image preview, and batch export state.
 - `app/types`: Shared types such as image entries, split settings, and export formats.
-- `app/utils`: Image decoding, detection, cropping, rotation, and format conversion utilities.
-- `app/assets/css`: Global theme, colors, and base control styles.
+- `app/utils`: Image decoding, detection, cropping, rotation, format conversion, EXIF reading, and frame rendering utilities.
+- `app/assets/css`: Global theme, colors, base control styles, and frame font imports.
+- `app/assets/frame-logos`: Camera brand logo SVGs used by the photo frame, along with their source notes.
 - `public`: Public static assets, including the favicon, PWA icons, and the `pwa-update-guard.js` update guard.
 
 The half-frame splitting workflow reuses source code from the personal project [Full2Half](https://github.com/haizakura/full2half), reorganized within Film X's unified page structure and theme system.
@@ -114,6 +128,7 @@ The half-frame splitting workflow reuses source code from the personal project [
 ## Image Processing Notes
 
 - All image processing happens entirely in the browser; nothing is uploaded to a server.
+- When the photo frame reads EXIF, it reads only the metadata segments of the file on demand and never loads a large TIFF in full for this; the preview is drawn from a downscaled copy, and the export redraws from the original image at the selected size.
 - Auto-splitting analyzes vertical brightness, texture, and edge changes in the central region. When the gutter cannot be reliably detected, no pixels are removed.
 - TIFF files are decoded in the browser. The half-frame splitter can output JPEG, PNG, WebP, and TIF. TIF output uses uncompressed 8-bit RGBA pixels for splitting and 90° integer rotations, avoiding another round of lossy encoding. High-bit-depth TIFF input is still limited by browser-side decoding to 8-bit RGBA.
 

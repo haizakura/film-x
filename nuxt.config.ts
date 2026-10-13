@@ -12,11 +12,12 @@ export default defineNuxtConfig({
     emitRouteChunkError: 'manual'
   },
   nitro: {
-    prerender: { routes: ['/', '/compose'] }
+    prerender: { routes: ['/', '/compose', '/frame'] }
   },
   routeRules: {
     '/': { headers: { 'cache-control': 'no-cache' } },
     '/compose': { headers: { 'cache-control': 'no-cache' } },
+    '/frame': { headers: { 'cache-control': 'no-cache' } },
     '/sw.js': { headers: { 'cache-control': 'no-cache' } },
     '/pwa-update-guard.js': { headers: { 'cache-control': 'no-cache' } },
     '/manifest.webmanifest': { headers: { 'cache-control': 'no-cache' } }
@@ -30,7 +31,7 @@ export default defineNuxtConfig({
       id: './',
       name: 'Film X',
       short_name: 'Film X',
-      description: 'Split and compose film scan images locally on your device.',
+      description: 'Split, compose and frame film scans and photos locally on your device.',
       start_url: './',
       scope: './',
       display: 'standalone',

@@ -4,7 +4,9 @@
     "splitterTitle": "ハーフサイズフィルム分割",
     "splitterDescription": "ハーフサイズフィルムのスキャン画像からコマ間の隙間を自動検出。ブラウザー内で分割・回転・一括書き出しができます。",
     "composerTitle": "フィルム合成",
-    "composerDescription": "1〜2枚のハーフサイズまたはフルサイズのフィルム写真を1枚の画像に合成。キャンバス、余白、配置、背景パターンを自由に設定できます。"
+    "composerDescription": "1〜2枚のハーフサイズまたはフルサイズのフィルム写真を1枚の画像に合成。キャンバス、余白、配置、背景パターンを自由に設定できます。",
+    "frameTitle": "フォトフレーム",
+    "frameDescription": "フィルムのスキャン画像やデジタル写真にカメラブランドのフレームを追加。EXIF から撮影情報を自動入力し、レイアウト・影・フォントも選べます。"
   },
   "language": {
     "label": "言語"
@@ -21,6 +23,8 @@
     "splitterTagline": "1枚のスキャンを2コマに",
     "composer": "フィルム合成",
     "composerTagline": "1〜2コマを1枚の画像に",
+    "frame": "フォトフレーム",
+    "frameTagline": "写真に額縁を",
     "github": "GitHub で Film X を見る",
     "themeLabel": "テーマ：{theme}",
     "themeSwitchTitle": "{label}・クリックで切り替え",
@@ -48,7 +52,9 @@
     "scanTitle": "ドロップしてスキャン画像を追加",
     "compositionTitle": "ドロップしてキャンバスに追加",
     "compositionDescription": "最初の2枚のみ使用します",
-    "compositionDescriptionSingle": "最初の1枚のみ使用します"
+    "compositionDescriptionSingle": "最初の1枚のみ使用します",
+    "frameTitle": "ドロップして写真にフレームを付ける",
+    "frameDescription": "最初の1枚のみ使用します"
   },
   "queue": {
     "title": "今回のスキャン",
@@ -218,6 +224,207 @@
     },
     "download": "生成してダウンロード"
   },
+  "frame": {
+    "eyebrow": "ツール 03 · フレーム",
+    "title": "フォトフレーム",
+    "placeholder": "写真をドロップ、またはクリックして選択",
+    "choosePhoto": "写真を選択",
+    "removePhoto": "写真を削除",
+    "photoSize": "{width} × {height} px",
+    "exifFound": "EXIF · {camera}",
+    "exifPartial": "EXIF 読み取り済み",
+    "exifMissing": "EXIF データが見つかりません",
+    "toast": {
+      "singleImage": "フレームは1枚ずつ付けられます。",
+      "generated": "フレーム付き画像を生成しました",
+      "failed": "画像を生成できませんでした"
+    },
+    "template": {
+      "heading": "レイアウト",
+      "polaroid": "ボーダー",
+      "gallery": "ギャラリー",
+      "float": "フロート",
+      "strip": "情報バー",
+      "hint": "レイアウトを選ぶと、おすすめの縁・影・内容が適用されます。各項目はあとから微調整できます。"
+    },
+    "brand": {
+      "heading": "ブランドとロゴ",
+      "search": "カメラブランドを検索",
+      "searchPlaceholder": "ブランドを検索",
+      "list": "カメラブランド",
+      "empty": "一致するブランドがありません",
+      "custom": "カスタム",
+      "logoStyle": "ロゴのスタイル",
+      "markOption": "ロゴ {number}",
+      "wordmark": "ワードマーク",
+      "customImage": "カスタム画像",
+      "none": "なし",
+      "wordmarkText": "ワードマークの文字",
+      "wordmarkPlaceholder": "ブランド名またはタイトルを入力",
+      "presets": {
+        "heading": "ワードマークのスタイル",
+        "classic": "クラシック斜体",
+        "roman": "ローマン",
+        "geometric": "ジオメトリック",
+        "heavy": "ボールド",
+        "wide": "ワイド",
+        "script": "スクリプト",
+        "mono": "モノ"
+      },
+      "customUpload": "ロゴ画像を選択",
+      "customRemove": "カスタムロゴを削除",
+      "customHint": "背景が透明な PNG または WebP がおすすめです。単色のロゴは文字色に合わせられます。",
+      "color": "ロゴの色",
+      "colorOriginal": "元の色",
+      "colorText": "文字色に合わせる",
+      "colorCustom": "カスタム",
+      "colorPicker": "ロゴの色を選択",
+      "colorHex": "ロゴ色の RGB 値（16進数）",
+      "multicolorHint": "複数色のロゴは元の色のまま表示されます。",
+      "size": "ロゴの大きさ",
+      "sizeInput": "ロゴの大きさを入力"
+    },
+    "info": {
+      "heading": "撮影情報",
+      "source": "写真の種類",
+      "digital": "デジタル",
+      "film": "フィルム",
+      "digitalHint": "写真を取り込むと EXIF を読み取って自動入力します。編集した項目は、写真を切り替えても保持されます。",
+      "filmHint": "フィルムのスキャン画像の EXIF は通常スキャナーの情報のため、自動入力は行いません。カメラ・レンズ・フィルムを一度入力すれば、ロール全体に引き継がれます。",
+      "noPhoto": "写真を取り込むと EXIF を読み取ります",
+      "exifReady": "EXIF 読み取り済み",
+      "fillExif": "EXIF から入力",
+      "show": "{line}を表示",
+      "lines": {
+        "camera": "カメラ",
+        "lens": "レンズ",
+        "film": "フィルム",
+        "exposure": "露出",
+        "date": "日付",
+        "custom": "カスタムテキスト"
+      },
+      "fields": {
+        "camera": "カメラ機種",
+        "lens": "レンズ",
+        "film": "フィルムの種類",
+        "focalLength": "焦点距離",
+        "aperture": "絞り",
+        "shutter": "シャッタースピード",
+        "iso": "ISO",
+        "date": "撮影日",
+        "custom": "カスタムテキスト"
+      },
+      "placeholders": {
+        "camera": "Hasselblad 503CW",
+        "lens": "Carl Zeiss Distagon 1:4 50mm",
+        "film": "Kodak Portra 160",
+        "focalLength": "50mm",
+        "aperture": "f/4",
+        "shutter": "1/125s",
+        "iso": "ISO 160",
+        "date": "2024.07.12",
+        "custom": "作者 · 撮影場所"
+      },
+      "tagline": "キャッチコピー",
+      "taglineShow": "キャッチコピーを表示",
+      "taglinePlaceholder": "例：CREATE TO INSPIRE"
+    },
+    "typography": {
+      "heading": "文字",
+      "wordmark": "ワードマーク",
+      "wordmarkFont": "ワードマークのフォント",
+      "caption": "キャプション",
+      "captionFont": "キャプションのフォント",
+      "bold": "太字",
+      "italic": "斜体",
+      "uppercase": "大文字",
+      "wordmarkBold": "ワードマークを太字にする",
+      "wordmarkItalic": "ワードマークを斜体にする",
+      "wordmarkUppercase": "ワードマークを大文字にする",
+      "captionBold": "キャプションを太字にする",
+      "captionItalic": "キャプションを斜体にする",
+      "captionUppercase": "キャプションを大文字にする",
+      "letterSpacing": "文字間隔",
+      "wordmarkLetterSpacingInput": "ワードマークの文字間隔を入力",
+      "captionLetterSpacingInput": "キャプションの文字間隔を入力",
+      "size": "文字サイズ",
+      "sizeInput": "文字サイズを入力",
+      "systemSans": "システム ゴシック体",
+      "systemSerif": "システム 明朝体",
+      "systemKai": "システム 楷書体",
+      "categories": {
+        "serif": "セリフ体",
+        "sans": "サンセリフ体",
+        "mono": "等幅",
+        "script": "手書き風",
+        "system": "システム（日本語・中国語対応）"
+      }
+    },
+    "style": {
+      "heading": "縁と色",
+      "frameColor": "フレームの色",
+      "frameColorPicker": "フレームの色を選択",
+      "frameColorHex": "フレーム色の RGB 値（16進数）",
+      "textColor": "文字色",
+      "textColorPicker": "文字色を選択",
+      "textColorHex": "文字色の RGB 値（16進数）",
+      "presets": {
+        "heading": "用紙のプリセット",
+        "white": "白",
+        "paper": "アイボリー紙",
+        "mist": "ライトグレー",
+        "charcoal": "チャコール",
+        "black": "黒"
+      },
+      "border": {
+        "top": "上の縁",
+        "side": "左右の縁",
+        "bottom": "下の縁",
+        "topInput": "上の縁の幅を入力",
+        "sideInput": "左右の縁の幅を入力",
+        "bottomInput": "下の縁の幅を入力"
+      },
+      "borderHint": "縁の幅は写真の大きさに合わせて変わります（100% は幅と高さの幾何平均）。正方形・横長・縦長・パノラマのどれでも、バランスよく仕上がります。"
+    },
+    "shadow": {
+      "heading": "影と背景",
+      "photo": "写真の影",
+      "intensity": "影の強さ",
+      "photoIntensityInput": "写真の影の強さを入力",
+      "cardIntensityInput": "フレームの影の強さを入力",
+      "presets": {
+        "none": "なし",
+        "contact": "接地",
+        "soft": "ソフト",
+        "lifted": "浮き上がり",
+        "ambient": "環境光",
+        "deep": "ディープ",
+        "directional": "斜め",
+        "hard": "ハード"
+      },
+      "backdrop": "背景",
+      "backdropLabel": "フレームの周囲に背景を追加",
+      "backdropColor": "背景色",
+      "backdropPresets": "背景色のプリセット",
+      "backdropPreset": "背景色 {color}",
+      "backdropColorPicker": "背景色を選択",
+      "backdropColorHex": "背景色の RGB 値（16進数）",
+      "padding": "背景の余白",
+      "paddingInput": "背景の余白を入力",
+      "card": "フレームの影",
+      "hint": "背景を追加すると、フレームがプリントのように背景の上に置かれ、選んだ影が落ちます。"
+    },
+    "export": {
+      "size": "出力サイズ（長辺）",
+      "original": "元のサイズ",
+      "custom": "カスタム",
+      "longSideInput": "カスタム出力の長辺（ピクセル）",
+      "customHint": "{min}〜{max} px。元の写真は拡大しません",
+      "dimensions": "{width} × {height} px",
+      "download": "生成してダウンロード",
+      "exporting": "生成中"
+    }
+  },
   "toast": {
     "readFailed": "{name} を読み込めませんでした",
     "unsupportedIgnored": "未対応のファイル {count} 件をスキップしました",
@@ -248,7 +455,8 @@
     "noImagesGenerated": "画像を生成できませんでした",
     "archiveFailed": "ZIP ファイルを作成できませんでした",
     "decodeFailed": "画像のデコードに失敗しました",
-    "compositionFailed": "合成画像を生成できませんでした"
+    "compositionFailed": "合成画像を生成できませんでした",
+    "frameFailed": "フレーム付き画像を生成できませんでした"
   },
   "pwa": {
     "updateReady": "更新の準備ができました。すべての Film X ウィンドウで画像を削除し、処理が完了すると自動更新されます。すべてのウィンドウを閉じてからアプリを開き直すこともできます。"

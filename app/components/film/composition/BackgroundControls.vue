@@ -18,7 +18,7 @@ const patterns = computed<Array<{ label: string; value: CompositionPattern; icon
 <template>
   <div class="border-b border-border p-5">
     <p class="text-xs font-medium">{{ t('composition.background.heading') }}</p>
-    <FilmCompositionColorField
+    <FilmColorField
       v-model="settings.background"
       class="mt-4"
       :picker-label="t('composition.background.color')"
