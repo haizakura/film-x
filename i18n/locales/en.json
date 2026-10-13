@@ -4,7 +4,9 @@
     "splitterTitle": "Half-frame film splitter",
     "splitterDescription": "Detect the center gap in half-frame film scans, then split, rotate, and batch export locally in your browser.",
     "composerTitle": "Film composer",
-    "composerDescription": "Compose one or two half-frame or full-frame film photos into a single image with custom canvas, spacing, layout, and patterns."
+    "composerDescription": "Compose one or two half-frame or full-frame film photos into a single image with custom canvas, spacing, layout, and patterns.",
+    "frameTitle": "Photo frame",
+    "frameDescription": "Add a camera-brand frame to film scans or digital photos, auto-fill shot details from EXIF, and choose from layouts, shadows and fonts."
   },
   "language": {
     "label": "Language"
@@ -21,6 +23,8 @@
     "splitterTagline": "One scan, two frames",
     "composer": "Film composer",
     "composerTagline": "One or two frames, one image",
+    "frame": "Photo frame",
+    "frameTagline": "Frame it",
     "github": "View Film X on GitHub",
     "themeLabel": "Theme: {theme}",
     "themeSwitchTitle": "{label}; click to switch",
@@ -48,7 +52,9 @@
     "scanTitle": "Release to add scan images",
     "compositionTitle": "Release to add to the canvas",
     "compositionDescription": "Only the first two images will be used",
-    "compositionDescriptionSingle": "Only the first image will be used"
+    "compositionDescriptionSingle": "Only the first image will be used",
+    "frameTitle": "Drop to frame this photo",
+    "frameDescription": "Only the first image is used"
   },
   "queue": {
     "title": "Current scan",
@@ -218,6 +224,204 @@
     },
     "download": "Generate and download"
   },
+  "frame": {
+    "eyebrow": "Tool 03 · Frame",
+    "title": "Photo frame",
+    "placeholder": "Drop a photo or click to choose",
+    "choosePhoto": "Choose photo",
+    "removePhoto": "Remove photo",
+    "photoSize": "{width} × {height} px",
+    "exifFound": "EXIF · {camera}",
+    "exifPartial": "EXIF read",
+    "exifMissing": "No EXIF data found",
+    "toast": {
+      "singleImage": "The frame works on one photo at a time.",
+      "generated": "Framed image created",
+      "failed": "Could not generate the image"
+    },
+    "template": {
+      "heading": "Layout",
+      "polaroid": "Border",
+      "gallery": "Gallery",
+      "float": "Float",
+      "strip": "Info bar",
+      "hint": "A layout applies recommended borders, shadows and content; you can still fine-tune each setting."
+    },
+    "brand": {
+      "heading": "Brand & logo",
+      "search": "Search camera brands",
+      "searchPlaceholder": "Search brands",
+      "list": "Camera brands",
+      "empty": "No matching brands",
+      "custom": "Custom",
+      "logoStyle": "Logo style",
+      "markOption": "Logo {number}",
+      "wordmark": "Wordmark",
+      "customImage": "Custom image",
+      "none": "None",
+      "wordmarkText": "Wordmark text",
+      "wordmarkPlaceholder": "Enter a brand or title",
+      "presets": {
+        "heading": "Wordmark styles",
+        "classic": "Classic italic",
+        "roman": "Roman",
+        "geometric": "Geometric",
+        "heavy": "Bold",
+        "wide": "Wide",
+        "script": "Script",
+        "mono": "Mono"
+      },
+      "customUpload": "Choose a logo image",
+      "customRemove": "Remove custom logo",
+      "customHint": "A PNG or WebP with a transparent background works best. Single-color logos can follow the text color.",
+      "color": "Logo color",
+      "colorOriginal": "Original",
+      "colorText": "Text color",
+      "colorCustom": "Custom",
+      "colorPicker": "Choose logo color",
+      "colorHex": "Logo color hexadecimal RGB value",
+      "multicolorHint": "Multicolor logos keep their own colors.",
+      "size": "Logo size",
+      "sizeInput": "Enter logo size"
+    },
+    "info": {
+      "heading": "Shot details",
+      "source": "Photo source",
+      "digital": "Digital",
+      "film": "Film",
+      "digitalHint": "EXIF is read to fill these in when you import a photo; fields you edit are kept when you switch photos.",
+      "filmHint": "EXIF in film scans usually describes the scanner, so nothing is filled in automatically. Enter the camera, lens and film once and they carry over to the whole roll.",
+      "noPhoto": "Import a photo to read its EXIF",
+      "exifReady": "EXIF read",
+      "fillExif": "Fill from EXIF",
+      "show": "Show {line}",
+      "lines": {
+        "camera": "Camera",
+        "lens": "Lens",
+        "film": "Film",
+        "exposure": "Exposure",
+        "date": "Date",
+        "custom": "Custom text"
+      },
+      "fields": {
+        "camera": "Camera model",
+        "lens": "Lens",
+        "film": "Film stock",
+        "focalLength": "Focal length",
+        "aperture": "Aperture",
+        "shutter": "Shutter speed",
+        "iso": "ISO",
+        "date": "Date taken",
+        "custom": "Custom text"
+      },
+      "placeholders": {
+        "camera": "Hasselblad 503CW",
+        "lens": "Carl Zeiss Distagon 1:4 50mm",
+        "film": "Kodak Portra 160",
+        "focalLength": "50mm",
+        "aperture": "f/4",
+        "shutter": "1/125s",
+        "iso": "ISO 160",
+        "date": "2024.07.12",
+        "custom": "Author · Location"
+      },
+      "tagline": "Tagline",
+      "taglineShow": "Show tagline",
+      "taglinePlaceholder": "e.g. CREATE TO INSPIRE"
+    },
+    "typography": {
+      "heading": "Typography",
+      "wordmark": "Wordmark",
+      "wordmarkFont": "Wordmark font",
+      "caption": "Caption",
+      "captionFont": "Caption font",
+      "bold": "Bold",
+      "italic": "Italic",
+      "uppercase": "Caps",
+      "wordmarkBold": "Use bold for the wordmark",
+      "wordmarkItalic": "Use italic for the wordmark",
+      "wordmarkUppercase": "Set the wordmark in capitals",
+      "captionBold": "Use bold for captions",
+      "captionItalic": "Use italic for captions",
+      "captionUppercase": "Set captions in capitals",
+      "letterSpacing": "Letter spacing",
+      "wordmarkLetterSpacingInput": "Enter wordmark letter spacing",
+      "captionLetterSpacingInput": "Enter caption letter spacing",
+      "size": "Text size",
+      "sizeInput": "Enter text size",
+      "systemSans": "System sans",
+      "systemSerif": "System serif",
+      "systemKai": "System Kai",
+      "categories": {
+        "serif": "Serif",
+        "sans": "Sans serif",
+        "mono": "Monospace",
+        "script": "Handwritten",
+        "system": "System (CJK)"
+      }
+    },
+    "style": {
+      "heading": "Border & color",
+      "frameColor": "Frame color",
+      "frameColorPicker": "Choose frame color",
+      "frameColorHex": "Frame color hexadecimal RGB value",
+      "textColor": "Text color",
+      "textColorPicker": "Choose text color",
+      "textColorHex": "Text color hexadecimal RGB value",
+      "presets": {
+        "heading": "Paper presets",
+        "white": "White",
+        "paper": "Ivory paper",
+        "mist": "Light grey",
+        "charcoal": "Charcoal",
+        "black": "Black"
+      },
+      "border": {
+        "top": "Top border",
+        "side": "Side borders",
+        "bottom": "Bottom border",
+        "topInput": "Enter top border width",
+        "sideInput": "Enter side border width",
+        "bottomInput": "Enter bottom border width"
+      },
+      "borderHint": "Borders scale with the photo (100% is the geometric mean of its width and height), so square, landscape, portrait and panoramic photos look consistent."
+    },
+    "shadow": {
+      "heading": "Shadow & backdrop",
+      "photo": "Photo shadow",
+      "intensity": "Shadow strength",
+      "photoIntensityInput": "Enter photo shadow strength",
+      "cardIntensityInput": "Enter frame shadow strength",
+      "presets": {
+        "none": "None",
+        "contact": "Contact",
+        "soft": "Soft",
+        "lifted": "Lifted",
+        "ambient": "Ambient",
+        "deep": "Deep",
+        "directional": "Angled",
+        "hard": "Hard"
+      },
+      "backdrop": "Backdrop",
+      "backdropLabel": "Add a backdrop around the frame",
+      "backdropColor": "Backdrop color",
+      "backdropPresets": "Backdrop color presets",
+      "backdropPreset": "Backdrop color {color}",
+      "backdropColorPicker": "Choose backdrop color",
+      "backdropColorHex": "Backdrop color hexadecimal RGB value",
+      "padding": "Backdrop margin",
+      "paddingInput": "Enter backdrop margin",
+      "card": "Frame shadow",
+      "hint": "With a backdrop, the frame sits on it like a print and casts the selected shadow."
+    },
+    "export": {
+      "size": "Output size (long side)",
+      "original": "Original",
+      "dimensions": "{width} × {height} px",
+      "download": "Create and download",
+      "exporting": "Creating"
+    }
+  },
   "toast": {
     "readFailed": "Could not read {name}",
     "unsupportedIgnored": "Ignored {count} unsupported files",
@@ -248,7 +452,8 @@
     "noImagesGenerated": "No images were generated successfully",
     "archiveFailed": "Could not create the archive",
     "decodeFailed": "Image decoding failed",
-    "compositionFailed": "Could not generate the composition"
+    "compositionFailed": "Could not generate the composition",
+    "frameFailed": "Could not generate the framed image"
   },
   "pwa": {
     "updateReady": "An update is ready. It will apply automatically when images are cleared and tasks finish in all Film X windows, or after you close and reopen the app."

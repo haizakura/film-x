@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { MonitorCog, Moon, PanelsTopLeft, ScanLine, Sun } from '@lucide/vue'
+import { Frame, MonitorCog, Moon, PanelsTopLeft, ScanLine, Sun } from '@lucide/vue'
 import { Button } from '@/components/ui/button'
 
 const route = useRoute()
@@ -18,6 +18,12 @@ const tools = computed(() => [
     description: t('header.composerTagline'),
     icon: PanelsTopLeft,
     to: '/compose'
+  },
+  {
+    label: t('header.frame'),
+    description: t('header.frameTagline'),
+    icon: Frame,
+    to: '/frame'
   }
 ])
 const isActive = (to: string) => route.path === to

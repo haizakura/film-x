@@ -4,7 +4,9 @@
     "splitterTitle": "半格胶片切分",
     "splitterDescription": "自动识别半格胶片扫描中缝，在浏览器本地完成切分、旋转与批量导出。",
     "composerTitle": "胶片排版拼图",
-    "composerDescription": "将一至两张半格或全画幅胶片排版成单张图像，自定义画布、间距、布局与底纹。"
+    "composerDescription": "将一至两张半格或全画幅胶片排版成单张图像，自定义画布、间距、布局与底纹。",
+    "frameTitle": "照片相框",
+    "frameDescription": "为胶片扫描或数码照片添加相机品牌相框，读取 EXIF 自动填写拍摄信息，支持多种版式、阴影与字体。"
   },
   "language": {
     "label": "语言"
@@ -21,6 +23,8 @@
     "splitterTagline": "一分为二",
     "composer": "排版拼图",
     "composerTagline": "单双成章",
+    "frame": "照片相框",
+    "frameTagline": "装裱成框",
     "github": "在 GitHub 上查看 Film X",
     "themeLabel": "主题：{theme}",
     "themeSwitchTitle": "{label}，点击切换",
@@ -48,7 +52,9 @@
     "scanTitle": "松开以添加扫描图像",
     "compositionTitle": "松开以加入排版画布",
     "compositionDescription": "最多读取前两张图像",
-    "compositionDescriptionSingle": "仅读取第一张图像"
+    "compositionDescriptionSingle": "仅读取第一张图像",
+    "frameTitle": "松开以加入相框",
+    "frameDescription": "仅读取第一张图像"
   },
   "queue": {
     "title": "本次扫描",
@@ -218,6 +224,204 @@
     },
     "download": "生成并下载"
   },
+  "frame": {
+    "eyebrow": "工具 03 · 相框",
+    "title": "照片相框",
+    "placeholder": "拖入照片或点击选择",
+    "choosePhoto": "选择照片",
+    "removePhoto": "移除照片",
+    "photoSize": "{width} × {height} px",
+    "exifFound": "EXIF · {camera}",
+    "exifPartial": "已读取 EXIF",
+    "exifMissing": "未找到 EXIF 信息",
+    "toast": {
+      "singleImage": "相框一次处理一张照片。",
+      "generated": "相框图像已生成",
+      "failed": "生成失败"
+    },
+    "template": {
+      "heading": "版式",
+      "polaroid": "白边",
+      "gallery": "画廊",
+      "float": "悬浮",
+      "strip": "信息条",
+      "hint": "版式会套用推荐的边框、阴影与显示内容，之后仍可逐项调整。"
+    },
+    "brand": {
+      "heading": "品牌与标志",
+      "search": "搜索相机品牌",
+      "searchPlaceholder": "搜索品牌",
+      "list": "相机品牌",
+      "empty": "没有匹配的品牌",
+      "custom": "自定义",
+      "logoStyle": "标志样式",
+      "markOption": "标志 {number}",
+      "wordmark": "文字标",
+      "customImage": "自定义图片",
+      "none": "不显示",
+      "wordmarkText": "文字标内容",
+      "wordmarkPlaceholder": "输入品牌或标题文字",
+      "presets": {
+        "heading": "文字标样式",
+        "classic": "经典斜体",
+        "roman": "罗马碑刻",
+        "geometric": "几何细体",
+        "heavy": "粗体",
+        "wide": "宽体",
+        "script": "花体",
+        "mono": "等宽"
+      },
+      "customUpload": "选择标志图片",
+      "customRemove": "移除自定义标志",
+      "customHint": "建议使用透明背景的 PNG 或 WebP。单色标志可跟随文字颜色重新着色。",
+      "color": "标志颜色",
+      "colorOriginal": "原色",
+      "colorText": "跟随文字",
+      "colorCustom": "自定义",
+      "colorPicker": "选择标志颜色",
+      "colorHex": "标志颜色十六进制 RGB 值",
+      "multicolorHint": "多色标志保持原有配色。",
+      "size": "标志大小",
+      "sizeInput": "输入标志大小"
+    },
+    "info": {
+      "heading": "拍摄信息",
+      "source": "照片来源",
+      "digital": "数码",
+      "film": "胶片",
+      "digitalHint": "导入照片时会读取 EXIF 自动填写；手动修改过的项目在更换照片后保留。",
+      "filmHint": "胶片扫描的 EXIF 通常记录的是扫描设备，因此不会自动填写；机型、镜头与胶卷手动填写一次，整卷照片都能沿用。",
+      "noPhoto": "导入照片后可读取 EXIF",
+      "exifReady": "已读取 EXIF",
+      "fillExif": "从 EXIF 填写",
+      "show": "显示{line}",
+      "lines": {
+        "camera": "机型",
+        "lens": "镜头",
+        "film": "胶卷",
+        "exposure": "曝光参数",
+        "date": "日期",
+        "custom": "自定义文字"
+      },
+      "fields": {
+        "camera": "相机机型",
+        "lens": "镜头",
+        "film": "胶卷",
+        "focalLength": "焦距",
+        "aperture": "光圈",
+        "shutter": "快门",
+        "iso": "感光度",
+        "date": "拍摄日期",
+        "custom": "自定义文字"
+      },
+      "placeholders": {
+        "camera": "Hasselblad 503CW",
+        "lens": "Carl Zeiss Distagon 1:4 50mm",
+        "film": "Kodak Portra 160",
+        "focalLength": "50mm",
+        "aperture": "f/4",
+        "shutter": "1/125s",
+        "iso": "ISO 160",
+        "date": "2024.07.12",
+        "custom": "作者 · 地点"
+      },
+      "tagline": "标语",
+      "taglineShow": "显示标语",
+      "taglinePlaceholder": "例如 CREATE TO INSPIRE"
+    },
+    "typography": {
+      "heading": "字体",
+      "wordmark": "文字标",
+      "wordmarkFont": "文字标字体",
+      "caption": "说明文字",
+      "captionFont": "说明文字字体",
+      "bold": "粗体",
+      "italic": "斜体",
+      "uppercase": "大写",
+      "wordmarkBold": "文字标使用粗体",
+      "wordmarkItalic": "文字标使用斜体",
+      "wordmarkUppercase": "文字标转为大写",
+      "captionBold": "说明文字使用粗体",
+      "captionItalic": "说明文字使用斜体",
+      "captionUppercase": "说明文字转为大写",
+      "letterSpacing": "字距",
+      "wordmarkLetterSpacingInput": "输入文字标字距",
+      "captionLetterSpacingInput": "输入说明文字字距",
+      "size": "文字大小",
+      "sizeInput": "输入文字大小",
+      "systemSans": "系统黑体",
+      "systemSerif": "系统宋体",
+      "systemKai": "系统楷体",
+      "categories": {
+        "serif": "衬线",
+        "sans": "无衬线",
+        "mono": "等宽",
+        "script": "手写",
+        "system": "系统（含中文）"
+      }
+    },
+    "style": {
+      "heading": "边框与颜色",
+      "frameColor": "相框颜色",
+      "frameColorPicker": "选择相框颜色",
+      "frameColorHex": "相框颜色十六进制 RGB 值",
+      "textColor": "文字颜色",
+      "textColorPicker": "选择文字颜色",
+      "textColorHex": "文字颜色十六进制 RGB 值",
+      "presets": {
+        "heading": "相纸配色预设",
+        "white": "纯白",
+        "paper": "米白相纸",
+        "mist": "浅灰",
+        "charcoal": "炭灰",
+        "black": "纯黑"
+      },
+      "border": {
+        "top": "上边框",
+        "side": "左右边框",
+        "bottom": "下边框",
+        "topInput": "输入上边框宽度",
+        "sideInput": "输入左右边框宽度",
+        "bottomInput": "输入下边框宽度"
+      },
+      "borderHint": "边框宽度按照片尺寸等比计算（以宽高的几何平均为 100%），方形、横幅、竖幅与宽幅照片的观感保持一致。"
+    },
+    "shadow": {
+      "heading": "阴影与底板",
+      "photo": "照片阴影",
+      "intensity": "阴影强度",
+      "photoIntensityInput": "输入照片阴影强度",
+      "cardIntensityInput": "输入相框阴影强度",
+      "presets": {
+        "none": "无",
+        "contact": "贴合",
+        "soft": "柔和",
+        "lifted": "浮起",
+        "ambient": "环绕",
+        "deep": "深邃",
+        "directional": "斜光",
+        "hard": "硬投影"
+      },
+      "backdrop": "底板",
+      "backdropLabel": "在相框外添加底板",
+      "backdropColor": "底板颜色",
+      "backdropPresets": "底板颜色预设",
+      "backdropPreset": "底板颜色 {color}",
+      "backdropColorPicker": "选择底板颜色",
+      "backdropColorHex": "底板颜色十六进制 RGB 值",
+      "padding": "底板留白",
+      "paddingInput": "输入底板留白",
+      "card": "相框阴影",
+      "hint": "开启底板后，相框会像一张相纸放在底板上，并投下所选阴影。"
+    },
+    "export": {
+      "size": "输出尺寸（长边）",
+      "original": "原尺寸",
+      "dimensions": "{width} × {height} px",
+      "download": "生成并下载",
+      "exporting": "正在生成"
+    }
+  },
   "toast": {
     "readFailed": "无法读取 {name}",
     "unsupportedIgnored": "已忽略 {count} 个不支持的文件",
@@ -248,7 +452,8 @@
     "noImagesGenerated": "没有成功生成的图像",
     "archiveFailed": "无法生成压缩包",
     "decodeFailed": "图像解码失败",
-    "compositionFailed": "无法生成排版图像"
+    "compositionFailed": "无法生成排版图像",
+    "frameFailed": "无法生成相框图像"
   },
   "pwa": {
     "updateReady": "新版本已就绪。所有 Film X 窗口清空图像并完成任务后将自动更新，也可关闭所有窗口后重新打开应用。"
