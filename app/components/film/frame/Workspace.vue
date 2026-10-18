@@ -42,7 +42,7 @@ defineExpose({ download, exporting })
 
 <template>
   <section
-    class="relative flex min-h-155 min-w-0 flex-col overflow-hidden bg-[#10100f] lg:min-h-0"
+    class="relative flex min-h-155 min-w-0 flex-col overflow-hidden bg-workbench lg:min-h-0"
     @dragenter.prevent="handleDragEnter"
     @dragover.prevent="handleDragOver"
     @dragleave="handleDragLeave"
@@ -145,6 +145,10 @@ defineExpose({ download, exporting })
 
 <style scoped>
 .frame-stage {
+  background: radial-gradient(circle at 50% 42%, #52514e 0%, #444341 62%, #3b3b3a 100%);
+}
+
+.dark .frame-stage {
   background: radial-gradient(circle at 50% 42%, #24231f 0%, #161614 62%, #10100f 100%);
 }
 
