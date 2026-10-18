@@ -18,14 +18,8 @@ const model = defineModel<number>({ required: true })
 const digits = computed(() => (String(props.step).split('.')[1] ?? '').length)
 const display = computed(() => Number((model.value * props.factor).toFixed(digits.value)))
 
-const commit = (event: Event) => {
-  const input = event.target as HTMLInputElement
-  const parsed = Number(input.value)
-  if (Number.isFinite(parsed) && input.value !== '') {
-    model.value = Math.min(props.max, Math.max(props.min, parsed)) / props.factor
-  }
-  // Show the clamped value even when the model did not change.
-  input.value = String(display.value)
+const slide = (event: Event) => {
+  model.value = Number((event.target as HTMLInputElement).value) / props.factor
 }
 </script>
 
@@ -33,21 +27,15 @@ const commit = (event: Event) => {
   <div>
     <div class="mb-2 flex items-center justify-between gap-3 text-[10px] text-muted-foreground">
       <span>{{ label }}</span>
-      <label class="flex items-center gap-1 rounded-md border border-border bg-card px-2">
-        <span class="sr-only">{{ inputLabel }}</span>
-        <input
-          :value="display"
-          class="w-12 bg-transparent py-1.5 text-right font-mono text-[10px] outline-none"
-          type="number"
-          :min="min"
-          :max="max"
-          :step="step"
-          inputmode="decimal"
-          :aria-label="inputLabel"
-          @change="commit"
-        />
-        <span class="font-mono text-[9px] text-muted-foreground/70">{{ unit }}</span>
-      </label>
+      <FilmFrameNumberField
+        v-model="model"
+        :label="inputLabel"
+        :min="min"
+        :max="max"
+        :step="step"
+        :unit="unit"
+        :factor="factor"
+      />
     </div>
     <input
       :value="display"
@@ -57,7 +45,7 @@ const commit = (event: Event) => {
       :max="max"
       :step="step"
       :aria-label="label"
-      @input="commit"
+      @input="slide"
     />
   </div>
 </template>
