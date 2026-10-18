@@ -112,6 +112,12 @@
     "processing": "正在处理 {name}",
     "packing": "正在打包 ZIP"
   },
+  "ratio": {
+    "auto": "自动",
+    "custom": "自定义",
+    "customWidth": "自定义比例宽度",
+    "customHeight": "自定义比例高度"
+  },
   "composition": {
     "eyebrow": "工具 02 · 排版",
     "title": "胶片排版拼图",
@@ -132,10 +138,6 @@
     },
     "ratio": {
       "heading": "画布比例",
-      "auto": "自动",
-      "custom": "自定义",
-      "customWidth": "自定义比例宽度",
-      "customHeight": "自定义比例高度",
       "autoHint": "根据图像比例与当前间距自动调整导出尺寸。"
     },
     "size": {

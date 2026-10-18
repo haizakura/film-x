@@ -4,6 +4,7 @@ import {
   getCompositionOutputGeometry,
   MAX_COMPOSITION_CANVAS_SIDE
 } from '~/types/composition'
+import { clampCanvasRatio, getCustomCanvasRatio } from '~/types/canvas'
 import type { ShallowRef } from 'vue'
 
 import type {
@@ -18,10 +19,6 @@ import type {
 } from '~/types/composition'
 
 const CANVAS_WIDTH = 2400
-const MIN_RATIO = 0.2
-const MAX_RATIO = 5
-
-const clampRatio = (value: number) => Math.min(MAX_RATIO, Math.max(MIN_RATIO, value))
 
 const normalizeCanvasDimension = (value: number | string) => {
   const parsed = Number(value)
@@ -65,13 +62,9 @@ export const useCompositionSettings = (images: ShallowRef<Array<CompositionImage
   const activeImages = computed(() => images.value.slice(0, settings.value.frameCount))
   const frameFormatSpec = computed(() => COMPOSITION_FRAME_FORMATS[settings.value.frameFormat])
 
-  const customRatio = computed(() => {
-    const width = Number(settings.value.customRatioWidth)
-    const height = Number(settings.value.customRatioHeight)
-    return Number.isFinite(width) && Number.isFinite(height) && width > 0 && height > 0
-      ? clampRatio(width / height)
-      : 1
-  })
+  const customRatio = computed(() =>
+    getCustomCanvasRatio(settings.value.customRatioWidth, settings.value.customRatioHeight)
+  )
 
   const selectedRatio = computed(() =>
     settings.value.ratioMode === 'custom' ? customRatio.value : settings.value.ratio
@@ -79,7 +72,7 @@ export const useCompositionSettings = (images: ShallowRef<Array<CompositionImage
 
   const commonFrameRatio = computed(() => {
     const loadedRatios = activeImages.value.flatMap((entry) =>
-      entry ? [clampRatio(entry.decoded.width / entry.decoded.height)] : []
+      entry ? [clampCanvasRatio(entry.decoded.width / entry.decoded.height)] : []
     )
     if (!loadedRatios.length) return frameFormatSpec.value.ratio
     return loadedRatios.reduce((sum, value) => sum + value, 0) / loadedRatios.length

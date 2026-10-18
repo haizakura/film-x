@@ -1,3 +1,4 @@
+import type { CanvasRatioMode } from '~/types/canvas'
 import type { DecodedImage } from '~/types/image'
 
 export const MAX_COMPOSITION_CANVAS_SIDE = 8000
@@ -9,7 +10,7 @@ export const MAX_COMPOSITION_SPROCKET_TEXT_LENGTH = 48
 export type CompositionPattern = 'none' | 'grid' | 'dots'
 export type CompositionFitMode = 'cover' | 'contain'
 export type CompositionOutputFormat = 'jpeg' | 'png'
-export type CompositionRatioMode = 'preset' | 'custom' | 'auto'
+export type CompositionRatioMode = CanvasRatioMode
 export type CompositionLayoutDirection = 'horizontal' | 'vertical'
 export type CompositionFrameFormat = 'half' | 'full'
 export type CompositionFrameCount = 1 | 2

@@ -112,6 +112,12 @@
     "processing": "Processing {name}",
     "packing": "Creating ZIP"
   },
+  "ratio": {
+    "auto": "Auto",
+    "custom": "Custom",
+    "customWidth": "Custom ratio width",
+    "customHeight": "Custom ratio height"
+  },
   "composition": {
     "eyebrow": "Tool 02 · Composer",
     "title": "Film composer",
@@ -132,10 +138,6 @@
     },
     "ratio": {
       "heading": "Canvas ratio",
-      "auto": "Auto",
-      "custom": "Custom",
-      "customWidth": "Custom ratio width",
-      "customHeight": "Custom ratio height",
       "autoHint": "Adjust the export dimensions automatically from the image ratio and current spacing."
     },
     "size": {

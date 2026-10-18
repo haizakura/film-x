@@ -112,6 +112,12 @@
     "processing": "{name} を処理中",
     "packing": "ZIP を作成中"
   },
+  "ratio": {
+    "auto": "自動",
+    "custom": "カスタム",
+    "customWidth": "カスタム比率の幅",
+    "customHeight": "カスタム比率の高さ"
+  },
   "composition": {
     "eyebrow": "ツール 02 · 合成",
     "title": "フィルム合成",
@@ -132,10 +138,6 @@
     },
     "ratio": {
       "heading": "キャンバスの比率",
-      "auto": "自動",
-      "custom": "カスタム",
-      "customWidth": "カスタム比率の幅",
-      "customHeight": "カスタム比率の高さ",
       "autoHint": "画像の比率と現在の余白・間隔に合わせて、書き出しサイズを自動調整します。"
     },
     "size": {
