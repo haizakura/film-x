@@ -4,6 +4,8 @@ export type AppErrorCode =
   | 'canvasUnavailable'
   | 'exportCanvasUnavailable'
   | 'noImagesGenerated'
+  | 'framePresetInvalid'
+  | 'framePresetUnsupported'
 
 export class AppError extends Error {
   constructor(readonly code: AppErrorCode) {

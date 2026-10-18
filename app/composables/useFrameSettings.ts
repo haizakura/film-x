@@ -15,6 +15,7 @@ import type {
   FrameWordmarkPreset
 } from '~/types/frame'
 import { getCameraBrand } from '~/utils/cameraBrands'
+import { decodeFramePreset, encodeFramePreset } from '~/utils/framePreset'
 
 /** auto: only while the user has not chosen; force: apply and forget the manual choice. */
 export type FrameChoiceSource = 'user' | 'auto' | 'force'
@@ -155,6 +156,21 @@ export const useFrameSettings = () => {
     settings.value.logo.typography = wordmarkTypography(preset)
   }
 
+  const exportPreset = () => encodeFramePreset(settings.value)
+
+  /** Applies a preset code as a manual choice; the caption text and tagline are kept. */
+  const importPreset = (code: string) => {
+    const current = settings.value
+    const preset = decodeFramePreset(code, current)
+    const brandChanged = preset.logo.brand !== current.logo.brand
+    settings.value = { ...preset, tagline: current.tagline, outputQuality: current.outputQuality }
+    brandChosen = true
+    sourceChosen = true
+    if (brandChanged && !taglineEdited) {
+      settings.value.tagline = getCameraBrand(preset.logo.brand).tagline ?? ''
+    }
+  }
+
   return {
     settings,
     templateSpec,
@@ -163,7 +179,9 @@ export const useFrameSettings = () => {
     selectBrand,
     setTagline,
     setSourceType,
-    applyWordmarkPreset
+    applyWordmarkPreset,
+    exportPreset,
+    importPreset
   }
 }
 

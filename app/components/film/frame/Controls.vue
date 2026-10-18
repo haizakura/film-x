@@ -22,6 +22,7 @@ defineProps<{
   exporting: boolean
 }>()
 const settings = defineModel<FrameSettings>({ required: true })
+const presetCode = defineModel<string>('presetCode', { required: true })
 const emit = defineEmits<{
   template: [template: FrameTemplate]
   brand: [id: CameraBrandId]
@@ -32,6 +33,8 @@ const emit = defineEmits<{
   'fill-exif': []
   'custom-logo': [files: File[]]
   'remove-custom-logo': []
+  'copy-preset': []
+  'apply-preset': []
   download: []
 }>()
 </script>
@@ -66,6 +69,11 @@ const emit = defineEmits<{
       <FilmFrameTypographyControls v-model="settings" />
       <FilmFrameStyleControls v-model="settings" />
       <FilmFrameShadowControls v-model="settings" />
+      <FilmFramePresetControls
+        v-model="presetCode"
+        @copy="emit('copy-preset')"
+        @apply="emit('apply-preset')"
+      />
       <FilmFrameExportControls
         v-model="settings"
         :has-photo="hasPhoto"

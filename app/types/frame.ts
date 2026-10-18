@@ -11,6 +11,8 @@ export const MAX_FRAME_CAPTION_COLUMN = 1
 export const MAX_FRAME_BACKDROP_PADDING = 0.4
 export const MAX_FRAME_COLUMN_GAP = 0.3
 export const MAX_FRAME_TEXT_LENGTH = 80
+/** Real preset codes are well under a kilobyte; the cap keeps a crafted one from inflating hugely. */
+export const MAX_FRAME_PRESET_LENGTH = 4096
 export const MIN_FRAME_SCALE = 0.5
 export const MAX_FRAME_SCALE = 4
 export const MAX_FRAME_SHADOW_INTENSITY = 1.5
@@ -244,6 +246,9 @@ export interface FrameSettings {
   /** Requested long side of the custom output; the photo is never upscaled past it. */
   outputLongSide: number
 }
+
+/** Settings carried by a preset code: everything except caption text and values with no control. */
+export type FramePreset = Omit<FrameSettings, 'tagline' | 'outputQuality'>
 
 export interface FramePhoto {
   name: string

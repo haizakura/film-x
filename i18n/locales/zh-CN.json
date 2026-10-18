@@ -443,6 +443,19 @@
       "card": "相框阴影",
       "hint": "开启底板后，相框会像一张相纸放在底板上，并投下所选阴影。"
     },
+    "preset": {
+      "heading": "预设码",
+      "input": "预设码",
+      "placeholder": "粘贴预设码，或复制当前设置",
+      "copy": "复制预设码",
+      "apply": "应用预设码",
+      "hint": "预设码保存版式、画布比例、品牌标志、字体、边框、间距、阴影与导出设置，以及拍摄信息的显示项与字号；不包含照片、自定义标志图片，也不包含拍摄信息与标语的文字内容。",
+      "copied": "已复制预设码",
+      "copyFailed": "无法访问剪贴板，预设码已显示在上方输入框中，请手动复制。",
+      "empty": "请先粘贴预设码。",
+      "applied": "已应用预设",
+      "applyFailed": "无法应用预设码"
+    },
     "export": {
       "size": "输出尺寸（长边）",
       "original": "原尺寸",
@@ -485,7 +498,9 @@
     "archiveFailed": "无法生成压缩包",
     "decodeFailed": "图像解码失败",
     "compositionFailed": "无法生成排版图像",
-    "frameFailed": "无法生成相框图像"
+    "frameFailed": "无法生成相框图像",
+    "framePresetInvalid": "预设码不完整，或不是 Film X 相框预设",
+    "framePresetUnsupported": "该预设码来自更新版本的 Film X"
   },
   "pwa": {
     "updateReady": "新版本已就绪。所有 Film X 窗口清空图像并完成任务后将自动更新，也可关闭所有窗口后重新打开应用。"

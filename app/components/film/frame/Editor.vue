@@ -17,6 +17,8 @@ const {
 const frame = useFrameSettings()
 const { settings, brand, applyTemplate, selectBrand, setTagline, setSourceType } = frame
 const { fields, exif, setField, applyExif, fillFromExif } = useFrameMetadata(frame)
+const preset = useFramePreset(frame)
+const presetCode = preset.code
 const workspace = ref<{ download: () => Promise<void>; exporting: boolean }>()
 
 watch(photo, (entry) => applyExif(entry?.exif))
@@ -50,6 +52,7 @@ const chooseCustomLogo = async (files: File[]) => {
     />
     <FilmFrameControls
       v-model="settings"
+      v-model:preset-code="presetCode"
       :brand="brand"
       :fields="fields"
       :exif="exif"
@@ -66,6 +69,8 @@ const chooseCustomLogo = async (files: File[]) => {
       @fill-exif="fillFromExif"
       @custom-logo="chooseCustomLogo"
       @remove-custom-logo="clearCustomLogo"
+      @copy-preset="preset.copy"
+      @apply-preset="preset.apply"
       @download="download"
     />
   </main>

@@ -443,6 +443,19 @@
       "card": "Frame shadow",
       "hint": "With a backdrop, the frame sits on it like a print and casts the selected shadow."
     },
+    "preset": {
+      "heading": "Preset code",
+      "input": "Preset code",
+      "placeholder": "Paste a preset code, or copy the current one",
+      "copy": "Copy code",
+      "apply": "Apply code",
+      "hint": "A preset code stores the layout, canvas ratio, logo, fonts, borders, spacing, shadows and export options, plus which details are shown and their sizes. It never includes the photo, a custom logo image, or the caption and tagline text.",
+      "copied": "Preset code copied",
+      "copyFailed": "Could not access the clipboard; the code is in the field above for you to copy.",
+      "empty": "Paste a preset code first.",
+      "applied": "Preset applied",
+      "applyFailed": "Could not apply the preset code"
+    },
     "export": {
       "size": "Output size (long side)",
       "original": "Original",
@@ -485,7 +498,9 @@
     "archiveFailed": "Could not create the archive",
     "decodeFailed": "Image decoding failed",
     "compositionFailed": "Could not generate the composition",
-    "frameFailed": "Could not generate the framed image"
+    "frameFailed": "Could not generate the framed image",
+    "framePresetInvalid": "The preset code is incomplete or not a Film X frame preset",
+    "framePresetUnsupported": "This preset code comes from a newer version of Film X"
   },
   "pwa": {
     "updateReady": "An update is ready. It will apply automatically when images are cleared and tasks finish in all Film X windows, or after you close and reopen the app."
