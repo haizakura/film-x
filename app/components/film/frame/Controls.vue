@@ -43,6 +43,7 @@ const emit = defineEmits<{
         :model-value="settings.template"
         @update:model-value="emit('template', $event)"
       />
+      <FilmFrameRatioControls v-model="settings" />
       <FilmFrameBrandControls
         v-model="settings"
         :brand="brand"

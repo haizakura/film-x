@@ -1,3 +1,4 @@
+import { getCustomCanvasRatio } from '~/types/canvas'
 import {
   FRAME_INFO_LINES,
   FRAME_SHADOW_PRESETS,
@@ -76,24 +77,56 @@ const SECONDARY_ALPHA = 0.6
 const CAPTION_ALPHA = 0.82
 const PLACEHOLDER_FONT: FrameFontFace = { font: 'system-sans', bold: false, italic: false }
 
+type FrameCanvasSettings = Pick<
+  FrameSettings,
+  'border' | 'backdrop' | 'ratioMode' | 'ratio' | 'customRatioWidth' | 'customRatioHeight'
+>
+
+/** Requested canvas width-to-height ratio, or undefined when the canvas follows the frame. */
+const getFrameCanvasRatio = (settings: FrameCanvasSettings) => {
+  if (settings.ratioMode === 'auto') return undefined
+  if (settings.ratioMode === 'custom') {
+    return getCustomCanvasRatio(settings.customRatioWidth, settings.customRatioHeight)
+  }
+  return settings.ratio
+}
+
 export const getFrameLayout = (
   photoWidth: number,
   photoHeight: number,
-  settings: Pick<FrameSettings, 'border' | 'backdrop'>
+  settings: FrameCanvasSettings
 ): FrameLayout => {
   const unit = Math.sqrt(photoWidth * photoHeight)
   const { top, right, bottom, left } = settings.border
   const padding = settings.backdrop.enabled ? settings.backdrop.padding * unit : 0
   const cardWidth = photoWidth + (left + right) * unit
   const cardHeight = photoHeight + (top + bottom) * unit
+  const naturalWidth = cardWidth + padding * 2
+  const naturalHeight = cardHeight + padding * 2
+
+  // A canvas ratio only adds centred space around the frame, so the photo is never cropped.
+  const ratio = getFrameCanvasRatio(settings)
+  let width = naturalWidth
+  let height = naturalHeight
+  if (ratio !== undefined) {
+    if (naturalWidth / naturalHeight < ratio) width = naturalHeight * ratio
+    else height = naturalWidth / ratio
+  }
+  const content = {
+    x: (width - naturalWidth) / 2 + padding,
+    y: (height - naturalHeight) / 2 + padding,
+    width: cardWidth,
+    height: cardHeight
+  }
   return {
     unit,
-    width: cardWidth + padding * 2,
-    height: cardHeight + padding * 2,
-    card: { x: padding, y: padding, width: cardWidth, height: cardHeight },
+    width,
+    height,
+    card: settings.backdrop.enabled ? content : { x: 0, y: 0, width, height },
+    content,
     photo: {
-      x: padding + left * unit,
-      y: padding + top * unit,
+      x: content.x + left * unit,
+      y: content.y + top * unit,
       width: photoWidth,
       height: photoHeight
     }
@@ -762,6 +795,7 @@ export const drawFrame = (context: CanvasRenderingContext2D, scene: FrameScene, 
   const unit = layout.unit * scale
   const size = getFrameCanvasSize(layout, scale)
   const card = toDevice(layout.card, scale)
+  const content = toDevice(layout.content, scale)
   const photo = toDevice(layout.photo, scale)
 
   context.save()
@@ -794,7 +828,7 @@ export const drawFrame = (context: CanvasRenderingContext2D, scene: FrameScene, 
   }
 
   const spec = FRAME_TEMPLATES[settings.template]
-  const area = getCaptionArea(card, photo, spec.placement)
+  const area = getCaptionArea(content, photo, spec.placement)
   if (area.width >= 1 && area.height >= 1) {
     context.save()
     context.beginPath()

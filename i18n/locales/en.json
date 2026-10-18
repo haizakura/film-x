@@ -253,6 +253,11 @@
       "column": "Column",
       "hint": "A layout applies recommended borders, shadows and content; you can still fine-tune each setting."
     },
+    "ratio": {
+      "heading": "Canvas ratio",
+      "autoHint": "The canvas follows the photo and the borders.",
+      "padHint": "The photo and frame stay as they are; the canvas is filled out around them with the backdrop color, or the frame color when the backdrop is off."
+    },
     "brand": {
       "heading": "Brand & logo",
       "search": "Search camera brands",

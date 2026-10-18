@@ -1,3 +1,4 @@
+import type { CanvasRatioMode } from '~/types/canvas'
 import { MAX_COMPOSITION_CANVAS_SIDE } from '~/types/composition'
 import type { DecodedImage } from '~/types/image'
 
@@ -215,6 +216,11 @@ export interface FrameLogoSettings {
 
 export interface FrameSettings {
   template: FrameTemplate
+  /** Canvas shape; preset and custom ratios pad around the frame and never crop it. */
+  ratioMode: CanvasRatioMode
+  ratio: number
+  customRatioWidth: number
+  customRatioHeight: number
   border: FrameBorder
   columnSpacing: FrameColumnSpacing
   frameColor: string
@@ -252,7 +258,10 @@ export interface FrameLayout {
   unit: number
   width: number
   height: number
+  /** Paper filled with the frame colour; spans the canvas padding when there is no backdrop. */
   card: FrameRect
+  /** The card at its natural size, which the caption is laid out against. */
+  content: FrameRect
   photo: FrameRect
 }
 

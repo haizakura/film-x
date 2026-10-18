@@ -53,6 +53,10 @@ const createDefaultSettings = (): FrameSettings => {
   const brand = getCameraBrand(DEFAULT_BRAND)
   return {
     template: DEFAULT_TEMPLATE,
+    ratioMode: 'auto',
+    ratio: 4 / 5,
+    customRatioWidth: 4,
+    customRatioHeight: 5,
     border: { ...template.border },
     columnSpacing: { ...DEFAULT_FRAME_COLUMN_SPACING },
     frameColor: '#FFFFFF',
