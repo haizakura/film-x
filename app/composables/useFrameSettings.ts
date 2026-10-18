@@ -1,4 +1,9 @@
-import { DEFAULT_FRAME_OUTPUT_SIDE, FRAME_TEMPLATES, FRAME_WORDMARK_PRESETS } from '~/types/frame'
+import {
+  DEFAULT_FRAME_COLUMN_SPACING,
+  DEFAULT_FRAME_OUTPUT_SIDE,
+  FRAME_TEMPLATES,
+  FRAME_WORDMARK_PRESETS
+} from '~/types/frame'
 import type {
   CameraBrand,
   CameraBrandId,
@@ -10,6 +15,7 @@ import type {
   FrameWordmarkPreset
 } from '~/types/frame'
 import { getCameraBrand } from '~/utils/cameraBrands'
+import { decodeFramePreset, encodeFramePreset } from '~/utils/framePreset'
 
 /** auto: only while the user has not chosen; force: apply and forget the manual choice. */
 export type FrameChoiceSource = 'user' | 'auto' | 'force'
@@ -48,7 +54,12 @@ const createDefaultSettings = (): FrameSettings => {
   const brand = getCameraBrand(DEFAULT_BRAND)
   return {
     template: DEFAULT_TEMPLATE,
+    ratioMode: 'auto',
+    ratio: 4 / 5,
+    customRatioWidth: 4,
+    customRatioHeight: 5,
     border: { ...template.border },
+    columnSpacing: { ...DEFAULT_FRAME_COLUMN_SPACING },
     frameColor: '#FFFFFF',
     textColor: DEFAULT_FRAME_TEXT_COLOR,
     photoShadow: { preset: template.photoShadow, intensity: 1 },
@@ -66,7 +77,9 @@ const createDefaultSettings = (): FrameSettings => {
     },
     showTagline: template.showTagline,
     tagline: brand.tagline ?? '',
+    taglineScale: 1,
     lines: linesFor('digital', template.showInfo),
+    lineScales: { camera: 1, lens: 1, film: 1, exposure: 1, date: 1, custom: 1 },
     text: { font: 'jost', bold: false, italic: false, letterSpacing: 0.02, uppercase: false },
     textScale: 1,
     sourceType: 'digital',
@@ -91,6 +104,7 @@ export const useFrameSettings = () => {
     const current = settings.value
     current.template = template
     current.border = { ...spec.border }
+    current.columnSpacing = { ...DEFAULT_FRAME_COLUMN_SPACING }
     current.photoShadow.preset = spec.photoShadow
     current.backdrop.enabled = spec.backdrop
     current.showTagline = spec.showTagline
@@ -142,6 +156,21 @@ export const useFrameSettings = () => {
     settings.value.logo.typography = wordmarkTypography(preset)
   }
 
+  const exportPreset = () => encodeFramePreset(settings.value)
+
+  /** Applies a preset code as a manual choice; the caption text and tagline are kept. */
+  const importPreset = (code: string) => {
+    const current = settings.value
+    const preset = decodeFramePreset(code, current)
+    const brandChanged = preset.logo.brand !== current.logo.brand
+    settings.value = { ...preset, tagline: current.tagline, outputQuality: current.outputQuality }
+    brandChosen = true
+    sourceChosen = true
+    if (brandChanged && !taglineEdited) {
+      settings.value.tagline = getCameraBrand(preset.logo.brand).tagline ?? ''
+    }
+  }
+
   return {
     settings,
     templateSpec,
@@ -150,7 +179,9 @@ export const useFrameSettings = () => {
     selectBrand,
     setTagline,
     setSourceType,
-    applyWordmarkPreset
+    applyWordmarkPreset,
+    exportPreset,
+    importPreset
   }
 }
 

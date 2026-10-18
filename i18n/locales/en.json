@@ -112,6 +112,12 @@
     "processing": "Processing {name}",
     "packing": "Creating ZIP"
   },
+  "ratio": {
+    "auto": "Auto",
+    "custom": "Custom",
+    "customWidth": "Custom ratio width",
+    "customHeight": "Custom ratio height"
+  },
   "composition": {
     "eyebrow": "Tool 02 · Composer",
     "title": "Film composer",
@@ -132,10 +138,6 @@
     },
     "ratio": {
       "heading": "Canvas ratio",
-      "auto": "Auto",
-      "custom": "Custom",
-      "customWidth": "Custom ratio width",
-      "customHeight": "Custom ratio height",
       "autoHint": "Adjust the export dimensions automatically from the image ratio and current spacing."
     },
     "size": {
@@ -245,7 +247,16 @@
       "gallery": "Gallery",
       "float": "Float",
       "strip": "Info bar",
+      "bar": "Brand bar",
+      "photoLeft": "Photo left",
+      "photoRight": "Photo right",
+      "column": "Column",
       "hint": "A layout applies recommended borders, shadows and content; you can still fine-tune each setting."
+    },
+    "ratio": {
+      "heading": "Canvas ratio",
+      "autoHint": "The canvas follows the photo and the borders.",
+      "padHint": "The photo and frame stay as they are; the canvas is filled out around them with the backdrop color, or the frame color when the backdrop is off."
     },
     "brand": {
       "heading": "Brand & logo",
@@ -295,6 +306,7 @@
       "exifReady": "EXIF read",
       "fillExif": "Fill from EXIF",
       "show": "Show {line}",
+      "size": "{line} size",
       "lines": {
         "camera": "Camera",
         "lens": "Lens",
@@ -382,9 +394,26 @@
         "bottom": "Bottom border",
         "topInput": "Enter top border width",
         "sideInput": "Enter side border width",
-        "bottomInput": "Enter bottom border width"
+        "bottomInput": "Enter bottom border width",
+        "left": "Left border",
+        "right": "Right border",
+        "panel": "Caption column",
+        "leftInput": "Enter left border width",
+        "rightInput": "Enter right border width",
+        "panelInput": "Enter caption column width"
       },
-      "borderHint": "Borders scale with the photo (100% is the geometric mean of its width and height), so square, landscape, portrait and panoramic photos look consistent."
+      "borderHint": "Borders scale with the photo (100% is the geometric mean of its width and height), so square, landscape, portrait and panoramic photos look consistent.",
+      "spacing": {
+        "heading": "Column spacing",
+        "photo": "Photo to rule",
+        "text": "Rule to text",
+        "logo": "Logo to details",
+        "group": "Between detail groups",
+        "photoInput": "Enter photo-to-rule spacing",
+        "textInput": "Enter rule-to-text spacing",
+        "logoInput": "Enter logo-to-details spacing",
+        "groupInput": "Enter spacing between detail groups"
+      }
     },
     "shadow": {
       "heading": "Shadow & backdrop",
@@ -413,6 +442,19 @@
       "paddingInput": "Enter backdrop margin",
       "card": "Frame shadow",
       "hint": "With a backdrop, the frame sits on it like a print and casts the selected shadow."
+    },
+    "preset": {
+      "heading": "Preset code",
+      "input": "Preset code",
+      "placeholder": "Paste a preset code, or copy the current one",
+      "copy": "Copy code",
+      "apply": "Apply code",
+      "hint": "A preset code stores the layout, canvas ratio, logo, fonts, borders, spacing, shadows and export options, plus which details are shown and their sizes. It never includes the photo, a custom logo image, or the caption and tagline text.",
+      "copied": "Preset code copied",
+      "copyFailed": "Could not access the clipboard; the code is in the field above for you to copy.",
+      "empty": "Paste a preset code first.",
+      "applied": "Preset applied",
+      "applyFailed": "Could not apply the preset code"
     },
     "export": {
       "size": "Output size (long side)",
@@ -456,7 +498,9 @@
     "archiveFailed": "Could not create the archive",
     "decodeFailed": "Image decoding failed",
     "compositionFailed": "Could not generate the composition",
-    "frameFailed": "Could not generate the framed image"
+    "frameFailed": "Could not generate the framed image",
+    "framePresetInvalid": "The preset code is incomplete or not a Film X frame preset",
+    "framePresetUnsupported": "This preset code comes from a newer version of Film X"
   },
   "pwa": {
     "updateReady": "An update is ready. It will apply automatically when images are cleared and tasks finish in all Film X windows, or after you close and reopen the app."

@@ -1,3 +1,4 @@
+import { getCustomCanvasRatio } from '~/types/canvas'
 import {
   FRAME_INFO_LINES,
   FRAME_SHADOW_PRESETS,
@@ -6,6 +7,7 @@ import {
   MIN_FRAME_OUTPUT_SIDE
 } from '~/types/frame'
 import type {
+  FrameCaptionPlacement,
   FrameInfoFields,
   FrameInfoLine,
   FrameLayout,
@@ -23,11 +25,20 @@ export interface FrameLogoAsset {
   tintable: boolean
 }
 
+/** A run of caption text drawn at its own size multiplier. */
+export interface FrameCaptionRun {
+  text: string
+  scale: number
+}
+
+/** Runs set on one line, separated by a middle dot. */
+export type FrameCaptionLine = FrameCaptionRun[]
+
 export interface FrameCaption {
-  tagline: string
-  stack: string[]
-  left: string[]
-  right: string[]
+  tagline?: FrameCaptionRun
+  stack: FrameCaptionLine[]
+  left: FrameCaptionLine[]
+  right: FrameCaptionLine[]
 }
 
 export interface FrameScene {
@@ -44,6 +55,8 @@ interface Block {
   height: number
   draw: (context: CanvasRenderingContext2D, x: number, y: number) => void
 }
+
+type StackAlign = 'center' | 'start' | 'end'
 
 interface TextStyle {
   face: FrameFontFace
@@ -63,30 +76,67 @@ const SYMBOL_LOGO_BOOST = 1.7
 const LINE_HEIGHT = 1.55
 const MAX_STACK_WIDTH = 0.82
 const MAX_STACK_HEIGHT = 0.84
-const MIN_SPLIT_PADDING = 0.04
+const MIN_CAPTION_PADDING = 0.04
+const RULE_WIDTH = 0.0012
+const RULE_ALPHA = 0.25
+// Side captions keep at least this share of the column for text.
+const MAX_SIDE_INSET = 0.2
 const TAGLINE_TRACKING = 0.32
 const SECONDARY_ALPHA = 0.6
 const CAPTION_ALPHA = 0.82
+const RUN_SEPARATOR = '  ·  '
 const PLACEHOLDER_FONT: FrameFontFace = { font: 'system-sans', bold: false, italic: false }
+
+type FrameCanvasSettings = Pick<
+  FrameSettings,
+  'border' | 'backdrop' | 'ratioMode' | 'ratio' | 'customRatioWidth' | 'customRatioHeight'
+>
+
+/** Requested canvas width-to-height ratio, or undefined when the canvas follows the frame. */
+const getFrameCanvasRatio = (settings: FrameCanvasSettings) => {
+  if (settings.ratioMode === 'auto') return undefined
+  if (settings.ratioMode === 'custom') {
+    return getCustomCanvasRatio(settings.customRatioWidth, settings.customRatioHeight)
+  }
+  return settings.ratio
+}
 
 export const getFrameLayout = (
   photoWidth: number,
   photoHeight: number,
-  settings: Pick<FrameSettings, 'border' | 'backdrop'>
+  settings: FrameCanvasSettings
 ): FrameLayout => {
   const unit = Math.sqrt(photoWidth * photoHeight)
-  const { top, side, bottom } = settings.border
+  const { top, right, bottom, left } = settings.border
   const padding = settings.backdrop.enabled ? settings.backdrop.padding * unit : 0
-  const cardWidth = photoWidth + side * unit * 2
+  const cardWidth = photoWidth + (left + right) * unit
   const cardHeight = photoHeight + (top + bottom) * unit
+  const naturalWidth = cardWidth + padding * 2
+  const naturalHeight = cardHeight + padding * 2
+
+  // A canvas ratio only adds centred space around the frame, so the photo is never cropped.
+  const ratio = getFrameCanvasRatio(settings)
+  let width = naturalWidth
+  let height = naturalHeight
+  if (ratio !== undefined) {
+    if (naturalWidth / naturalHeight < ratio) width = naturalHeight * ratio
+    else height = naturalWidth / ratio
+  }
+  const content = {
+    x: (width - naturalWidth) / 2 + padding,
+    y: (height - naturalHeight) / 2 + padding,
+    width: cardWidth,
+    height: cardHeight
+  }
   return {
     unit,
-    width: cardWidth + padding * 2,
-    height: cardHeight + padding * 2,
-    card: { x: padding, y: padding, width: cardWidth, height: cardHeight },
+    width,
+    height,
+    card: settings.backdrop.enabled ? content : { x: 0, y: 0, width, height },
+    content,
     photo: {
-      x: padding + side * unit,
-      y: padding + top * unit,
+      x: content.x + left * unit,
+      y: content.y + top * unit,
       width: photoWidth,
       height: photoHeight
     }
@@ -119,22 +169,24 @@ const lineText = (fields: FrameInfoFields, settings: FrameSettings, line: FrameI
   return fields[line].trim()
 }
 
-const joinParts = (parts: string[]) => parts.filter(Boolean).join('  ·  ')
-
 export const buildFrameCaption = (
   fields: FrameInfoFields,
   settings: FrameSettings
 ): FrameCaption => {
-  const text = (line: FrameInfoLine) => lineText(fields, settings, line)
+  /** The shown lines as one caption line, each keeping its own size. */
+  const line = (...lines: FrameInfoLine[]): FrameCaptionLine =>
+    lines.flatMap((item) => {
+      const text = lineText(fields, settings, item)
+      return text ? [{ text, scale: settings.lineScales[item] }] : []
+    })
+  const shown = (lines: FrameCaptionLine[]) => lines.filter((runs) => runs.length)
   const stacked = FRAME_TEMPLATES[settings.template].layout === 'stack'
+  const tagline = stacked && settings.showTagline ? settings.tagline.trim() : ''
   return {
-    tagline: stacked && settings.showTagline ? settings.tagline.trim() : '',
-    stack: FRAME_INFO_LINES.map(text).filter(Boolean),
-    left: [text('camera'), text('lens')].filter(Boolean),
-    right: [
-      joinParts([text('exposure'), text('film')]),
-      joinParts([text('date'), text('custom')])
-    ].filter(Boolean)
+    tagline: tagline ? { text: tagline, scale: settings.taglineScale } : undefined,
+    stack: shown(FRAME_INFO_LINES.map((item) => line(item))),
+    left: shown([line('camera'), line('lens')]),
+    right: shown([line('exposure', 'film'), line('date', 'custom')])
   }
 }
 
@@ -256,34 +308,67 @@ const fillTracked = (
   }
 }
 
-/** A caption line laid out in a fixed line box, shrunk to fit the available width. */
+/** Distance from the middle line down to the alphabetic baseline, per pixel of font size. */
+const baselineRatio = (context: CanvasRenderingContext2D, face: FrameFontFace) => {
+  context.save()
+  context.font = buildFrameFont(face, 100)
+  context.textBaseline = 'middle'
+  const fromMiddle = context.measureText('H').actualBoundingBoxAscent
+  context.textBaseline = 'alphabetic'
+  const fromBaseline = context.measureText('H').actualBoundingBoxAscent
+  context.restore()
+  return (fromBaseline - fromMiddle) / 100
+}
+
+/**
+ * A caption line laid out in a fixed line box, shrunk to fit the available width. Runs of
+ * different sizes share the baseline of the largest one.
+ */
 const textBlock = (
   context: CanvasRenderingContext2D,
-  text: string,
+  line: FrameCaptionLine,
   style: TextStyle,
   maxWidth: number
 ): Block => {
-  const content = style.uppercase ? text.toUpperCase() : text
-  let size = style.size
-  context.font = buildFrameFont(style.face, size)
-  let width = measureTracked(context, content, style.tracking * size)
+  const texts = line.map(
+    (run, index) =>
+      (index > 0 ? RUN_SEPARATOR : '') + (style.uppercase ? run.text.toUpperCase() : run.text)
+  )
+  const measure = (fit: number) =>
+    line.map((run, index) => {
+      const size = style.size * run.scale * fit
+      context.font = buildFrameFont(style.face, size)
+      const text = texts[index] ?? ''
+      return { text, size, width: measureTracked(context, text, style.tracking * size) }
+    })
+  const lineWidth = (runs: Array<{ width: number }>) =>
+    runs.reduce((sum, run) => sum + run.width, 0)
+
+  let runs = measure(1)
+  let width = lineWidth(runs)
   if (width > maxWidth && width > 0) {
-    size *= maxWidth / width
-    context.font = buildFrameFont(style.face, size)
-    width = measureTracked(context, content, style.tracking * size)
+    runs = measure(maxWidth / width)
+    width = lineWidth(runs)
   }
-  const height = size * LINE_HEIGHT
+  const largest = Math.max(0, ...runs.map((run) => run.size))
+  const height = largest * LINE_HEIGHT
+  const ratio = runs.length > 1 ? baselineRatio(context, style.face) : 0
   return {
     width,
     height,
     draw: (target, x, y) => {
       target.save()
-      target.font = buildFrameFont(style.face, size)
       target.fillStyle = style.color
       target.globalAlpha = style.alpha
       target.textAlign = 'left'
       target.textBaseline = 'middle'
-      fillTracked(target, content, x, y + height / 2, style.tracking * size)
+      let cursor = x
+      for (const run of runs) {
+        target.font = buildFrameFont(style.face, run.size)
+        const middle = y + height / 2 + (largest - run.size) * ratio
+        fillTracked(target, run.text, cursor, middle, style.tracking * run.size)
+        cursor += run.width
+      }
       target.restore()
     }
   }
@@ -391,16 +476,26 @@ const logoBlock = (
   }
 }
 
+/** Stacked caption; start and end align to an inset from the column edges. */
 const drawStack = (
   context: CanvasRenderingContext2D,
   scene: FrameScene,
   area: FrameRect,
-  unit: number
+  unit: number,
+  align: StackAlign,
+  inset: number
 ) => {
   const { settings, caption } = scene
   const spec = FRAME_TEMPLATES[settings.template]
-  const maxWidth = area.width * MAX_STACK_WIDTH
+  const maxWidth = align === 'center' ? area.width * MAX_STACK_WIDTH : area.width - inset * 2
+  if (maxWidth <= 0) return
   const textFace = settings.text
+  const blockX = (width: number) =>
+    align === 'start'
+      ? area.x + inset
+      : align === 'end'
+        ? area.x + area.width - inset - width
+        : area.x + (area.width - width) / 2
 
   const build = (factor: number) => {
     const items: Array<{ block: Block; gap: number }> = []
@@ -413,7 +508,7 @@ const drawStack = (
       items.push({
         block: textBlock(
           context,
-          caption.tagline,
+          [caption.tagline],
           {
             face: { font: textFace.font, bold: false, italic: textFace.italic },
             size: taglineSize,
@@ -461,9 +556,43 @@ const drawStack = (
   let y = area.y + (area.height - totalHeight(items)) / 2
   for (const { block, gap } of items) {
     y += gap
-    block.draw(context, area.x + (area.width - block.width) / 2, y)
+    block.draw(context, blockX(block.width), y)
     y += block.height
   }
+}
+
+/** Bar caption lines: a bold first line over smaller, lighter secondary lines. */
+const barColumn = (
+  context: CanvasRenderingContext2D,
+  settings: FrameSettings,
+  lines: FrameCaptionLine[],
+  textSize: number,
+  maxWidth: number
+) =>
+  lines.map((line, index) =>
+    textBlock(
+      context,
+      line,
+      {
+        face: index === 0 ? { ...settings.text, bold: true } : settings.text,
+        size: index === 0 ? textSize * 1.1 : textSize * 0.85,
+        tracking: settings.text.letterSpacing,
+        uppercase: settings.text.uppercase,
+        color: settings.textColor,
+        alpha: index === 0 ? 1 : SECONDARY_ALPHA
+      },
+      maxWidth
+    )
+  )
+
+const columnWidth = (blocks: Block[]) => Math.max(0, ...blocks.map((block) => block.width))
+const columnHeight = (blocks: Block[]) => blocks.reduce((sum, block) => sum + block.height, 0)
+
+/** Horizontal bounds of a bar's content, inset by the side borders. */
+const barInner = (settings: FrameSettings, area: FrameRect, unit: number) => {
+  const left = area.x + Math.max(settings.border.left, MIN_CAPTION_PADDING) * unit
+  const right = area.x + area.width - Math.max(settings.border.right, MIN_CAPTION_PADDING) * unit
+  return { x: left, width: right - left }
 }
 
 const drawSplit = (
@@ -474,32 +603,13 @@ const drawSplit = (
 ) => {
   const { settings, caption } = scene
   const spec = FRAME_TEMPLATES[settings.template]
-  const padding = Math.max(settings.border.side * unit, MIN_SPLIT_PADDING * unit)
-  const innerX = area.x + padding
-  const innerWidth = area.width - padding * 2
+  const { x: innerX, width: innerWidth } = barInner(settings, area, unit)
   if (innerWidth <= 0) return
-  const textFace = settings.text
 
   const build = (factor: number, maxWidth: number) => {
     const textSize = spec.textSize * unit * settings.textScale * factor
-    const column = (lines: string[]) =>
-      lines.map((line, index) =>
-        textBlock(
-          context,
-          line,
-          {
-            face: index === 0 ? { ...textFace, bold: true } : textFace,
-            size: index === 0 ? textSize * 1.1 : textSize * 0.85,
-            tracking: textFace.letterSpacing,
-            uppercase: textFace.uppercase,
-            color: settings.textColor,
-            alpha: index === 0 ? 1 : SECONDARY_ALPHA
-          },
-          maxWidth
-        )
-      )
-    const left = column(caption.left)
-    const right = column(caption.right)
+    const left = barColumn(context, settings, caption.left, textSize, maxWidth)
+    const right = barColumn(context, settings, caption.right, textSize, maxWidth)
     const logo = logoBlock(
       context,
       scene,
@@ -507,10 +617,8 @@ const drawSplit = (
       maxWidth * 0.4
     )
     const gap = 0.022 * unit * factor
-    const columnWidth = (blocks: Block[]) => Math.max(0, ...blocks.map((block) => block.width))
-    const columnHeight = (blocks: Block[]) => blocks.reduce((sum, block) => sum + block.height, 0)
     const rightTextWidth = columnWidth(right)
-    const dividerWidth = Math.max(1, 0.0012 * unit)
+    const dividerWidth = Math.max(1, RULE_WIDTH * unit)
     const divided = Boolean(logo && right.length)
     const rightWidth = (logo?.width ?? 0) + (divided ? gap * 2 + dividerWidth : 0) + rightTextWidth
     return {
@@ -522,8 +630,7 @@ const drawSplit = (
       divided,
       leftWidth: columnWidth(left),
       rightWidth,
-      rightTextWidth,
-      columnHeight
+      rightTextWidth
     }
   }
 
@@ -532,8 +639,8 @@ const drawSplit = (
   const required =
     natural.leftWidth + natural.rightWidth + (natural.leftWidth ? natural.gap * 2 : 0)
   const height = Math.max(
-    natural.columnHeight(natural.left),
-    natural.columnHeight(natural.right),
+    columnHeight(natural.left),
+    columnHeight(natural.right),
     natural.logo?.height ?? 0
   )
   if (!required || !height) return
@@ -542,7 +649,7 @@ const drawSplit = (
 
   const centerY = area.y + area.height / 2
   const drawColumn = (blocks: Block[], x: number) => {
-    let y = centerY - parts.columnHeight(blocks) / 2
+    let y = centerY - columnHeight(blocks) / 2
     for (const block of blocks) {
       block.draw(context, x, y)
       y += block.height
@@ -557,15 +664,56 @@ const drawSplit = (
   }
   if (parts.divided) {
     x += parts.gap
-    const dividerHeight = Math.max(parts.columnHeight(parts.right), parts.logo?.height ?? 0)
+    const dividerHeight = Math.max(columnHeight(parts.right), parts.logo?.height ?? 0)
     context.save()
     context.fillStyle = settings.textColor
-    context.globalAlpha = 0.25
+    context.globalAlpha = RULE_ALPHA
     context.fillRect(x, centerY - dividerHeight / 2, parts.dividerWidth, dividerHeight)
     context.restore()
     x += parts.dividerWidth + parts.gap
   }
   drawColumn(parts.right, x)
+}
+
+/** Logo at the left edge of the bar, every caption line right-aligned at the other. */
+const drawBar = (
+  context: CanvasRenderingContext2D,
+  scene: FrameScene,
+  area: FrameRect,
+  unit: number
+) => {
+  const { settings, caption } = scene
+  const spec = FRAME_TEMPLATES[settings.template]
+  const { x: innerX, width: innerWidth } = barInner(settings, area, unit)
+  if (innerWidth <= 0) return
+  const lines = [...caption.left, ...caption.right]
+
+  const build = (factor: number, maxWidth: number) => {
+    const textSize = spec.textSize * unit * settings.textScale * factor
+    const info = barColumn(context, settings, lines, textSize, maxWidth)
+    const logo = logoBlock(
+      context,
+      scene,
+      spec.logoHeight * unit * settings.logo.scale * factor,
+      maxWidth * 0.5
+    )
+    const gap = logo && info.length ? 0.04 * unit * factor : 0
+    return { info, logo, width: (logo?.width ?? 0) + gap + columnWidth(info) }
+  }
+
+  const natural = build(1, Number.POSITIVE_INFINITY)
+  const height = Math.max(columnHeight(natural.info), natural.logo?.height ?? 0)
+  if (!natural.width || !height) return
+  const factor = Math.min(1, innerWidth / natural.width, (area.height * MAX_STACK_HEIGHT) / height)
+  const { info, logo } = build(factor, innerWidth)
+
+  const centerY = area.y + area.height / 2
+  if (logo) logo.draw(context, innerX, centerY - logo.height / 2)
+  let y = centerY - columnHeight(info) / 2
+  for (const block of info) {
+    block.draw(context, innerX + innerWidth - block.width, y)
+    y += block.height
+  }
 }
 
 const drawPlaceholder = (
@@ -593,12 +741,106 @@ const drawPlaceholder = (
   context.restore()
 }
 
+/**
+ * Side caption behind a rule the height of the photo: the logo over both bar caption groups,
+ * aligned toward the rule and bottom-aligned with the photo. The inset is the outer margin.
+ */
+const drawSideColumn = (
+  context: CanvasRenderingContext2D,
+  scene: FrameScene,
+  area: FrameRect,
+  unit: number,
+  align: Exclude<StackAlign, 'center'>,
+  inset: number
+) => {
+  const { settings, caption } = scene
+  const spec = FRAME_TEMPLATES[settings.template]
+  const spacing = settings.columnSpacing
+  const ruleWidth = Math.max(1, RULE_WIDTH * unit)
+  const photoGap = spacing.photo * unit
+  const textGap = spacing.text * unit
+  const maxWidth = area.width - photoGap - ruleWidth - textGap - inset
+  if (maxWidth <= 0) return
+  const groups = [caption.left, caption.right].filter((lines) => lines.length)
+
+  const build = (factor: number, width: number) => {
+    const logoHeight = spec.logoHeight * unit * settings.logo.scale * factor
+    const textSize = spec.textSize * unit * settings.textScale * factor
+    const items: Array<{ block: Block; gap: number }> = []
+    const logo = logoBlock(context, scene, logoHeight, width)
+    if (logo) items.push({ block: logo, gap: 0 })
+    groups.forEach((lines, group) => {
+      barColumn(context, settings, lines, textSize, width).forEach((block, line) => {
+        const gap =
+          line > 0 ? 0 : (group > 0 ? spacing.group : logo ? spacing.logo : 0) * unit * factor
+        items.push({ block, gap })
+      })
+    })
+    return items
+  }
+  const totalHeight = (items: Array<{ block: Block; gap: number }>) =>
+    items.reduce((sum, item) => sum + item.gap + item.block.height, 0)
+
+  const natural = build(1, Number.POSITIVE_INFINITY)
+  const naturalWidth = Math.max(0, ...natural.map((item) => item.block.width))
+  const naturalHeight = totalHeight(natural)
+  if (!naturalWidth || !naturalHeight) return
+  const factor = Math.min(
+    1,
+    maxWidth / naturalWidth,
+    (area.height * MAX_STACK_HEIGHT) / naturalHeight
+  )
+  const items = build(factor, maxWidth)
+
+  const ruleX = align === 'start' ? area.x + photoGap : area.x + area.width - photoGap - ruleWidth
+  context.save()
+  context.fillStyle = settings.textColor
+  context.globalAlpha = RULE_ALPHA
+  context.fillRect(ruleX, area.y, ruleWidth, area.height)
+  context.restore()
+
+  const textEdge = align === 'start' ? ruleX + ruleWidth + textGap : ruleX - textGap
+  let y = area.y + area.height - totalHeight(items)
+  for (const { block, gap } of items) {
+    y += gap
+    block.draw(context, align === 'start' ? textEdge : textEdge - block.width, y)
+    y += block.height
+  }
+}
+
+/** Region beside the photo that holds the caption; side captions centre on the photo. */
+const getCaptionArea = (
+  card: FrameRect,
+  photo: FrameRect,
+  placement: FrameCaptionPlacement
+): FrameRect => {
+  const photoRight = photo.x + photo.width
+  if (placement === 'left') {
+    return { x: card.x, y: photo.y, width: photo.x - card.x, height: photo.height }
+  }
+  if (placement === 'right') {
+    return {
+      x: photoRight,
+      y: photo.y,
+      width: card.x + card.width - photoRight,
+      height: photo.height
+    }
+  }
+  return {
+    x: card.x,
+    y: photo.y + photo.height,
+    width: card.width,
+    height: card.y + card.height - (photo.y + photo.height)
+  }
+}
+
 /** Renders the whole frame; the canvas must already be sized with getFrameCanvasSize. */
 export const drawFrame = (context: CanvasRenderingContext2D, scene: FrameScene, scale: number) => {
   const { layout, settings } = scene
   const unit = layout.unit * scale
   const size = getFrameCanvasSize(layout, scale)
   const card = toDevice(layout.card, scale)
+  const content = toDevice(layout.content, scale)
   const photo = toDevice(layout.photo, scale)
 
   context.save()
@@ -630,21 +872,27 @@ export const drawFrame = (context: CanvasRenderingContext2D, scene: FrameScene, 
     drawPlaceholder(context, photo, scene.placeholder, unit)
   }
 
-  const area = {
-    x: card.x,
-    y: photo.y + photo.height,
-    width: card.width,
-    height: card.y + card.height - (photo.y + photo.height)
-  }
-  if (area.height >= 1) {
+  const spec = FRAME_TEMPLATES[settings.template]
+  const area = getCaptionArea(content, photo, spec.placement)
+  if (area.width >= 1 && area.height >= 1) {
     context.save()
     context.beginPath()
     context.rect(card.x, card.y, card.width, card.height)
     context.clip()
-    if (FRAME_TEMPLATES[settings.template].layout === 'split') {
+    // Side captions align toward the photo, spaced like its opposite border.
+    const outer = spec.placement === 'right' ? settings.border.left : settings.border.right
+    const inset = Math.min(Math.max(outer, MIN_CAPTION_PADDING) * unit, area.width * MAX_SIDE_INSET)
+    const sideAlign = spec.placement === 'right' ? 'start' : 'end'
+    if (spec.layout === 'split') {
       drawSplit(context, scene, area, unit)
+    } else if (spec.layout === 'bar') {
+      drawBar(context, scene, area, unit)
+    } else if (spec.layout === 'column') {
+      drawSideColumn(context, scene, area, unit, sideAlign, inset)
+    } else if (spec.placement === 'bottom') {
+      drawStack(context, scene, area, unit, 'center', 0)
     } else {
-      drawStack(context, scene, area, unit)
+      drawStack(context, scene, area, unit, sideAlign, inset)
     }
     context.restore()
   }
@@ -657,7 +905,7 @@ export const getFrameSceneFonts = (settings: FrameSettings): FrameFontFace[] => 
     settings.text,
     { font: settings.text.font, bold: false, italic: settings.text.italic }
   ]
-  if (FRAME_TEMPLATES[settings.template].layout === 'split') {
+  if (FRAME_TEMPLATES[settings.template].layout !== 'stack') {
     faces.push({ font: settings.text.font, bold: true, italic: settings.text.italic })
   }
   if (settings.logo.style === 'wordmark') faces.push(settings.logo.typography)

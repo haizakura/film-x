@@ -112,6 +112,12 @@
     "processing": "正在处理 {name}",
     "packing": "正在打包 ZIP"
   },
+  "ratio": {
+    "auto": "自动",
+    "custom": "自定义",
+    "customWidth": "自定义比例宽度",
+    "customHeight": "自定义比例高度"
+  },
   "composition": {
     "eyebrow": "工具 02 · 排版",
     "title": "胶片排版拼图",
@@ -132,10 +138,6 @@
     },
     "ratio": {
       "heading": "画布比例",
-      "auto": "自动",
-      "custom": "自定义",
-      "customWidth": "自定义比例宽度",
-      "customHeight": "自定义比例高度",
       "autoHint": "根据图像比例与当前间距自动调整导出尺寸。"
     },
     "size": {
@@ -245,7 +247,16 @@
       "gallery": "画廊",
       "float": "悬浮",
       "strip": "信息条",
+      "bar": "品牌条",
+      "photoLeft": "左图",
+      "photoRight": "右图",
+      "column": "分栏",
       "hint": "版式会套用推荐的边框、阴影与显示内容，之后仍可逐项调整。"
+    },
+    "ratio": {
+      "heading": "画布比例",
+      "autoHint": "画布随照片与边框尺寸自动确定。",
+      "padHint": "照片与相框保持不变，画布四周以底板颜色补足留白；未开启底板时使用相框颜色。"
     },
     "brand": {
       "heading": "品牌与标志",
@@ -295,6 +306,7 @@
       "exifReady": "已读取 EXIF",
       "fillExif": "从 EXIF 填写",
       "show": "显示{line}",
+      "size": "{line}字号",
       "lines": {
         "camera": "机型",
         "lens": "镜头",
@@ -382,9 +394,26 @@
         "bottom": "下边框",
         "topInput": "输入上边框宽度",
         "sideInput": "输入左右边框宽度",
-        "bottomInput": "输入下边框宽度"
+        "bottomInput": "输入下边框宽度",
+        "left": "左边框",
+        "right": "右边框",
+        "panel": "信息栏宽度",
+        "leftInput": "输入左边框宽度",
+        "rightInput": "输入右边框宽度",
+        "panelInput": "输入信息栏宽度"
       },
-      "borderHint": "边框宽度按照片尺寸等比计算（以宽高的几何平均为 100%），方形、横幅、竖幅与宽幅照片的观感保持一致。"
+      "borderHint": "边框宽度按照片尺寸等比计算（以宽高的几何平均为 100%），方形、横幅、竖幅与宽幅照片的观感保持一致。",
+      "spacing": {
+        "heading": "分栏间距",
+        "photo": "照片与竖线",
+        "text": "竖线与文字",
+        "logo": "标志与信息",
+        "group": "信息分组之间",
+        "photoInput": "输入照片与竖线的间距",
+        "textInput": "输入竖线与文字的间距",
+        "logoInput": "输入标志与信息的间距",
+        "groupInput": "输入信息分组之间的间距"
+      }
     },
     "shadow": {
       "heading": "阴影与底板",
@@ -413,6 +442,19 @@
       "paddingInput": "输入底板留白",
       "card": "相框阴影",
       "hint": "开启底板后，相框会像一张相纸放在底板上，并投下所选阴影。"
+    },
+    "preset": {
+      "heading": "预设码",
+      "input": "预设码",
+      "placeholder": "粘贴预设码，或复制当前设置",
+      "copy": "复制预设码",
+      "apply": "应用预设码",
+      "hint": "预设码保存版式、画布比例、品牌标志、字体、边框、间距、阴影与导出设置，以及拍摄信息的显示项与字号；不包含照片、自定义标志图片，也不包含拍摄信息与标语的文字内容。",
+      "copied": "已复制预设码",
+      "copyFailed": "无法访问剪贴板，预设码已显示在上方输入框中，请手动复制。",
+      "empty": "请先粘贴预设码。",
+      "applied": "已应用预设",
+      "applyFailed": "无法应用预设码"
     },
     "export": {
       "size": "输出尺寸（长边）",
@@ -456,7 +498,9 @@
     "archiveFailed": "无法生成压缩包",
     "decodeFailed": "图像解码失败",
     "compositionFailed": "无法生成排版图像",
-    "frameFailed": "无法生成相框图像"
+    "frameFailed": "无法生成相框图像",
+    "framePresetInvalid": "预设码不完整，或不是 Film X 相框预设",
+    "framePresetUnsupported": "该预设码来自更新版本的 Film X"
   },
   "pwa": {
     "updateReady": "新版本已就绪。所有 Film X 窗口清空图像并完成任务后将自动更新，也可关闭所有窗口后重新打开应用。"

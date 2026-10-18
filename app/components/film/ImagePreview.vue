@@ -39,7 +39,7 @@ const updateCenter = (event: Event) => {
 </script>
 
 <template>
-  <section class="flex min-h-140 min-w-0 flex-col bg-[#141414] lg:min-h-0">
+  <section class="flex min-h-140 min-w-0 flex-col bg-workbench dark:bg-[#141414] lg:min-h-0">
     <div class="flex h-13 items-center justify-between border-b border-white/8 px-5 text-white/70">
       <p class="min-w-0 truncate text-xs font-medium text-white/90">{{ name }}</p>
       <div v-if="decoded" class="font-mono text-[10px] tracking-wide text-white/45">
@@ -115,12 +115,20 @@ const updateCenter = (event: Event) => {
 }
 
 .range-dark::-webkit-slider-thumb {
-  border-color: #141414;
+  border-color: var(--workbench);
   background: white;
 }
 
 .range-dark::-moz-range-thumb {
-  border-color: #141414;
+  border-color: var(--workbench);
   background: white;
+}
+
+.dark .range-dark::-webkit-slider-thumb {
+  border-color: #141414;
+}
+
+.dark .range-dark::-moz-range-thumb {
+  border-color: #141414;
 }
 </style>

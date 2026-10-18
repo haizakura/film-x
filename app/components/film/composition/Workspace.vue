@@ -105,7 +105,7 @@ defineExpose({ download })
 
 <template>
   <section
-    class="relative flex min-h-155 min-w-0 flex-col overflow-hidden bg-[#10100f] lg:min-h-0"
+    class="relative flex min-h-155 min-w-0 flex-col overflow-hidden bg-workbench lg:min-h-0"
     @dragenter.prevent="handleDragEnter"
     @dragover.prevent="handleDragOver"
     @dragleave="handleDragLeave"
@@ -191,7 +191,7 @@ defineExpose({ download })
 
 <style scoped>
 .composition-stage {
-  background-color: #181817;
+  background-color: #434342;
   background-image:
     linear-gradient(45deg, rgb(255 255 255 / 2.5%) 25%, transparent 25%),
     linear-gradient(-45deg, rgb(255 255 255 / 2.5%) 25%, transparent 25%),
@@ -203,6 +203,10 @@ defineExpose({ download })
     16px -16px,
     -16px 0;
   background-size: 32px 32px;
+}
+
+.dark .composition-stage {
+  background-color: #181817;
 }
 
 canvas {

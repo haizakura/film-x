@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import { RefreshCw } from '@lucide/vue'
-import { FRAME_INFO_LINES, FRAME_TEMPLATES, MAX_FRAME_TEXT_LENGTH } from '~/types/frame'
+import {
+  FRAME_INFO_LINES,
+  FRAME_TEMPLATES,
+  MAX_FRAME_SCALE,
+  MAX_FRAME_TEXT_LENGTH,
+  MIN_FRAME_SCALE
+} from '~/types/frame'
 import type {
   FrameInfoField,
   FrameInfoFields,
@@ -75,11 +81,21 @@ const updateField = (field: FrameInfoField, event: Event) =>
     </div>
 
     <div v-for="line in FRAME_INFO_LINES" :key="line" class="space-y-2">
-      <FilmFrameToggleField
-        v-model="settings.lines[line]"
-        :label="lineLabel(line)"
-        :aria-label="t('frame.info.show', { line: lineLabel(line) })"
-      />
+      <div class="flex items-center gap-3">
+        <FilmFrameToggleField
+          v-model="settings.lines[line]"
+          class="min-w-0 flex-1"
+          :label="lineLabel(line)"
+          :aria-label="t('frame.info.show', { line: lineLabel(line) })"
+        />
+        <FilmFrameNumberField
+          v-model="settings.lineScales[line]"
+          :label="t('frame.info.size', { line: lineLabel(line) })"
+          :min="MIN_FRAME_SCALE * 100"
+          :max="MAX_FRAME_SCALE * 100"
+          :step="5"
+        />
+      </div>
       <div v-if="line === 'exposure'" class="grid grid-cols-2 gap-1.5">
         <input
           v-for="field in EXPOSURE_FIELDS"
@@ -110,11 +126,21 @@ const updateField = (field: FrameInfoField, event: Event) =>
     </div>
 
     <div v-if="stacked" class="space-y-2 border-t border-border pt-4">
-      <FilmFrameToggleField
-        v-model="settings.showTagline"
-        :label="t('frame.info.tagline')"
-        :aria-label="t('frame.info.taglineShow')"
-      />
+      <div class="flex items-center gap-3">
+        <FilmFrameToggleField
+          v-model="settings.showTagline"
+          class="min-w-0 flex-1"
+          :label="t('frame.info.tagline')"
+          :aria-label="t('frame.info.taglineShow')"
+        />
+        <FilmFrameNumberField
+          v-model="settings.taglineScale"
+          :label="t('frame.info.size', { line: t('frame.info.tagline') })"
+          :min="MIN_FRAME_SCALE * 100"
+          :max="MAX_FRAME_SCALE * 100"
+          :step="5"
+        />
+      </div>
       <input
         :value="settings.tagline"
         class="frame-input"
