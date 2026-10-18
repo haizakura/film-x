@@ -154,6 +154,8 @@ export const FRAME_INFO_LINES: readonly FrameInfoLine[] = [
 
 export type FrameInfoFields = Record<FrameInfoField, string>
 export type FrameInfoLines = Record<FrameInfoLine, boolean>
+/** Size multipliers per caption line, applied on top of the overall text scale. */
+export type FrameInfoLineScales = Record<FrameInfoLine, number>
 
 export interface FrameTypography {
   font: FrameFontId
@@ -230,7 +232,9 @@ export interface FrameSettings {
   logo: FrameLogoSettings
   showTagline: boolean
   tagline: string
+  taglineScale: number
   lines: FrameInfoLines
+  lineScales: FrameInfoLineScales
   text: FrameTypography
   textScale: number
   sourceType: FrameSourceType

@@ -306,6 +306,7 @@
       "exifReady": "已读取 EXIF",
       "fillExif": "从 EXIF 填写",
       "show": "显示{line}",
+      "size": "{line}字号",
       "lines": {
         "camera": "机型",
         "lens": "镜头",

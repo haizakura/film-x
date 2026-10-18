@@ -25,11 +25,20 @@ export interface FrameLogoAsset {
   tintable: boolean
 }
 
+/** A run of caption text drawn at its own size multiplier. */
+export interface FrameCaptionRun {
+  text: string
+  scale: number
+}
+
+/** Runs set on one line, separated by a middle dot. */
+export type FrameCaptionLine = FrameCaptionRun[]
+
 export interface FrameCaption {
-  tagline: string
-  stack: string[]
-  left: string[]
-  right: string[]
+  tagline?: FrameCaptionRun
+  stack: FrameCaptionLine[]
+  left: FrameCaptionLine[]
+  right: FrameCaptionLine[]
 }
 
 export interface FrameScene {
@@ -75,6 +84,7 @@ const MAX_SIDE_INSET = 0.2
 const TAGLINE_TRACKING = 0.32
 const SECONDARY_ALPHA = 0.6
 const CAPTION_ALPHA = 0.82
+const RUN_SEPARATOR = '  ·  '
 const PLACEHOLDER_FONT: FrameFontFace = { font: 'system-sans', bold: false, italic: false }
 
 type FrameCanvasSettings = Pick<
@@ -159,22 +169,24 @@ const lineText = (fields: FrameInfoFields, settings: FrameSettings, line: FrameI
   return fields[line].trim()
 }
 
-const joinParts = (parts: string[]) => parts.filter(Boolean).join('  ·  ')
-
 export const buildFrameCaption = (
   fields: FrameInfoFields,
   settings: FrameSettings
 ): FrameCaption => {
-  const text = (line: FrameInfoLine) => lineText(fields, settings, line)
+  /** The shown lines as one caption line, each keeping its own size. */
+  const line = (...lines: FrameInfoLine[]): FrameCaptionLine =>
+    lines.flatMap((item) => {
+      const text = lineText(fields, settings, item)
+      return text ? [{ text, scale: settings.lineScales[item] }] : []
+    })
+  const shown = (lines: FrameCaptionLine[]) => lines.filter((runs) => runs.length)
   const stacked = FRAME_TEMPLATES[settings.template].layout === 'stack'
+  const tagline = stacked && settings.showTagline ? settings.tagline.trim() : ''
   return {
-    tagline: stacked && settings.showTagline ? settings.tagline.trim() : '',
-    stack: FRAME_INFO_LINES.map(text).filter(Boolean),
-    left: [text('camera'), text('lens')].filter(Boolean),
-    right: [
-      joinParts([text('exposure'), text('film')]),
-      joinParts([text('date'), text('custom')])
-    ].filter(Boolean)
+    tagline: tagline ? { text: tagline, scale: settings.taglineScale } : undefined,
+    stack: shown(FRAME_INFO_LINES.map((item) => line(item))),
+    left: shown([line('camera'), line('lens')]),
+    right: shown([line('exposure', 'film'), line('date', 'custom')])
   }
 }
 
@@ -296,34 +308,67 @@ const fillTracked = (
   }
 }
 
-/** A caption line laid out in a fixed line box, shrunk to fit the available width. */
+/** Distance from the middle line down to the alphabetic baseline, per pixel of font size. */
+const baselineRatio = (context: CanvasRenderingContext2D, face: FrameFontFace) => {
+  context.save()
+  context.font = buildFrameFont(face, 100)
+  context.textBaseline = 'middle'
+  const fromMiddle = context.measureText('H').actualBoundingBoxAscent
+  context.textBaseline = 'alphabetic'
+  const fromBaseline = context.measureText('H').actualBoundingBoxAscent
+  context.restore()
+  return (fromBaseline - fromMiddle) / 100
+}
+
+/**
+ * A caption line laid out in a fixed line box, shrunk to fit the available width. Runs of
+ * different sizes share the baseline of the largest one.
+ */
 const textBlock = (
   context: CanvasRenderingContext2D,
-  text: string,
+  line: FrameCaptionLine,
   style: TextStyle,
   maxWidth: number
 ): Block => {
-  const content = style.uppercase ? text.toUpperCase() : text
-  let size = style.size
-  context.font = buildFrameFont(style.face, size)
-  let width = measureTracked(context, content, style.tracking * size)
+  const texts = line.map(
+    (run, index) =>
+      (index > 0 ? RUN_SEPARATOR : '') + (style.uppercase ? run.text.toUpperCase() : run.text)
+  )
+  const measure = (fit: number) =>
+    line.map((run, index) => {
+      const size = style.size * run.scale * fit
+      context.font = buildFrameFont(style.face, size)
+      const text = texts[index] ?? ''
+      return { text, size, width: measureTracked(context, text, style.tracking * size) }
+    })
+  const lineWidth = (runs: Array<{ width: number }>) =>
+    runs.reduce((sum, run) => sum + run.width, 0)
+
+  let runs = measure(1)
+  let width = lineWidth(runs)
   if (width > maxWidth && width > 0) {
-    size *= maxWidth / width
-    context.font = buildFrameFont(style.face, size)
-    width = measureTracked(context, content, style.tracking * size)
+    runs = measure(maxWidth / width)
+    width = lineWidth(runs)
   }
-  const height = size * LINE_HEIGHT
+  const largest = Math.max(0, ...runs.map((run) => run.size))
+  const height = largest * LINE_HEIGHT
+  const ratio = runs.length > 1 ? baselineRatio(context, style.face) : 0
   return {
     width,
     height,
     draw: (target, x, y) => {
       target.save()
-      target.font = buildFrameFont(style.face, size)
       target.fillStyle = style.color
       target.globalAlpha = style.alpha
       target.textAlign = 'left'
       target.textBaseline = 'middle'
-      fillTracked(target, content, x, y + height / 2, style.tracking * size)
+      let cursor = x
+      for (const run of runs) {
+        target.font = buildFrameFont(style.face, run.size)
+        const middle = y + height / 2 + (largest - run.size) * ratio
+        fillTracked(target, run.text, cursor, middle, style.tracking * run.size)
+        cursor += run.width
+      }
       target.restore()
     }
   }
@@ -463,7 +508,7 @@ const drawStack = (
       items.push({
         block: textBlock(
           context,
-          caption.tagline,
+          [caption.tagline],
           {
             face: { font: textFace.font, bold: false, italic: textFace.italic },
             size: taglineSize,
@@ -520,7 +565,7 @@ const drawStack = (
 const barColumn = (
   context: CanvasRenderingContext2D,
   settings: FrameSettings,
-  lines: string[],
+  lines: FrameCaptionLine[],
   textSize: number,
   maxWidth: number
 ) =>

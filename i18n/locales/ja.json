@@ -306,6 +306,7 @@
       "exifReady": "EXIF 読み取り済み",
       "fillExif": "EXIF から入力",
       "show": "{line}を表示",
+      "size": "{line}の文字サイズ",
       "lines": {
         "camera": "カメラ",
         "lens": "レンズ",

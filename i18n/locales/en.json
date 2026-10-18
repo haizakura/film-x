@@ -306,6 +306,7 @@
       "exifReady": "EXIF read",
       "fillExif": "Fill from EXIF",
       "show": "Show {line}",
+      "size": "{line} size",
       "lines": {
         "camera": "Camera",
         "lens": "Lens",
