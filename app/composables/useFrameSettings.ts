@@ -1,4 +1,9 @@
-import { DEFAULT_FRAME_OUTPUT_SIDE, FRAME_TEMPLATES, FRAME_WORDMARK_PRESETS } from '~/types/frame'
+import {
+  DEFAULT_FRAME_COLUMN_SPACING,
+  DEFAULT_FRAME_OUTPUT_SIDE,
+  FRAME_TEMPLATES,
+  FRAME_WORDMARK_PRESETS
+} from '~/types/frame'
 import type {
   CameraBrand,
   CameraBrandId,
@@ -49,6 +54,7 @@ const createDefaultSettings = (): FrameSettings => {
   return {
     template: DEFAULT_TEMPLATE,
     border: { ...template.border },
+    columnSpacing: { ...DEFAULT_FRAME_COLUMN_SPACING },
     frameColor: '#FFFFFF',
     textColor: DEFAULT_FRAME_TEXT_COLOR,
     photoShadow: { preset: template.photoShadow, intensity: 1 },
@@ -91,6 +97,7 @@ export const useFrameSettings = () => {
     const current = settings.value
     current.template = template
     current.border = { ...spec.border }
+    current.columnSpacing = { ...DEFAULT_FRAME_COLUMN_SPACING }
     current.photoShadow.preset = spec.photoShadow
     current.backdrop.enabled = spec.backdrop
     current.showTagline = spec.showTagline

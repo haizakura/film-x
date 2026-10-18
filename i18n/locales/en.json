@@ -247,6 +247,10 @@
       "gallery": "Gallery",
       "float": "Float",
       "strip": "Info bar",
+      "bar": "Brand bar",
+      "photoLeft": "Photo left",
+      "photoRight": "Photo right",
+      "column": "Column",
       "hint": "A layout applies recommended borders, shadows and content; you can still fine-tune each setting."
     },
     "brand": {
@@ -384,9 +388,26 @@
         "bottom": "Bottom border",
         "topInput": "Enter top border width",
         "sideInput": "Enter side border width",
-        "bottomInput": "Enter bottom border width"
+        "bottomInput": "Enter bottom border width",
+        "left": "Left border",
+        "right": "Right border",
+        "panel": "Caption column",
+        "leftInput": "Enter left border width",
+        "rightInput": "Enter right border width",
+        "panelInput": "Enter caption column width"
       },
-      "borderHint": "Borders scale with the photo (100% is the geometric mean of its width and height), so square, landscape, portrait and panoramic photos look consistent."
+      "borderHint": "Borders scale with the photo (100% is the geometric mean of its width and height), so square, landscape, portrait and panoramic photos look consistent.",
+      "spacing": {
+        "heading": "Column spacing",
+        "photo": "Photo to rule",
+        "text": "Rule to text",
+        "logo": "Logo to details",
+        "group": "Between detail groups",
+        "photoInput": "Enter photo-to-rule spacing",
+        "textInput": "Enter rule-to-text spacing",
+        "logoInput": "Enter logo-to-details spacing",
+        "groupInput": "Enter spacing between detail groups"
+      }
     },
     "shadow": {
       "heading": "Shadow & backdrop",

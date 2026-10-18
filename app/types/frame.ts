@@ -5,7 +5,10 @@ import type { DecodedImage } from '~/types/image'
 export const MAX_FRAME_CANVAS_SIDE = MAX_COMPOSITION_CANVAS_SIDE
 export const FRAME_PREVIEW_SIDE = 2000
 export const MAX_FRAME_BORDER = 0.6
+/** Side captions hold the logo and text, so their column may grow wider than a plain border. */
+export const MAX_FRAME_CAPTION_COLUMN = 1
 export const MAX_FRAME_BACKDROP_PADDING = 0.4
+export const MAX_FRAME_COLUMN_GAP = 0.3
 export const MAX_FRAME_TEXT_LENGTH = 80
 export const MIN_FRAME_SCALE = 0.5
 export const MAX_FRAME_SCALE = 2
@@ -17,8 +20,18 @@ export const DEFAULT_FRAME_OUTPUT_SIDE = 4096
 // Layout used for the empty preview before a photo is imported (a 3:2 frame).
 export const FRAME_PLACEHOLDER_SIZE = { width: 3000, height: 2000 } as const
 
-export type FrameTemplate = 'polaroid' | 'gallery' | 'float' | 'strip'
-export type FrameTextLayout = 'stack' | 'split'
+export type FrameTemplate =
+  | 'polaroid'
+  | 'gallery'
+  | 'float'
+  | 'strip'
+  | 'bar'
+  | 'photoLeft'
+  | 'photoRight'
+  | 'column'
+export type FrameTextLayout = 'stack' | 'split' | 'bar' | 'column'
+/** Edge of the card that holds the caption. */
+export type FrameCaptionPlacement = 'bottom' | 'left' | 'right'
 export type FrameShadowPreset =
   | 'none'
   | 'contact'
@@ -153,8 +166,28 @@ export interface FrameTypography {
 /** Border widths as fractions of the photo unit (geometric mean of its sides). */
 export interface FrameBorder {
   top: number
-  side: number
+  right: number
   bottom: number
+  left: number
+}
+
+/** Gaps of the column layout as fractions of the photo unit. */
+export interface FrameColumnSpacing {
+  /** Photo edge to the rule. */
+  photo: number
+  /** Rule to the caption text. */
+  text: number
+  /** Logo to the first caption group. */
+  logo: number
+  /** Between the caption groups. */
+  group: number
+}
+
+export const DEFAULT_FRAME_COLUMN_SPACING: FrameColumnSpacing = {
+  photo: 0.06,
+  text: 0.06,
+  logo: 0.025,
+  group: 0.02
 }
 
 export interface FrameShadow {
@@ -183,6 +216,7 @@ export interface FrameLogoSettings {
 export interface FrameSettings {
   template: FrameTemplate
   border: FrameBorder
+  columnSpacing: FrameColumnSpacing
   frameColor: string
   textColor: string
   photoShadow: FrameShadow
@@ -224,6 +258,7 @@ export interface FrameLayout {
 
 export interface FrameTemplateSpec {
   layout: FrameTextLayout
+  placement: FrameCaptionPlacement
   border: FrameBorder
   /** Logo height, tagline and caption sizes as fractions of the photo unit. */
   logoHeight: number
@@ -238,7 +273,8 @@ export interface FrameTemplateSpec {
 export const FRAME_TEMPLATES: Record<FrameTemplate, FrameTemplateSpec> = {
   polaroid: {
     layout: 'stack',
-    border: { top: 0.035, side: 0.035, bottom: 0.2 },
+    placement: 'bottom',
+    border: { top: 0.035, right: 0.035, bottom: 0.2, left: 0.035 },
     logoHeight: 0.034,
     taglineSize: 0.013,
     textSize: 0.015,
@@ -249,7 +285,8 @@ export const FRAME_TEMPLATES: Record<FrameTemplate, FrameTemplateSpec> = {
   },
   gallery: {
     layout: 'stack',
-    border: { top: 0.08, side: 0.08, bottom: 0.3 },
+    placement: 'bottom',
+    border: { top: 0.08, right: 0.08, bottom: 0.3, left: 0.08 },
     logoHeight: 0.03,
     taglineSize: 0.012,
     textSize: 0.0135,
@@ -260,7 +297,8 @@ export const FRAME_TEMPLATES: Record<FrameTemplate, FrameTemplateSpec> = {
   },
   float: {
     layout: 'stack',
-    border: { top: 0.15, side: 0.085, bottom: 0.21 },
+    placement: 'bottom',
+    border: { top: 0.15, right: 0.085, bottom: 0.21, left: 0.085 },
     logoHeight: 0.032,
     taglineSize: 0.0125,
     textSize: 0.014,
@@ -271,10 +309,60 @@ export const FRAME_TEMPLATES: Record<FrameTemplate, FrameTemplateSpec> = {
   },
   strip: {
     layout: 'split',
-    border: { top: 0, side: 0, bottom: 0.12 },
+    placement: 'bottom',
+    border: { top: 0, right: 0, bottom: 0.12, left: 0 },
     logoHeight: 0.03,
     taglineSize: 0.012,
     textSize: 0.017,
+    photoShadow: 'none',
+    backdrop: false,
+    showTagline: false,
+    showInfo: true
+  },
+  bar: {
+    layout: 'bar',
+    placement: 'bottom',
+    border: { top: 0, right: 0, bottom: 0.12, left: 0 },
+    logoHeight: 0.034,
+    taglineSize: 0.012,
+    textSize: 0.016,
+    photoShadow: 'none',
+    backdrop: false,
+    showTagline: false,
+    showInfo: true
+  },
+  // Side columns are narrow, so they get a wide caption edge and slightly smaller text.
+  photoLeft: {
+    layout: 'stack',
+    placement: 'right',
+    border: { top: 0.06, right: 0.42, bottom: 0.06, left: 0.06 },
+    logoHeight: 0.03,
+    taglineSize: 0.0115,
+    textSize: 0.013,
+    photoShadow: 'none',
+    backdrop: false,
+    showTagline: true,
+    showInfo: true
+  },
+  photoRight: {
+    layout: 'stack',
+    placement: 'left',
+    border: { top: 0.06, right: 0.06, bottom: 0.06, left: 0.42 },
+    logoHeight: 0.03,
+    taglineSize: 0.0115,
+    textSize: 0.013,
+    photoShadow: 'none',
+    backdrop: false,
+    showTagline: true,
+    showInfo: true
+  },
+  column: {
+    layout: 'column',
+    placement: 'right',
+    border: { top: 0.06, right: 0.55, bottom: 0.06, left: 0.06 },
+    logoHeight: 0.032,
+    taglineSize: 0.012,
+    textSize: 0.016,
     photoShadow: 'none',
     backdrop: false,
     showTagline: false,

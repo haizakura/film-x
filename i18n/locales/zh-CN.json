@@ -247,6 +247,10 @@
       "gallery": "画廊",
       "float": "悬浮",
       "strip": "信息条",
+      "bar": "品牌条",
+      "photoLeft": "左图",
+      "photoRight": "右图",
+      "column": "分栏",
       "hint": "版式会套用推荐的边框、阴影与显示内容，之后仍可逐项调整。"
     },
     "brand": {
@@ -384,9 +388,26 @@
         "bottom": "下边框",
         "topInput": "输入上边框宽度",
         "sideInput": "输入左右边框宽度",
-        "bottomInput": "输入下边框宽度"
+        "bottomInput": "输入下边框宽度",
+        "left": "左边框",
+        "right": "右边框",
+        "panel": "信息栏宽度",
+        "leftInput": "输入左边框宽度",
+        "rightInput": "输入右边框宽度",
+        "panelInput": "输入信息栏宽度"
       },
-      "borderHint": "边框宽度按照片尺寸等比计算（以宽高的几何平均为 100%），方形、横幅、竖幅与宽幅照片的观感保持一致。"
+      "borderHint": "边框宽度按照片尺寸等比计算（以宽高的几何平均为 100%），方形、横幅、竖幅与宽幅照片的观感保持一致。",
+      "spacing": {
+        "heading": "分栏间距",
+        "photo": "照片与竖线",
+        "text": "竖线与文字",
+        "logo": "标志与信息",
+        "group": "信息分组之间",
+        "photoInput": "输入照片与竖线的间距",
+        "textInput": "输入竖线与文字的间距",
+        "logoInput": "输入标志与信息的间距",
+        "groupInput": "输入信息分组之间的间距"
+      }
     },
     "shadow": {
       "heading": "阴影与底板",
