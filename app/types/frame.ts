@@ -12,7 +12,7 @@ export const MAX_FRAME_BACKDROP_PADDING = 0.4
 export const MAX_FRAME_COLUMN_GAP = 0.3
 export const MAX_FRAME_TEXT_LENGTH = 80
 export const MIN_FRAME_SCALE = 0.5
-export const MAX_FRAME_SCALE = 2
+export const MAX_FRAME_SCALE = 4
 export const MAX_FRAME_SHADOW_INTENSITY = 1.5
 export const MAX_FRAME_LETTER_SPACING = 0.8
 /** Bounds of a custom output long side, in pixels; the upper bound is the canvas budget. */
