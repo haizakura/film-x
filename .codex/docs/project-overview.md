@@ -90,7 +90,7 @@ mise.toml                         Node.js 版本
 
 国际化当前支持 en、zh-CN 与 ja。默认语言和回退语言均为 en；首次访问会根据浏览器语言选择，并把选择写入 Cookie。页面标题、描述、Toast、可访问性标签和普通界面文字都以语言包为来源。
 
-主题由 color-mode 管理，默认跟随系统；页头可在 system、light、dark 间循环。全局样式使用 neutral 语义颜色变量，普通界面应以 background、foreground、card、border、primary 等语义 token 适配明暗主题。图像工作台保持深色属于产品视觉的一部分。
+主题由 color-mode 管理，默认跟随系统；页头可在 system、light、dark 间循环。全局样式使用 neutral 语义颜色变量，普通界面应以 background、foreground、card、border、primary 等语义 token 适配明暗主题。图像工作台（半格切分、排版拼图、照片相框的预览区）通过 main.css 中的 workbench 颜色变量适配：light 模式为深灰色，dark 模式保持原有近黑色；两种模式的工作台都足够暗，内部文字、边框与底栏沿用白色 / 黑色半透明色。
 
 ## 5. 功能一：半格胶片切分
 
@@ -159,12 +159,14 @@ CompositionSettings（含 frameFormat 与 frameCount）是拼图设置的单一�
 ### 7.1 用户能力
 
 - 单张照片槽位，支持点击选择和拖放 TIFF、JPEG、PNG、WebP；适配任意画幅，兼容胶片扫描与数码照片。
-- 四种版式（白边、画廊、悬浮、信息条）作为预设套用边框、照片阴影、底板与显示内容，之后仍可逐项调整。
+- 八种版式（白边、画廊、悬浮、信息条、品牌条、左图、右图、分栏）作为预设套用边框、照片阴影、底板与显示内容，之后仍可逐项调整。版式由文字布局（stack 堆叠、split 信息条、bar 品牌条、column 竖线分栏且与照片底边对齐，四项间距由 FrameSettings.columnSpacing 控制并随版式重置）与信息位置（bottom、left、right）组合而成；左右并排版式的信息朝照片一侧对齐，边框滑块随信息位置切换为上、下、外侧边框与信息栏宽度。
+- 画布比例与排版拼图共用 FilmRatioPicker 和 app/types/canvas.ts 的预设与 1:5–5:1 限制；非自动比例只在居中的相框四周补足画布（有底板时补底板，否则补相框纸面），不裁切照片。
 - 八种照片阴影预设与强度；可选底板，底板上的相框另有独立阴影。
-- 导入时本地读取 EXIF 自动填写机型、镜头、曝光参数和日期，并按厂商匹配品牌；字段均可手动修改。
+- 导入时本地读取 EXIF 自动填写机型、镜头、曝光参数和日期，并按厂商匹配品牌；字段均可手动修改。各信息行与标语有独立字号倍率（lineScales / taglineScale），说明文字以 FrameCaptionRun 携带倍率，同一行多个项目按基线对齐。
 - 照片来源分为数码与胶片；识别到扫描仪 EXIF 时自动切换为胶片模式且不填写扫描仪信息。
 - 品牌目录、内置 logo 图形、七种文字标样式、自定义 logo 图片；单色标志可重新着色。
 - 18 款随应用打包的 OFL 字体（仅拉丁子集）与三种系统中文字体；输出 JPEG 或 PNG，可选原尺寸或自定义长边（256–8000 px，不放大原图）。
+- 预设码：app/utils/framePreset.ts 将 FramePreset（FrameSettings 去掉标语文字与无控件的输出质量）序列化为 `FXF<版本>.` + base64url(DEFLATE(JSON))，使用已有依赖 fflate；解码前限制长度（MAX_FRAME_PRESET_LENGTH），逐字段校验枚举、颜色与数值范围，缺失或无效的字段沿用当前设置。导入由 useFrameSettings.importPreset 应用，视为手动选择品牌与来源类型；剪贴板与提示在 useFramePreset 中处理，剪贴板不可用时预设码保留在输入框供手动复制。
 
 ### 7.2 数据流与约束
 
@@ -178,7 +180,7 @@ FilmFrameEditor
        '- useFrameCanvas：预览绘制（缓存降采样照片）、logo 资源解析、字体加载与导出
 ~~~
 
-- 布局与绘制集中在 app/utils/photoFrame.ts：getFrameLayout 以照片宽高的几何平均（unit）为基准计算边框、文字与阴影尺寸，预览与导出共用同一绘制函数，只改变 scale。导出尺寸须经 getFrameScale 与 MAX_FRAME_CANVAS_SIDE（复用拼图的 8000 px 上限）计算，不放大原图。
+- 布局与绘制集中在 app/utils/photoFrame.ts：getFrameLayout 以照片宽高的几何平均（unit）为基准计算上、右、下、左四边边框、文字与阴影尺寸，预览与导出共用同一绘制函数，只改变 scale。FrameLayout 的 card 为纸面与裁切区域（无底板时随画布比例扩展），content 为自然尺寸的相框，说明文字始终以 content 定位，避免画布扩展后信息栏脱离照片。导出尺寸须经 getFrameScale 与 MAX_FRAME_CANVAS_SIDE（复用拼图的 8000 px 上限）计算，不放大原图。
 - 阴影只绘制阴影本身（形状置于画布外，用偏移把阴影带回），大半径阴影在降采样离屏 Canvas 上绘制再放大，临时 Canvas 绘制后立即释放；照片阴影裁切在相框内。
 - 字体 @font-face 由 app/assets/css/frame-fonts.css 引入 @fontsource 包的 latin 子集，只在相框页面加载。Canvas 绘制前用 document.fonts.load 确保字体就绪；未就绪时先用回退字体绘制并在加载后重绘。Canvas letterSpacing 兼容性不足，字距通过逐字符排版实现。
 - EXIF 读取在 app/utils/exif.ts，通过 Blob.slice 只读取元数据所在的少量字节，不整读大 TIFF；解析失败返回 undefined 而不抛错。字段格式化、扫描仪识别在 app/utils/frameMetadata.ts。
