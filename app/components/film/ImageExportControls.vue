@@ -2,6 +2,7 @@
 import { Loader2, PackageOpen } from '@lucide/vue'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
+import { MAX_EXPORT_QUALITY, MIN_EXPORT_QUALITY } from '~/types/image'
 import type { ExportFormat } from '~/types/image'
 
 defineProps<{
@@ -51,8 +52,8 @@ const formats: ExportFormat[] = ['jpeg', 'png', 'webp', 'tiff']
         :value="quality"
         class="range"
         type="range"
-        min="0.7"
-        max="1"
+        :min="MIN_EXPORT_QUALITY"
+        :max="MAX_EXPORT_QUALITY"
         step="0.01"
         @input="emit('update:quality', Number(($event.target as HTMLInputElement).value))"
       />

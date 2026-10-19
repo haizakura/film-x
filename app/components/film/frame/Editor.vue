@@ -1,7 +1,11 @@
 <script setup lang="ts">
 import '~/assets/css/frame-fonts.css'
-import { getFrameOutputLimit, getFrameSceneLayout } from '~/composables/useFrameCanvas'
-import { getFrameCanvasSize, getFrameScale } from '~/utils/photoFrame'
+import {
+  getFrameCanvasSize,
+  getFrameOutputLimit,
+  getFrameScale,
+  getFrameSceneLayout
+} from '~/utils/photoFrame'
 
 const {
   image: photo,
@@ -25,7 +29,7 @@ watch(photo, (entry) => applyExif(entry?.exif))
 
 const outputSize = computed(() => {
   if (!photo.value) return undefined
-  const layout = getFrameSceneLayout(photo.value, settings.value)
+  const layout = getFrameSceneLayout(photo.value.decoded, settings.value)
   return getFrameCanvasSize(layout, getFrameScale(layout, getFrameOutputLimit(settings.value)))
 })
 

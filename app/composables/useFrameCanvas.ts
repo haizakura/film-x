@@ -1,22 +1,21 @@
 import { toast } from 'vue-sonner'
-import { FRAME_PLACEHOLDER_SIZE, FRAME_PREVIEW_SIDE, MAX_FRAME_CANVAS_SIDE } from '~/types/frame'
+import { FRAME_PLACEHOLDER_SIZE, FRAME_PREVIEW_SIDE } from '~/types/frame'
 import type { FrameInfoFields, FrameSettings } from '~/types/frame'
 import type { DecodedImage } from '~/types/image'
 import type { FrameImageEntry } from '~/composables/useFrameImage'
 import { canvasToBlob, downloadBlob } from '~/utils/download'
-import { getLogoMark } from '~/utils/cameraBrands'
 import { AppError, errorMessageKey } from '~/utils/errors'
 import { isFrameFontReady, loadFrameFonts } from '~/utils/frameFonts'
-import { loadFrameLogoImage } from '~/utils/frameLogos'
+import { resolveFrameLogoAsset } from '~/utils/frameLogos'
 import { baseName } from '~/utils/image'
 import {
   buildFrameCaption,
-  clampFrameOutputSide,
   drawFrame,
   getFrameCanvasSize,
-  getFrameLayout,
+  getFrameOutputLimit,
   getFrameScale,
-  getFrameSceneFonts
+  getFrameSceneFonts,
+  getFrameSceneLayout
 } from '~/utils/photoFrame'
 import type { FrameLogoAsset, FrameScene } from '~/utils/photoFrame'
 
@@ -26,21 +25,6 @@ interface FrameCanvasSources {
   settings: () => FrameSettings
   fields: () => FrameInfoFields
 }
-
-export const getFrameOutputLimit = (
-  settings: Pick<FrameSettings, 'outputSizeMode' | 'outputLongSide'>
-) =>
-  settings.outputSizeMode === 'custom'
-    ? (clampFrameOutputSide(settings.outputLongSide) ?? MAX_FRAME_CANVAS_SIDE)
-    : MAX_FRAME_CANVAS_SIDE
-
-/** Frame layout for the current photo, or the placeholder layout before one is imported. */
-export const getFrameSceneLayout = (photo: FrameImageEntry | undefined, settings: FrameSettings) =>
-  getFrameLayout(
-    photo?.decoded.width ?? FRAME_PLACEHOLDER_SIZE.width,
-    photo?.decoded.height ?? FRAME_PLACEHOLDER_SIZE.height,
-    settings
-  )
 
 const releaseCanvas = (canvas: HTMLCanvasElement) => {
   canvas.width = 0
@@ -93,7 +77,7 @@ export const useFrameCanvas = (sources: FrameCanvasSources) => {
   const createScene = (photo: FrameImageEntry | undefined, source?: CanvasImageSource) => {
     const settings = sources.settings()
     return {
-      layout: getFrameSceneLayout(photo, settings),
+      layout: getFrameSceneLayout(photo?.decoded, settings),
       settings,
       caption: buildFrameCaption(sources.fields(), settings),
       photo: source,
@@ -129,26 +113,10 @@ export const useFrameCanvas = (sources: FrameCanvasSources) => {
   }
 
   const resolveLogo = async (request: number) => {
-    const { logo } = sources.settings()
-    const custom = sources.customLogo()
-    let asset: FrameLogoAsset | undefined
-    if (logo.style === 'mark' && logo.mark) {
-      const image = await loadFrameLogoImage(logo.mark)
-      const mark = getLogoMark(logo.mark)
-      if (image?.naturalWidth && image.naturalHeight) {
-        asset = {
-          source: image,
-          aspectRatio: image.naturalWidth / image.naturalHeight,
-          tintable: mark?.tintable ?? false
-        }
-      }
-    } else if (logo.style === 'custom' && custom) {
-      asset = {
-        source: custom.decoded.source,
-        aspectRatio: custom.decoded.width / custom.decoded.height,
-        tintable: true
-      }
-    }
+    const asset = await resolveFrameLogoAsset(
+      sources.settings().logo,
+      sources.customLogo()?.decoded
+    )
     if (request !== logoRequest) return
     logoAsset.value = asset
     scheduleDraw()

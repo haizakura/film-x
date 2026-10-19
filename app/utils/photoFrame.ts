@@ -1,6 +1,7 @@
 import { getCustomCanvasRatio } from '~/types/canvas'
 import {
   FRAME_INFO_LINES,
+  FRAME_PLACEHOLDER_SIZE,
   FRAME_SHADOW_PRESETS,
   FRAME_TEMPLATES,
   MAX_FRAME_CANVAS_SIDE,
@@ -143,11 +144,29 @@ export const getFrameLayout = (
   }
 }
 
+/** Frame layout for the current photo, or the placeholder layout before one is imported. */
+export const getFrameSceneLayout = (
+  photo: { width: number; height: number } | undefined,
+  settings: FrameSettings
+) =>
+  getFrameLayout(
+    photo?.width ?? FRAME_PLACEHOLDER_SIZE.width,
+    photo?.height ?? FRAME_PLACEHOLDER_SIZE.height,
+    settings
+  )
+
 /** Rounds a custom output long side into its allowed range; undefined when it is not a number. */
 export const clampFrameOutputSide = (value: number) =>
   Number.isFinite(value)
     ? Math.min(MAX_FRAME_CANVAS_SIDE, Math.max(MIN_FRAME_OUTPUT_SIDE, Math.round(value)))
     : undefined
+
+export const getFrameOutputLimit = (
+  settings: Pick<FrameSettings, 'outputSizeMode' | 'outputLongSide'>
+) =>
+  settings.outputSizeMode === 'custom'
+    ? (clampFrameOutputSide(settings.outputLongSide) ?? MAX_FRAME_CANVAS_SIDE)
+    : MAX_FRAME_CANVAS_SIDE
 
 /** Largest scale (never upscaling) that keeps the long side within the limit. */
 export const getFrameScale = (layout: FrameLayout, maxSide: number) =>
