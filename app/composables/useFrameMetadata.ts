@@ -1,34 +1,16 @@
 import type { FrameInfoField, FrameInfoFields } from '~/types/frame'
-import { getCameraBrand, matchCameraBrand } from '~/utils/cameraBrands'
 import type { PhotoExif } from '~/utils/exif'
-import { detectFrameSourceType, getExifInfoFields } from '~/utils/frameMetadata'
+import {
+  createEmptyFrameFields,
+  detectFrameSourceType,
+  FRAME_EXIF_FIELDS,
+  getFrameExifFill
+} from '~/utils/frameMetadata'
 import type { FrameSettingsApi } from '~/composables/useFrameSettings'
-
-const EXIF_FIELDS: readonly FrameInfoField[] = [
-  'camera',
-  'lens',
-  'focalLength',
-  'aperture',
-  'shutter',
-  'iso',
-  'date'
-]
-
-const emptyFields = (): FrameInfoFields => ({
-  camera: '',
-  lens: '',
-  film: '',
-  focalLength: '',
-  aperture: '',
-  shutter: '',
-  iso: '',
-  date: '',
-  custom: ''
-})
 
 /** Caption fields auto-filled from EXIF; anything the user edits is kept across photos. */
 export const useFrameMetadata = (frame: FrameSettingsApi) => {
-  const fields = ref<FrameInfoFields>(emptyFields())
+  const fields = ref<FrameInfoFields>(createEmptyFrameFields())
   const exif = shallowRef<PhotoExif>()
   const edited = new Set<FrameInfoField>()
 
@@ -47,11 +29,9 @@ export const useFrameMetadata = (frame: FrameSettingsApi) => {
       const detected = detectFrameSourceType(next)
       if (detected) frame.setSourceType(detected, 'auto')
     }
-    const usable = next && (force || frame.settings.value.sourceType === 'digital')
-    const brandId = usable ? matchCameraBrand(next) : undefined
+    const { brandId, values } = getFrameExifFill(next, frame.settings.value.sourceType, force)
     if (brandId) frame.selectBrand(brandId, force ? 'force' : 'auto')
-    const values = usable ? getExifInfoFields(next, brandId && getCameraBrand(brandId).name) : {}
-    for (const field of EXIF_FIELDS) {
+    for (const field of FRAME_EXIF_FIELDS) {
       if (force) edited.delete(field)
       if (!edited.has(field)) fields.value[field] = values[field] ?? ''
     }

@@ -1,5 +1,5 @@
 import { deflateSync, inflateSync, strFromU8, strToU8 } from 'fflate'
-import { MAX_CANVAS_RATIO, MIN_CANVAS_RATIO } from '~/types/canvas'
+import { MAX_CANVAS_RATIO, MAX_CANVAS_RATIO_TERM, MIN_CANVAS_RATIO } from '~/types/canvas'
 import type { CanvasRatioMode } from '~/types/canvas'
 import {
   FRAME_FONTS,
@@ -33,6 +33,7 @@ import type {
   FrameTemplate,
   FrameTypography
 } from '~/types/frame'
+import { MAX_EXPORT_QUALITY, MIN_EXPORT_QUALITY } from '~/types/image'
 import { CAMERA_BRANDS, getCameraBrand } from '~/utils/cameraBrands'
 import { normalizeHexColor } from '~/utils/color'
 import { AppError } from '~/utils/errors'
@@ -42,7 +43,6 @@ import { clampFrameOutputSide } from '~/utils/photoFrame'
 // survives being pasted into chats and URLs. The version lets later formats migrate old codes.
 const PRESET_VERSION = 1
 const PRESET_PATTERN = /^FXF(\d+)\.([\w-]+)$/
-const MAX_RATIO_TERM = 99
 
 type Raw = Record<string, unknown>
 
@@ -149,8 +149,13 @@ const readPreset = (raw: Raw, base: FrameSettings): FramePreset => {
     template,
     ratioMode: pick(raw.ratioMode, RATIO_MODES, base.ratioMode),
     ratio: number(raw.ratio, MIN_CANVAS_RATIO, MAX_CANVAS_RATIO, base.ratio),
-    customRatioWidth: number(raw.customRatioWidth, 1, MAX_RATIO_TERM, base.customRatioWidth),
-    customRatioHeight: number(raw.customRatioHeight, 1, MAX_RATIO_TERM, base.customRatioHeight),
+    customRatioWidth: number(raw.customRatioWidth, 1, MAX_CANVAS_RATIO_TERM, base.customRatioWidth),
+    customRatioHeight: number(
+      raw.customRatioHeight,
+      1,
+      MAX_CANVAS_RATIO_TERM,
+      base.customRatioHeight
+    ),
     border,
     columnSpacing: {
       photo: number(rawSpacing.photo, 0, MAX_FRAME_COLUMN_GAP, base.columnSpacing.photo),
@@ -185,6 +190,21 @@ const readPreset = (raw: Raw, base: FrameSettings): FramePreset => {
       typeof raw.outputLongSide === 'number'
         ? (clampFrameOutputSide(raw.outputLongSide) ?? base.outputLongSide)
         : base.outputLongSide
+  }
+}
+
+/** Complete settings from untrusted data via the preset reader, plus the two fields presets omit. */
+export const sanitizeFrameSettings = (raw: unknown, base: FrameSettings): FrameSettings => {
+  const source = record(raw)
+  return {
+    ...readPreset(source, base),
+    tagline: text(source.tagline, base.tagline),
+    outputQuality: number(
+      source.outputQuality,
+      MIN_EXPORT_QUALITY,
+      MAX_EXPORT_QUALITY,
+      base.outputQuality
+    )
   }
 }
 

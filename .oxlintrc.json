@@ -5,5 +5,12 @@
     "suspicious": "warn",
     "perf": "warn"
   },
-  "ignorePatterns": [".codex/**", ".nuxt/**", ".output/**", "node_modules/**", "sample/**"]
+  "ignorePatterns": [
+    ".codex/**",
+    ".nuxt/**",
+    ".output/**",
+    "node_modules/**",
+    "sample/**",
+    "**/dist/**"
+  ]
 }

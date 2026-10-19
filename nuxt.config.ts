@@ -1,5 +1,10 @@
+import { existsSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
 import tailwindcss from '@tailwindcss/vite'
 import { version } from './package.json'
+
+// Built by `pnpm mcp:build` (part of build and generate): the MCP server and its installer.
+const mcpSiteDir = fileURLToPath(new URL('./packages/mcp/dist/site', import.meta.url))
 
 export default defineNuxtConfig({
   appConfig: {
@@ -12,12 +17,15 @@ export default defineNuxtConfig({
     emitRouteChunkError: 'manual'
   },
   nitro: {
-    prerender: { routes: ['/', '/compose', '/frame'] }
+    prerender: { routes: ['/', '/compose', '/frame', '/mcp-renderer'] },
+    // Served as /mcp/install.sh and friends; skipped when the MCP package has not been built.
+    publicAssets: existsSync(mcpSiteDir) ? [{ baseURL: 'mcp', dir: mcpSiteDir, maxAge: 0 }] : []
   },
   routeRules: {
     '/': { headers: { 'cache-control': 'no-cache' } },
     '/compose': { headers: { 'cache-control': 'no-cache' } },
     '/frame': { headers: { 'cache-control': 'no-cache' } },
+    '/mcp-renderer': { headers: { 'cache-control': 'no-cache' } },
     '/sw.js': { headers: { 'cache-control': 'no-cache' } },
     '/pwa-update-guard.js': { headers: { 'cache-control': 'no-cache' } },
     '/manifest.webmanifest': { headers: { 'cache-control': 'no-cache' } }
@@ -56,7 +64,8 @@ export default defineNuxtConfig({
     },
     workbox: {
       globPatterns: ['**/*.{js,css,html,json,svg,png,ico,woff2}'],
-      globIgnores: ['**/200.html', '**/404.html'],
+      // The MCP installer files are for the terminal, not for the offline app.
+      globIgnores: ['**/200.html', '**/404.html', 'mcp/**'],
       importScripts: ['pwa-update-guard.js'],
       cleanupOutdatedCaches: true,
       clientsClaim: true,

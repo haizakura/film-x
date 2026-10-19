@@ -3,6 +3,9 @@ export type CanvasRatioMode = 'preset' | 'custom' | 'auto'
 export const MIN_CANVAS_RATIO = 0.2
 export const MAX_CANVAS_RATIO = 5
 
+// Largest term of a custom ratio such as 16:9.
+export const MAX_CANVAS_RATIO_TERM = 99
+
 export const CANVAS_RATIO_PRESETS = [
   { label: '4:5', value: 4 / 5 },
   { label: '1:1', value: 1 },

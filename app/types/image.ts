@@ -1,3 +1,6 @@
+export const MIN_EXPORT_QUALITY = 0.7
+export const MAX_EXPORT_QUALITY = 1
+
 export type Rotation = 0 | 90 | 180 | 270
 
 export type ExportFormat = 'jpeg' | 'png' | 'webp' | 'tiff'

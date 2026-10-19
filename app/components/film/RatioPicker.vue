@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { CANVAS_RATIO_PRESETS } from '~/types/canvas'
+import { CANVAS_RATIO_PRESETS, MAX_CANVAS_RATIO_TERM } from '~/types/canvas'
 import type { CanvasRatioMode } from '~/types/canvas'
 
 const mode = defineModel<CanvasRatioMode>('mode', { required: true })
@@ -65,7 +65,7 @@ const selectPreset = (value: number) => {
           class="w-full rounded-md border border-border bg-card px-3 py-2 text-center font-mono text-xs outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           type="number"
           min="1"
-          max="99"
+          :max="MAX_CANVAS_RATIO_TERM"
           step="1"
           :aria-label="t('ratio.customWidth')"
         />
@@ -78,7 +78,7 @@ const selectPreset = (value: number) => {
           class="w-full rounded-md border border-border bg-card px-3 py-2 text-center font-mono text-xs outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           type="number"
           min="1"
-          max="99"
+          :max="MAX_CANVAS_RATIO_TERM"
           step="1"
           :aria-label="t('ratio.customHeight')"
         />

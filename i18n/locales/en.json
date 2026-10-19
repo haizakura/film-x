@@ -6,7 +6,9 @@
     "composerTitle": "Film composer",
     "composerDescription": "Compose one or two half-frame or full-frame film photos into a single image with custom canvas, spacing, layout, and patterns.",
     "frameTitle": "Photo frame",
-    "frameDescription": "Add a camera-brand frame to film scans or digital photos, auto-fill shot details from EXIF, and choose from layouts, shadows and fonts."
+    "frameDescription": "Add a camera-brand frame to film scans or digital photos, auto-fill shot details from EXIF, and choose from layouts, shadows and fonts.",
+    "agentRendererTitle": "Renderer for AI agents",
+    "agentRendererDescription": "Used by the local Film X MCP server to process images on this computer."
   },
   "language": {
     "label": "Language"
@@ -504,5 +506,9 @@
   },
   "pwa": {
     "updateReady": "An update is ready. It will apply automatically when images are cleared and tasks finish in all Film X windows, or after you close and reopen the app."
+  },
+  "agentRenderer": {
+    "title": "Renderer for AI agents",
+    "description": "The local Film X MCP server opens this page in a headless browser so desktop AI agents can split, compose and frame images. The images are read and written only on that computer. There is nothing to do here; open one of the tools above instead."
   }
 }

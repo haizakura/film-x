@@ -6,7 +6,9 @@
     "composerTitle": "胶片排版拼图",
     "composerDescription": "将一至两张半格或全画幅胶片排版成单张图像，自定义画布、间距、布局与底纹。",
     "frameTitle": "照片相框",
-    "frameDescription": "为胶片扫描或数码照片添加相机品牌相框，读取 EXIF 自动填写拍摄信息，支持多种版式、阴影与字体。"
+    "frameDescription": "为胶片扫描或数码照片添加相机品牌相框，读取 EXIF 自动填写拍摄信息，支持多种版式、阴影与字体。",
+    "agentRendererTitle": "AI Agent 渲染页",
+    "agentRendererDescription": "供本地 Film X MCP 服务在本机处理图像使用。"
   },
   "language": {
     "label": "语言"
@@ -504,5 +506,9 @@
   },
   "pwa": {
     "updateReady": "新版本已就绪。所有 Film X 窗口清空图像并完成任务后将自动更新，也可关闭所有窗口后重新打开应用。"
+  },
+  "agentRenderer": {
+    "title": "AI Agent 渲染页",
+    "description": "本地 Film X MCP 服务会在无头浏览器中打开此页面，让桌面 AI Agent 完成切分、拼图与相框处理。图像只在那台电脑上读取和写入。此页面无需操作，请使用上方的工具。"
   }
 }

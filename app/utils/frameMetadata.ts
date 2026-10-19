@@ -1,4 +1,5 @@
-import type { FrameInfoFields, FrameSourceType } from '~/types/frame'
+import type { CameraBrandId, FrameInfoField, FrameInfoFields, FrameSourceType } from '~/types/frame'
+import { getCameraBrand, matchCameraBrand } from '~/utils/cameraBrands'
 import type { PhotoExif } from '~/utils/exif'
 
 // Film scanners and scanning software write their own Make/Model into the EXIF block.
@@ -10,6 +11,29 @@ const SCANNER_PATTERN =
 const SMALL_SENSOR_CROP_FACTOR = 2.5
 // Above 1/10 s the reciprocal is always shown; slower speeds use decimals unless exact.
 const RECIPROCAL_SHUTTER_LIMIT = 10
+
+/** Caption fields that EXIF can fill. */
+export const FRAME_EXIF_FIELDS: readonly FrameInfoField[] = [
+  'camera',
+  'lens',
+  'focalLength',
+  'aperture',
+  'shutter',
+  'iso',
+  'date'
+]
+
+export const createEmptyFrameFields = (): FrameInfoFields => ({
+  camera: '',
+  lens: '',
+  film: '',
+  focalLength: '',
+  aperture: '',
+  shutter: '',
+  iso: '',
+  date: '',
+  custom: ''
+})
 
 const trimNumber = (value: number, digits = 1) => String(Number(value.toFixed(digits)))
 
@@ -90,3 +114,15 @@ export const getExifInfoFields = (
   iso: exif.iso ? formatIso(exif.iso) : '',
   date: exif.dateTimeOriginal ? formatExifDate(exif.dateTimeOriginal) : ''
 })
+
+/** EXIF-derived caption values; film-scan EXIF (scanner, not camera) fills nothing unless forced. */
+export const getFrameExifFill = (
+  exif: PhotoExif | undefined,
+  sourceType: FrameSourceType,
+  force: boolean
+): { brandId?: CameraBrandId; values: Partial<FrameInfoFields> } => {
+  const usable = exif && (force || sourceType === 'digital')
+  const brandId = usable ? matchCameraBrand(exif) : undefined
+  const values = usable ? getExifInfoFields(exif, brandId && getCameraBrand(brandId).name) : {}
+  return { brandId, values }
+}

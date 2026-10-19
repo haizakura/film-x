@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import { Check } from '@lucide/vue'
 import { Switch } from '@/components/ui/switch'
+import { MAX_COMPOSITION_GAP, MAX_COMPOSITION_PADDING } from '~/types/composition'
 import type { CompositionSettings } from '~/types/composition'
 
-const MAX_PADDING = 440
-const MAX_GAP = 320
 const settings = defineModel<CompositionSettings>({ required: true })
 const { t } = useI18n()
 const advancedPadding = ref(false)
@@ -23,14 +22,14 @@ const spacingModel = (getValue: () => number, setValue: (value: number) => void,
 const paddingModel = computed({
   get: () => settings.value.padding.top,
   set: (value: number | string) => {
-    const next = clampSpacing(value, MAX_PADDING)
+    const next = clampSpacing(value, MAX_COMPOSITION_PADDING)
     settings.value.padding = { top: next, right: next, bottom: next, left: next }
   }
 })
 const gapModel = spacingModel(
   () => settings.value.gap,
   (value) => (settings.value.gap = value),
-  MAX_GAP
+  MAX_COMPOSITION_GAP
 )
 const paddingControls = computed(() => [
   {
@@ -55,7 +54,10 @@ const paddingControls = computed(() => [
   }
 ])
 const updatePadding = (key: 'top' | 'right' | 'bottom' | 'left', event: Event) => {
-  settings.value.padding[key] = clampSpacing((event.target as HTMLInputElement).value, MAX_PADDING)
+  settings.value.padding[key] = clampSpacing(
+    (event.target as HTMLInputElement).value,
+    MAX_COMPOSITION_PADDING
+  )
 }
 const isMixedPadding = computed(() => {
   const { top, right, bottom, left } = settings.value.padding
@@ -88,7 +90,7 @@ const isMixedPadding = computed(() => {
           class="range min-w-0 flex-1"
           type="range"
           min="0"
-          :max="MAX_PADDING"
+          :max="MAX_COMPOSITION_PADDING"
           step="4"
           :aria-label="t('composition.spacing.uniform')"
         />
@@ -101,7 +103,7 @@ const isMixedPadding = computed(() => {
             class="w-12 bg-transparent py-1.5 text-right font-mono text-[10px] outline-none"
             type="number"
             min="0"
-            :max="MAX_PADDING"
+            :max="MAX_COMPOSITION_PADDING"
             step="1"
             :aria-label="t('composition.spacing.uniformInput')"
           />
@@ -143,7 +145,7 @@ const isMixedPadding = computed(() => {
             class="min-w-0 flex-1 bg-transparent py-2 text-right font-mono text-[10px] outline-none"
             type="number"
             min="0"
-            :max="MAX_PADDING"
+            :max="MAX_COMPOSITION_PADDING"
             step="1"
             :aria-label="control.name"
             @input="updatePadding(control.key, $event)"
@@ -163,7 +165,7 @@ const isMixedPadding = computed(() => {
           class="range min-w-0 flex-1"
           type="range"
           min="0"
-          :max="MAX_GAP"
+          :max="MAX_COMPOSITION_GAP"
           step="4"
           :aria-label="t('composition.spacing.gap')"
         />
@@ -176,7 +178,7 @@ const isMixedPadding = computed(() => {
             class="w-12 bg-transparent py-1.5 text-right font-mono text-[10px] outline-none"
             type="number"
             min="0"
-            :max="MAX_GAP"
+            :max="MAX_COMPOSITION_GAP"
             step="1"
             :aria-label="t('composition.spacing.gapInput')"
           />

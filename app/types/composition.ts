@@ -3,6 +3,8 @@ import type { DecodedImage } from '~/types/image'
 
 export const MAX_COMPOSITION_CANVAS_SIDE = 8000
 export const MAX_COMPOSITION_FRAMES = 2
+export const MAX_COMPOSITION_PADDING = 440
+export const MAX_COMPOSITION_GAP = 320
 export const MIN_COMPOSITION_SPROCKET_WIDTH = 24
 export const MAX_COMPOSITION_SPROCKET_WIDTH = 240
 export const MAX_COMPOSITION_SPROCKET_TEXT_LENGTH = 48

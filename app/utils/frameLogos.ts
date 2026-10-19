@@ -1,3 +1,8 @@
+import type { FrameLogoSettings } from '~/types/frame'
+import type { DecodedImage } from '~/types/image'
+import { getLogoMark } from '~/utils/cameraBrands'
+import type { FrameLogoAsset } from '~/utils/photoFrame'
+
 // Logo artwork stays out of the main bundle; each SVG becomes a lazily loaded chunk.
 const logoSources = import.meta.glob<string>('../assets/frame-logos/*.svg', {
   query: '?raw',
@@ -60,4 +65,29 @@ export const loadFrameLogoImage = (id: string) => {
     imageCache.set(id, pending)
   }
   return pending
+}
+
+/** Drawable logo artwork for the current settings; undefined when there is nothing to draw. */
+export const resolveFrameLogoAsset = async (
+  logo: Pick<FrameLogoSettings, 'style' | 'mark'>,
+  custom?: DecodedImage
+): Promise<FrameLogoAsset | undefined> => {
+  if (logo.style === 'mark' && logo.mark) {
+    const image = await loadFrameLogoImage(logo.mark)
+    const mark = getLogoMark(logo.mark)
+    if (image?.naturalWidth && image.naturalHeight) {
+      return {
+        source: image,
+        aspectRatio: image.naturalWidth / image.naturalHeight,
+        tintable: mark?.tintable ?? false
+      }
+    }
+  } else if (logo.style === 'custom' && custom) {
+    return {
+      source: custom.source,
+      aspectRatio: custom.width / custom.height,
+      tintable: true
+    }
+  }
+  return undefined
 }

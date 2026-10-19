@@ -1,6 +1,6 @@
 {
   "name": "film-x",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "private": true,
   "description": "A local-first collection of tools for film photography",
   "license": "Apache-2.0",
@@ -11,17 +11,19 @@
   },
   "type": "module",
   "scripts": {
-    "build": "nuxt build",
+    "build": "pnpm mcp:build && nuxt build",
     "dev": "nuxt dev",
-    "generate": "nuxt generate",
+    "generate": "pnpm mcp:build && nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
+    "mcp:build": "pnpm --filter film-x-mcp build",
     "typecheck": "nuxt typecheck",
     "test:pwa": "node --test tests/pwa-update.test.mjs",
+    "test:mcp": "pnpm generate && pnpm --filter film-x-mcp test",
     "lint": "oxlint .",
-    "format": "oxfmt --write app public/pwa-update-guard.js tests nuxt.config.ts package.json tsconfig.json .oxlintrc.json .oxfmtrc.json pnpm-workspace.yaml README.md",
-    "format:check": "oxfmt --check app public/pwa-update-guard.js tests nuxt.config.ts package.json tsconfig.json .oxlintrc.json .oxfmtrc.json pnpm-workspace.yaml README.md",
-    "check": "pnpm format:check && pnpm lint && pnpm typecheck"
+    "format": "oxfmt --write app public/pwa-update-guard.js tests nuxt.config.ts package.json tsconfig.json .oxlintrc.json .oxfmtrc.json pnpm-workspace.yaml README.md packages/mcp/src packages/mcp/scripts packages/mcp/tests packages/mcp/package.json packages/mcp/vite.server.config.ts packages/mcp/tsconfig.server.json",
+    "format:check": "oxfmt --check app public/pwa-update-guard.js tests nuxt.config.ts package.json tsconfig.json .oxlintrc.json .oxfmtrc.json pnpm-workspace.yaml README.md packages/mcp/src packages/mcp/scripts packages/mcp/tests packages/mcp/package.json packages/mcp/vite.server.config.ts packages/mcp/tsconfig.server.json",
+    "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm --filter film-x-mcp typecheck"
   },
   "dependencies": {
     "@fontsource/bebas-neue": "^5.3.0",

@@ -1,0 +1,10 @@
+# Cloudflare Pages response headers. The MCP installers are run straight from the network
+# (`curl | sh`, `irm | iex`), so they are served as text and always revalidated.
+/mcp/*
+  Cache-Control: no-cache
+
+/mcp/install.sh
+  Content-Type: text/plain; charset=utf-8
+
+/mcp/install.ps1
+  Content-Type: text/plain; charset=utf-8
