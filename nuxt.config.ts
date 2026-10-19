@@ -12,12 +12,13 @@ export default defineNuxtConfig({
     emitRouteChunkError: 'manual'
   },
   nitro: {
-    prerender: { routes: ['/', '/compose', '/frame'] }
+    prerender: { routes: ['/', '/compose', '/frame', '/mcp-renderer'] }
   },
   routeRules: {
     '/': { headers: { 'cache-control': 'no-cache' } },
     '/compose': { headers: { 'cache-control': 'no-cache' } },
     '/frame': { headers: { 'cache-control': 'no-cache' } },
+    '/mcp-renderer': { headers: { 'cache-control': 'no-cache' } },
     '/sw.js': { headers: { 'cache-control': 'no-cache' } },
     '/pwa-update-guard.js': { headers: { 'cache-control': 'no-cache' } },
     '/manifest.webmanifest': { headers: { 'cache-control': 'no-cache' } }
