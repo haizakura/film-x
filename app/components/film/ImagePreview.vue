@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ImageOff, LoaderCircle } from '@lucide/vue'
+import { MAX_SPLIT_CENTER, MIN_SPLIT_CENTER } from '~/types/image'
 import type { DecodedImage, SplitSettings } from '~/types/image'
 
 const props = defineProps<{
@@ -92,18 +93,22 @@ const updateCenter = (event: Event) => {
 
     <div v-if="settings" class="border-t border-white/8 bg-black/20 px-5 py-3">
       <div class="mx-auto flex max-w-xl items-center gap-4">
-        <span class="font-mono text-[9px] tracking-wider text-white/35">40%</span>
+        <span class="font-mono text-[9px] tracking-wider text-white/35"
+          >{{ Math.round(MIN_SPLIT_CENTER * 100) }}%</span
+        >
         <input
           :value="settings.center"
           class="range range-dark"
           type="range"
-          min="0.4"
-          max="0.6"
+          :min="MIN_SPLIT_CENTER"
+          :max="MAX_SPLIT_CENTER"
           step="0.001"
           :aria-label="t('preview.splitPosition')"
           @input="updateCenter"
         />
-        <span class="min-w-10 font-mono text-[9px] tracking-wider text-white/35">60%</span>
+        <span class="min-w-10 font-mono text-[9px] tracking-wider text-white/35"
+          >{{ Math.round(MAX_SPLIT_CENTER * 100) }}%</span
+        >
       </div>
     </div>
   </section>

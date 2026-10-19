@@ -1,10 +1,8 @@
+import { MAX_SPLIT_CENTER, MAX_SPLIT_GAP, MIN_SPLIT_CENTER } from '~/types/image'
 import type { DecodedImage, SplitDetectionResult } from '~/types/image'
 
 const ANALYSIS_MAX_WIDTH = 900
 const ANALYSIS_MAX_HEIGHT = 600
-const SEARCH_START = 0.4
-const SEARCH_END = 0.6
-const MAX_GAP = 0.08
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value))
 
@@ -103,10 +101,10 @@ export const detectSplit = (image: DecodedImage): SplitDetectionResult => {
 
   const { luminance, activity } = profiles
   const width = luminance.length
-  const searchStart = Math.max(2, Math.floor(width * SEARCH_START))
-  const searchEnd = Math.min(width - 2, Math.ceil(width * SEARCH_END))
+  const searchStart = Math.max(2, Math.floor(width * MIN_SPLIT_CENTER))
+  const searchEnd = Math.min(width - 2, Math.ceil(width * MAX_SPLIT_CENTER))
   const minGap = Math.max(2, Math.round(width * 0.002))
-  const maxGap = Math.max(minGap, Math.round(width * MAX_GAP))
+  const maxGap = Math.max(minGap, Math.round(width * MAX_SPLIT_GAP))
   const boundaryBand = Math.max(2, Math.round(width * 0.008))
   const luminancePrefix = makePrefix(luminance)
   const luminanceSquarePrefix = makePrefix(luminance.map((value) => value * value))
@@ -175,7 +173,6 @@ export const detectSplit = (image: DecodedImage): SplitDetectionResult => {
   const fallbackSearchStart = Math.max(searchStart, Math.floor(width * 0.46))
   const fallbackSearchEnd = Math.min(searchEnd, Math.ceil(width * 0.54))
   const fallbackRadius = Math.max(1, Math.round(width * 0.004))
-  const activityWindow = makePrefix(activity)
   let fallbackCenter = Math.round(width * 0.5)
   let fallbackScore = Number.POSITIVE_INFINITY
 
@@ -183,7 +180,7 @@ export const detectSplit = (image: DecodedImage): SplitDetectionResult => {
     const start = Math.max(0, x - fallbackRadius)
     const end = Math.min(width, x + fallbackRadius + 1)
     const score =
-      rangeMean(activityWindow, start, end) / Math.max(1, activityHigh) +
+      rangeMean(activityPrefix, start, end) / Math.max(1, activityHigh) +
       Math.abs(x / width - 0.5) * 1.2
     if (score < fallbackScore) {
       fallbackScore = score

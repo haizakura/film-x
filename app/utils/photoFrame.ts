@@ -16,6 +16,7 @@ import type {
   FrameSettings,
   FrameShadow
 } from '~/types/frame'
+import { releaseCanvas } from '~/utils/download'
 import { buildFrameFont } from '~/utils/frameFonts'
 import type { FrameFontFace } from '~/utils/frameFonts'
 
@@ -218,11 +219,6 @@ const toDevice = (rect: FrameRect, scale: number): FrameRect => {
     width: Math.round((rect.x + rect.width) * scale) - x,
     height: Math.round((rect.y + rect.height) * scale) - y
   }
-}
-
-const releaseCanvas = (canvas: HTMLCanvasElement) => {
-  canvas.width = 0
-  canvas.height = 0
 }
 
 /** Draws only the shadow: the shape sits off-canvas and the offset brings its shadow back. */

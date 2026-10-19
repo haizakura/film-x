@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { LoaderCircle, ScanSearch } from '@lucide/vue'
+import { MAX_SPLIT_CENTER, MAX_SPLIT_GAP, MIN_SPLIT_CENTER } from '~/types/image'
 import type { AnalysisStatus, SplitSettings } from '~/types/image'
 
 const props = defineProps<{ settings: SplitSettings; analysisStatus: AnalysisStatus }>()
@@ -55,8 +56,8 @@ const updateNumber = (key: 'center' | 'gap', event: Event) => {
           :value="settings.center"
           class="range"
           type="range"
-          min="0.4"
-          max="0.6"
+          :min="MIN_SPLIT_CENTER"
+          :max="MAX_SPLIT_CENTER"
           step="0.001"
           @input="updateNumber('center', $event)"
         />
@@ -74,7 +75,7 @@ const updateNumber = (key: 'center' | 'gap', event: Event) => {
           class="range"
           type="range"
           min="0"
-          max="0.08"
+          :max="MAX_SPLIT_GAP"
           step="0.001"
           @input="updateNumber('gap', $event)"
         />

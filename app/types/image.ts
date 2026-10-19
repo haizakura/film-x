@@ -1,6 +1,11 @@
 export const MIN_EXPORT_QUALITY = 0.7
 export const MAX_EXPORT_QUALITY = 1
 
+// Split centre and removed gutter, as fractions of the scan width.
+export const MIN_SPLIT_CENTER = 0.4
+export const MAX_SPLIT_CENTER = 0.6
+export const MAX_SPLIT_GAP = 0.08
+
 export type Rotation = 0 | 90 | 180 | 270
 
 export type ExportFormat = 'jpeg' | 'png' | 'webp' | 'tiff'

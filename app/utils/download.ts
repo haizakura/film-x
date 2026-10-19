@@ -13,6 +13,11 @@ export const canvasToBlob = (
     )
   })
 
+export const releaseCanvas = (canvas: HTMLCanvasElement) => {
+  canvas.width = 0
+  canvas.height = 0
+}
+
 export const downloadBlob = (blob: Blob, filename: string) => {
   const url = URL.createObjectURL(blob)
   const anchor = document.createElement('a')
