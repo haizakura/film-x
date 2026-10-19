@@ -44,7 +44,7 @@ const updateFormat = (format: ExportFormat) => {
           {{ t('frame.export.dimensions', outputSize) }}
         </span>
       </div>
-      <FilmFrameSegmented
+      <FilmSegmented
         v-model="settings.outputSizeMode"
         :options="sizeOptions"
         :label="t('frame.export.size')"

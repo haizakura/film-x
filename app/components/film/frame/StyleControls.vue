@@ -109,7 +109,7 @@ const isPaper = (preset: (typeof PAPER_PRESETS)[number]) =>
     </div>
 
     <div class="space-y-4">
-      <FilmFrameRangeField
+      <FilmRangeField
         v-for="slider in borderSliders"
         :key="slider.id"
         :model-value="settings.border[slider.edges[0]]"
@@ -127,7 +127,7 @@ const isPaper = (preset: (typeof PAPER_PRESETS)[number]) =>
 
     <div v-if="columnLayout" class="space-y-4 border-t border-border pt-4">
       <p class="text-[10px] text-muted-foreground">{{ t('frame.style.spacing.heading') }}</p>
-      <FilmFrameRangeField
+      <FilmRangeField
         v-for="gap in COLUMN_GAPS"
         :key="gap"
         v-model="settings.columnSpacing[gap]"

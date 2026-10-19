@@ -19,7 +19,7 @@ const BACKDROP_PRESETS = ['#ECEAE6', '#FFFFFF', '#D9D4CA', '#3A3A38', '#121212']
         :label="t('frame.shadow.photo')"
         :surface="settings.frameColor"
       />
-      <FilmFrameRangeField
+      <FilmRangeField
         v-if="settings.photoShadow.preset !== 'none'"
         v-model="settings.photoShadow.intensity"
         :label="t('frame.shadow.intensity')"
@@ -31,7 +31,7 @@ const BACKDROP_PRESETS = ['#ECEAE6', '#FFFFFF', '#D9D4CA', '#3A3A38', '#121212']
     </div>
 
     <div class="space-y-3 border-t border-border pt-4">
-      <FilmFrameToggleField
+      <FilmToggleField
         v-model="settings.backdrop.enabled"
         :label="t('frame.shadow.backdrop')"
         :aria-label="t('frame.shadow.backdropLabel')"
@@ -70,7 +70,7 @@ const BACKDROP_PRESETS = ['#ECEAE6', '#FFFFFF', '#D9D4CA', '#3A3A38', '#121212']
             placeholder="#ECEAE6"
           />
         </div>
-        <FilmFrameRangeField
+        <FilmRangeField
           v-model="settings.backdrop.padding"
           :label="t('frame.shadow.padding')"
           :input-label="t('frame.shadow.paddingInput')"
@@ -84,7 +84,7 @@ const BACKDROP_PRESETS = ['#ECEAE6', '#FFFFFF', '#D9D4CA', '#3A3A38', '#121212']
           :label="t('frame.shadow.card')"
           :surface="settings.backdrop.color"
         />
-        <FilmFrameRangeField
+        <FilmRangeField
           v-if="settings.backdrop.shadow.preset !== 'none'"
           v-model="settings.backdrop.shadow.intensity"
           :label="t('frame.shadow.intensity')"
