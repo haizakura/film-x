@@ -10,7 +10,7 @@
   },
   "type": "module",
   "scripts": {
-    "build": "vite build --config vite.server.config.ts",
+    "build": "vite build --config vite.server.config.ts && node scripts/build-site.mjs",
     "typecheck": "tsc -p tsconfig.server.json --noEmit"
   },
   "dependencies": {
