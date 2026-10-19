@@ -128,7 +128,8 @@ const readPreset = (raw: Raw, base: FrameSettings): FramePreset => {
   const rawBorder = record(raw.border)
   const border = { ...base.border }
   for (const edge of BORDER_EDGES) {
-    const max = edge === placement ? MAX_FRAME_CAPTION_COLUMN : MAX_FRAME_BORDER
+    const max =
+      edge === placement && placement !== 'bottom' ? MAX_FRAME_CAPTION_COLUMN : MAX_FRAME_BORDER
     border[edge] = number(rawBorder[edge], 0, max, Math.min(max, base.border[edge]))
   }
   const rawSpacing = record(raw.columnSpacing)
