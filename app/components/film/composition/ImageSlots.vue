@@ -22,7 +22,7 @@ const pickFile = (index: number) => document.getElementById(inputId(index))?.cli
     <div
       v-for="(_, index) in images"
       :key="index"
-      class="group flex min-w-0 items-center gap-3 rounded-lg border border-white/9 bg-white/4 p-2.5"
+      class="flex min-w-0 items-center gap-3 rounded-lg border border-white/9 bg-white/4 p-2.5"
     >
       <FilmImageFileInput
         :id="inputId(index)"
@@ -58,7 +58,8 @@ const pickFile = (index: number) => document.getElementById(inputId(index))?.cli
       </label>
       <button
         v-if="images[index]"
-        class="invisible grid size-7 place-items-center rounded text-white/40 hover:bg-white/8 hover:text-white group-hover:visible focus:visible"
+        type="button"
+        class="grid size-7 place-items-center rounded text-white/40 hover:bg-white/8 hover:text-white"
         :aria-label="t('composition.removeFrame', { number: `0${index + 1}` })"
         @click="emit('remove', index)"
       >

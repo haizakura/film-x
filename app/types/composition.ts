@@ -8,6 +8,8 @@ export const MAX_COMPOSITION_GAP = 320
 export const MIN_COMPOSITION_SPROCKET_WIDTH = 24
 export const MAX_COMPOSITION_SPROCKET_WIDTH = 240
 export const MAX_COMPOSITION_SPROCKET_TEXT_LENGTH = 48
+/** Longest side of the on-screen preview; exports still render at full output size. */
+export const COMPOSITION_PREVIEW_SIDE = 2000
 
 export type CompositionPattern = 'none' | 'grid' | 'dots'
 export type CompositionFitMode = 'cover' | 'contain'

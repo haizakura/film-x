@@ -119,14 +119,19 @@ export const useCompositionImages = () => {
   }
 
   const removeImage = (index: number) => {
+    // Invalidate a pending decode so it cannot refill the slot after removal.
+    decodeVersions[index] = (decodeVersions[index] ?? 0) + 1
     images.value[index]?.decoded.dispose()
     const next = [...images.value]
     next[index] = undefined
     images.value = next
   }
 
+  // Pending decodes target a slot index, so slots must not move until they land.
   const swapImages = () => {
+    if (rendering.value) return false
     images.value = [images.value[1], images.value[0]]
+    return true
   }
 
   const updateImageTransform = (index: number, transform: Partial<CompositionImageTransform>) => {
