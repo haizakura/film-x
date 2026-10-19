@@ -29,6 +29,8 @@
 | 响应式状态、异步流程、生命周期 | app/composables | 可复用逻辑不能散落在多个页面或展示组件中。 |
 | 纯计算与浏览器图像工具 | app/utils | 不持有 Vue 状态，不引入 UI 文案。 |
 | 跨模块模型、有限选项、边界常量 | app/types | 使用联合类型和显式接口，不以任意字符串或 any 绕过约束。 |
+| MCP 渲染页 | app/pages/mcp-renderer.vue、app/utils/agentRenderer.ts | 只组合 app/utils 已有能力，不复制业务规则或常量；app/types/agent.ts 的不兼容修改必须提升 AGENT_RENDERER_PROTOCOL，且网站与 MCP 服务需同步更新。 |
+| 本地 MCP 服务 | packages/mcp | 只负责路径校验、回环代理与文件传输、串行队列与工具 schema；不得新增上传或远程处理。install.sh 是 POSIX sh，必须保持 POSIX；install.ps1 须兼容 PowerShell 5.1 与 7，失败时抛出错误而非退出，且同样遵守下述约束（以 curl \| sh 运行：子命令需带 </dev/null，主体在 main 函数中运行）；两个安装脚本都不得修改任何 Agent 配置，不得删除非自身创建的文件夹；服务运行时所需依赖一旦变化，scripts/build-site.mjs 必须继续锁定精确版本。 |
 
 - 使用 script setup lang="ts"，类型仅导入时使用 type import。
 - 共享状态应有清晰的单一来源。子组件不可直接修改不属于自己的外部深层状态。
@@ -99,6 +101,12 @@ git diff --check
 
 ~~~sh
 mise exec -- pnpm build
+~~~
+
+若修改涉及 packages/mcp、MCP 渲染页（app/pages/mcp-renderer.vue、app/utils/agentRenderer.ts、app/types/agent.ts）或其复用的 app/utils，额外运行：
+
+~~~sh
+mise exec -- pnpm test:mcp
 ~~~
 
 如果某项验证无法运行，应记录具体命令、失败原因和未覆盖的风险，不能把未执行描述为已通过。

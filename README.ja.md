@@ -63,6 +63,119 @@
 - 画像や処理がある場合は更新待ちの状態を表示します。すべてのウィンドウの画像をクリアして処理の完了を待つか、Film X のウィンドウをすべて閉じると更新を適用できます。
 - 画像はメモリにのみ保持され、再読み込みやページを閉じた後には復元できません。オフラインキャッシュには、読み込んだ画像や編集作業は保存されません。
 
+## AI エージェントからの利用（ローカル MCP）
+
+Film X はローカルの stdio MCP サーバー（ワークスペースパッケージ `packages/mcp`、名称 `film-x-mcp`）を備えており、Claude Desktop、ChatGPT Desktop、Codex CLI などの MCP 対応デスクトップ AI エージェントから、3 つのツールを直接実行して生成された画像を受け取れます。
+
+- ローカル専用：エージェントアプリがローカルプロセスとして起動し、画像はローカルのパスから読み込まれ、ローカルのパスに書き出されます。アップロードされることはありません。レンダラーページは Film X の Web サイトの一部（ルート `/mcp-renderer`、サイトとともに Cloudflare Pages にデプロイ）です。サーバーはループバック専用のポート（127.0.0.1、ランダムなポート）のリバースプロキシ経由で、ヘッドレスモードの Google Chrome または Microsoft Edge（playwright-core）にこのページを読み込みます。そのため、出力は Web アプリと同じ `app/utils` のコードで描画されます（フォント、ロゴ、スプロケット、EXIF の向きも同じです）。
+- コードはサイトから取得し、画像はこのコンピューター上でのみ読み書きされます。画像はループバックポートを通じてサーバーとページの間でやり取りされ、サイトやその他の場所に送信されることはありません。プロキシはサイト自身のファイルに対する `GET` / `HEAD` リクエストだけを Cookie なしで転送し、ヘッドレスブラウザーではサイトの Service Worker をブロックします。コンテンツハッシュ付きの `_nuxt` アセットは、サーバーの実行中メモリにキャッシュされます。ブラウザーの起動時（最初のジョブと、5 分間のアイドル終了後の次のジョブ）には、サイトへのネットワークアクセスが必要です。
+- サイトは Film X 0.6.0 以降（`/mcp-renderer` を配信するバージョン）で動作している必要があります。そうでない場合、最初のジョブは 0.6.0 以降のデプロイまたは `FILM_X_SITE_URL` の設定を促すメッセージで失敗します。サーバーとページはレンダラープロトコルのバージョンを共有しており、不一致の場合はどちら側を更新すべきか（サイトの再デプロイ、または MCP サーバーの再ビルド / 更新）がエラーに示されます。
+- レンダラーページのコードは現在のジョブの画像にアクセスできるため、`FILM_X_SITE_URL` は信頼できる Film X のデプロイ（通常は自分自身のもの）だけに向けてください。
+- `FILM_X_BROWSER_PATH` で、Chromium ベースの別のブラウザー実行ファイルを指定できます。ブラウザーは 5 分間アイドル状態が続くと終了します。
+- ジョブは Web アプリと同様に 1 つずつ順番に実行され、大きな TIFF スキャンのメモリ使用量を抑えます。
+- 必要なもの：Node.js 22 以降（LTS であればいずれも可）、インストール済みの Chrome または Edge、およびブラウザー起動時のサイトへのネットワークアクセス。
+
+### ワンクリックインストール（macOS / Linux / Windows）
+
+macOS / Linux：
+
+```bash
+curl -fsSL https://filmx.nya.run/mcp/install.sh | sh
+```
+
+Windows（PowerShell 5.1 または 7）：
+
+```powershell
+irm https://filmx.nya.run/mcp/install.ps1 | iex
+```
+
+サイトのビルドでは `/mcp/` 配下に `install.sh`、`install.ps1`、`server.mjs`、`package.json`、`SHA256SUMS` が公開されます。サイトが 0.6.0 以降で動作している場合にのみ利用でき、それまではダウンロードが 404 を返し、スクリプトはサイトが Film X 0.6.0 以降で動作している必要があると表示します。どちらのスクリプトも同じ手順で処理します。
+
+- 前提条件の確認：Node.js 22 以降（npm 含む）と curl または wget が必要です。
+- `<サイト>/mcp/` からファイルをダウンロードし、SHA-256 チェックサムを検証します。
+- `npm install --omit=dev` を実行して依存関係をインストールし（npm レジストリへのネットワークアクセスが必要）、`server.mjs --version` が動作することを確認します。
+- `~/.film-x-mcp`（Windows では `%LOCALAPPDATA%\film-x-mcp`。`FILM_X_MCP_HOME` で変更可能）へアトミックにインストールします。新しいコピーを対象の隣に用意してから移動します。既存のフォルダーは、以前のインストーラーが作成したもの（マーカーファイルあり）の場合にのみ置き換えられ、それ以外のフォルダーは拒否されます。
+- Google Chrome も Microsoft Edge も見つからない場合は警告します（Windows には Edge が付属しています）。
+- Claude Desktop（JSON）と ChatGPT Desktop / Codex（`~/.codex/config.toml`、または 設定 → MCP サーバー → サーバーを追加 → STDIO）向けに、そのままコピーできる設定を `node server.mjs --print-config` で表示します。その Node.js バイナリの絶対パスとインストール済みの `server.mjs` が入力済みで、各プラットフォームの設定ファイルの場所（Claude Desktop：Windows は `%APPDATA%\Claude\claude_desktop_config.json`、macOS は `~/Library/Application Support/Claude/claude_desktop_config.json`。Codex / ChatGPT Desktop：Windows は `%USERPROFILE%\.codex\config.toml`、macOS / Linux は `~/.codex/config.toml`）も示します。`FILM_X_SITE_URL` が既定値でない場合はそれも含まれます。
+
+エージェントの設定は一切変更せず、何もアップロードしません。Windows で環境変数を使う場合は先に設定してください（例：`$env:FILM_X_MCP_HOME = 'D:\film-x-mcp'`）。失敗時は PowerShell 版インストーラーが終了せずにエラーをスローするため、PowerShell のウィンドウは閉じません。`FILM_X_SITE_URL` でインストール元かつレンダリングに使うサイトを指定します（既定は `https://filmx.nya.run/`。https のみで、http は localhost に限ります）。
+
+- 更新：同じコマンドをもう一度実行します。設定はその Node.js バイナリを指しているため、Node.js をアップグレードした後も再実行してください。
+- アンインストール：インストールフォルダーを削除し、設定のエントリーを削除します。
+- 後で設定を作り直すときは `node server.mjs --print-config` を実行できます。`server.mjs` は `--version` / `--help` にも対応しています。
+
+### ソースからビルド（開発者向け）
+
+```bash
+mise exec -- pnpm install
+mise exec -- pnpm mcp:build
+```
+
+`packages/mcp/dist/server.mjs` のみが生成されます。
+
+GUI アプリはシェルの PATH（mise、fish など）を引き継がないため、設定には node の絶対パス（`mise which node` で表示されます。例：`/Users/you/.local/share/mise/installs/node/24/bin/node`）と `dist/server.mjs` の絶対パスを使用してください。
+
+### Claude Desktop
+
+インストーラーは、この設定を入力済みの状態で表示します。
+
+設定ファイル（macOS では `~/Library/Application Support/Claude/claude_desktop_config.json`。設定 → 開発者 → 設定を編集 からも開けます）を編集し、Claude Desktop を再起動します。
+
+```json
+{
+  "mcpServers": {
+    "film-x": {
+      "command": "/absolute/path/to/node",
+      "args": ["/absolute/path/to/film-x/packages/mcp/dist/server.mjs"],
+      "env": {
+        "FILM_X_IMAGE_DIR": "/Users/you/Pictures/Scans",
+        "FILM_X_SITE_URL": "https://filmx.nya.run/"
+      }
+    }
+  }
+}
+```
+
+### ChatGPT Desktop / Codex CLI
+
+インストーラーは、この設定を入力済みの状態で表示します。
+
+ChatGPT Desktop は Codex ホストの MCP 設定を使用し、Codex CLI や IDE 拡張機能と共有されます。設定 → MCP サーバー → サーバーを追加 → STDIO でコマンドと引数を入力するか、`~/.codex/config.toml` を編集します。
+
+```toml
+[mcp_servers.film-x]
+command = "/absolute/path/to/node"
+args = ["/absolute/path/to/film-x/packages/mcp/dist/server.mjs"]
+startup_timeout_sec = 30
+# 大きな TIFF をまとめて処理すると、既定の 60 秒では足りない場合があります。
+tool_timeout_sec = 600
+env = { FILM_X_IMAGE_DIR = "/Users/you/Pictures/Scans", FILM_X_SITE_URL = "https://filmx.nya.run/" }
+```
+
+既知の問題：一部の ChatGPT Desktop ビルドでは、ローカル MCP ツールは検出されるものの、通常のチャットセッションでは利用できません（[openai/codex#38162](https://github.com/openai/codex/issues/38162) を参照）。Codex CLI とデスクトップの Work 画面では動作します。
+
+### 環境変数
+
+- `FILM_X_IMAGE_DIR`：`list_images` の既定のフォルダー。
+- `FILM_X_SITE_URL`：サイトのベース URL。既定は `https://filmx.nya.run/` です。https である必要があり、http はローカルテスト用に `localhost` / `127.0.0.1` / `[::1]` のみ使用できます。`https://example.com/film-x/` のようなサブパスへのデプロイにも対応します。
+- `FILM_X_BROWSER_PATH`：ブラウザー実行ファイルのパス。自動検出される Chrome / Edge の代わりに使用します。
+- `FILM_X_MCP_HOME`：インストールフォルダー。既定は `~/.film-x-mcp`（インストーラーのみが使用）。
+
+### ツール
+
+- `list_images`：フォルダー内の対応画像（TIFF、JPEG、PNG、WebP）を一覧表示します（再帰も可能）。
+- `read_photo_exif`：EXIF、検出されたブランド、デジタルまたはフィルムの種別、キャプション項目を、フレームツールが自動入力する内容と同じ形で読み取ります。
+- `split_half_frame`：1 枚以上のハーフサイズのスキャンを `<name>_01` / `<name>_02`（JPEG、PNG、WebP、TIF）に分割します。中心と隙間を指定しない場合は中央の隙間を自動検出し、左右を個別に回転できます。
+- `compose_film`：1〜2 枚の写真をハーフサイズまたはフルサイズのレイアウトに合成します。向き、比率（`auto` や `4:5` など）、余白、画像間隔、背景、パターン、フィット、縁文字付きのスプロケット帯、フィルム質感を指定できます。既定では、最初の写真の隣に `film-x-layout.jpg|png` を書き出します。
+- `frame_photo`：1 枚の写真にフレームを付けます。テンプレート、ブランド、一部の設定、Web アプリの `FXF1.` プリセットコードを指定でき、EXIF の自動入力（既定でオン）とキャプションの上書きに対応します。`<name>-frame.jpg|png` を書き出し、確定した設定のプリセットコードを返すため、Web アプリにそのまま貼り付けられます。
+- `frame_preset`：描画せずにフレーム設定やプリセットコードを解決します（読み取り専用）。
+
+使用上の注意：
+
+- 入力は絶対パスまたは `~/…` で指定します。チャットの添付ファイルはサーバーから見えないため、ファイルまたはフォルダーのパスを直接伝えてください。
+- 描画系のツールは、`overwrite: true` を指定しない限り既存のファイルを上書きせず、入力ファイルにも決して書き込みません。出力パス、ピクセルサイズ、エージェントが確認できる小さな JPEG プレビュー（長辺 1024 px 以下）を返します（`preview: false` で無効化）。
+- キャンバスの制限は Web アプリと同じです：長辺 8000 px、スプロケット帯の幅は 24〜240 px。
+
 ## 技術スタック
 
 アプリケーションフレームワークと UI：Nuxt 4 + Vue 3 + shadcn-vue + Reka UI + Tailwind CSS
@@ -76,6 +189,8 @@
 インストール、オフライン対応、更新：`@vite-pwa/nuxt` + Workbox
 
 コード検査とフォーマット：TypeScript + Oxlint + Oxfmt
+
+MCP：`@modelcontextprotocol/sdk` + `playwright-core`（システムの Chrome / Edge）
 
 ## ローカル開発
 
@@ -94,10 +209,13 @@ mise exec -- pnpm dev
 ```bash
 mise exec -- pnpm check
 mise exec -- pnpm test:pwa
+mise exec -- pnpm test:mcp
 mise exec -- pnpm build
 ```
 
 `test:pwa` は Node 標準の回帰テストで、複数ウィンドウの待機中・処理中・無応答・終了、スコープ、再試行、同時メッセージにおける更新の有効化条件を検証します。
+
+`test:mcp` はまず `pnpm generate`（MCP パッケージのビルドを含む）を実行し、続いて `packages/mcp/tests/*.test.mjs` を実行します。生成された `.output/public` をローカルポートで配信し、プロキシ経由でそれに対してテストします。その中の `install.test.mjs` は、生成されたサイトに対して実際の `curl … | sh` のワンライナーを一時フォルダーへ実行し、表示される設定の確認、インストール済みサーバーの起動、その場での更新、およびインストーラーが作成していないフォルダーの拒否を検証します。PowerShell（`FILM_X_PWSH` または PATH 上の `pwsh`）が見つかる場合は `install.ps1` も `irm … | iex` で実行し、見つからない場合はその項目をスキップします（npm のインストールにはレジストリへのネットワークアクセスが必要）。検証には git 管理外の `sample/` フォルダー（または `FILM_X_SAMPLE`）の最初の画像を使い、使える画像がない場合はスキップされます。`FILM_X_SITE_URL` を設定すると、テストはデプロイ済みのサイトに対して実行されます。
 
 `check` は、フォーマット検査、Oxlint、Nuxt の型検査を順に実行します。静的サイトの生成やビルド結果のプレビューには、次のコマンドを使用できます。
 
@@ -113,6 +231,7 @@ mise exec -- pnpm preview
 - ルートパスと、`NUXT_APP_BASE_URL` で設定したサブパスへの配置に対応しています。ビルドとデプロイでは同じベースパスを使用してください。
 - `sw.js`、`pwa-update-guard.js`、`manifest.webmanifest`、HTML には `Cache-Control: no-cache` を設定し、ブラウザーが更新を速やかに再検証できるようにしてください。静的ホスティングでは、これらのレスポンスヘッダーを別途設定する必要があります。
 - 新しい静的リソースと Service Worker は同じリリースで公開し、リソースを先に、worker を後に公開してください。ローリングデプロイ中は古い `_nuxt` のハッシュ付きリソースも保持し、旧バージョンを実行中のウィンドウから引き続き読み込めるようにしてください。
+- ビルド（`pnpm generate` と `pnpm build` はどちらも先に `pnpm mcp:build` を実行します）では、MCP のインストーラー用ファイル（`install.sh`、`install.ps1`、`server.mjs`、`package.json`、`SHA256SUMS`）が `/mcp/` 配下に公開されます。これらは PWA の Service Worker にプリキャッシュされません。そのため Pages のビルドコマンドは、素の `nuxt generate` ではなく `pnpm generate`（または `pnpm build`）にする必要があります。`public/_headers` により、Pages は 2 つのインストーラーをプレーンテキストとして返し、`/mcp/` 配下のファイルを常に再検証します。
 
 ## コード構成
 
@@ -124,12 +243,15 @@ mise exec -- pnpm preview
 - `app/assets/css`：グローバルテーマ、色、基本的な UI 部品のスタイル、フレーム用フォントの読み込み。
 - `app/assets/frame-logos`：フォトフレームで使うカメラブランドのロゴ SVG と、その出典の説明。
 - `public`：favicon、PWA アイコン、更新保護スクリプト `pwa-update-guard.js` などの公開静的リソース。
+- `packages/mcp`：ローカル MCP サーバー（Node）：ループバックプロキシ、ファイル転送、ツール定義。`install.sh` / `install.ps1` はワンクリックインストーラー、`scripts/build-site.mjs` はインストーラー用ファイルを `dist/site` に生成し、サイトのビルド時に `/mcp/` 配下へ公開されます。
+- 使用するレンダラーページは `app/pages/mcp-renderer.vue` と `app/utils/agentRenderer.ts` です。
 
 ハーフサイズ分割のワークフローは、個人プロジェクト [Full2Half](https://github.com/haizakura/full2half) のソースコードを再利用し、Film X の共通ページ構成とテーマシステムに合わせて再構成しています。
 
 ## 画像処理について
 
 - 画像処理はすべてブラウザー内で行われ、サーバーにアップロードされることはありません。
+- ローカル MCP サーバーは設定されたサイトからコードを読み込み、このコンピューター上のヘッドレスブラウザーで画像を処理します。画像がアップロードされることはありません。
 - フォトフレームが EXIF を読み取るときは、ファイル内のメタデータ部分だけを必要に応じて読み込み、そのために大きな TIFF 全体を読み込むことはありません。プレビューは縮小したコピーで描画し、書き出し時に選択したサイズで元の画像から描き直します。
 - 自動分割では、中央領域の縦方向の明るさ、テクスチャ、境界の変化を解析します。中央の隙間を確実に検出できない場合は、ピクセルを削除しません。
 - TIFF はブラウザー内でデコードされます。ハーフサイズ分割では JPEG、PNG、WebP、TIF で書き出せます。TIF は非圧縮の 8 ビット RGBA ピクセルを使用し、分割と 90° 単位の回転を行うことで、再度の非可逆エンコードを避けます。高ビット深度の TIFF 入力も、ブラウザー側で 8 ビット RGBA にデコードされる制約を受けます。

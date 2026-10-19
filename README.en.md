@@ -63,6 +63,119 @@ The horizontal menu at the top of the page switches between the three tools. Eac
 - If images or tasks are present, the app shows a pending update. Clear the images in every window and let tasks finish, or close all Film X windows, to allow the update to apply.
 - Images stay in memory only and cannot be recovered after a refresh or closing the page. Offline caching does not save imported images or editing work.
 
+## AI Agent Access (Local MCP)
+
+Film X ships a local stdio MCP server (workspace package `packages/mcp`, named `film-x-mcp`) so that desktop AI agents such as Claude Desktop, ChatGPT Desktop, Codex CLI, and other MCP clients can run the three tools directly and receive the generated images.
+
+- Local only: the agent app launches it as a local process; images are read from and written to local paths and are never uploaded. The renderer page is part of the Film X website (route `/mcp-renderer`, deployed with the site to Cloudflare Pages). The server loads it through a reverse proxy on a loopback-only port (127.0.0.1, random port) into headless Google Chrome or Microsoft Edge (playwright-core), so the output is drawn by the same `app/utils` code as the web app (same fonts, logos, sprockets, and EXIF orientation).
+- The code comes from the site; images are read and written only on this computer. They travel between the server and the page over the loopback port and are never sent to the site or anywhere else. The proxy only forwards `GET` / `HEAD` requests for the site's own files, without cookies; the site's service worker is blocked in the headless browser; and the content-hashed `_nuxt` assets are cached in memory while the server runs. Network access to the site is needed whenever the browser starts (on the first job, and again after the 5-minute idle close).
+- The site must run Film X 0.6.0 or later (that is, serve `/mcp-renderer`); otherwise the first job fails with a message saying to deploy 0.6.0+ or set `FILM_X_SITE_URL`. The server and the page share a renderer protocol version; on a mismatch the error says which side to update: redeploy the site, or rebuild/update the MCP server.
+- The renderer page's code runs with access to the images of the current job, so point `FILM_X_SITE_URL` only at a Film X deployment you trust, normally your own.
+- `FILM_X_BROWSER_PATH` can point to another Chromium-based browser executable. The browser closes after 5 minutes idle.
+- Jobs run one at a time, like the web app, to cap memory use on large TIFF scans.
+- Requirements: Node.js 22 or later (any LTS works), an installed Chrome or Edge, and network access to the site when the browser starts.
+
+### One-Click Install (macOS / Linux / Windows)
+
+macOS / Linux:
+
+```bash
+curl -fsSL https://filmx.nya.run/mcp/install.sh | sh
+```
+
+Windows (PowerShell 5.1 or 7):
+
+```powershell
+irm https://filmx.nya.run/mcp/install.ps1 | iex
+```
+
+The site build publishes `install.sh`, `install.ps1`, `server.mjs`, `package.json`, and `SHA256SUMS` under `/mcp/`. This works only once the site runs 0.6.0 or later; until then the download returns 404 and the script says the site must run Film X 0.6.0 or later. Both scripts take the same steps:
+
+- Checks prerequisites: Node.js 22 or later with npm, and curl or wget.
+- Downloads the files from `<site>/mcp/` and verifies their SHA-256 checksums.
+- Runs `npm install --omit=dev` (needs network access to the npm registry), then checks that `server.mjs --version` runs.
+- Installs atomically into `~/.film-x-mcp` (`%LOCALAPPDATA%\film-x-mcp` on Windows; override with `FILM_X_MCP_HOME`): the new copy is staged next to the target and moved into place. An existing folder is replaced only if an earlier run of the installer created it (marker file); any other folder is refused.
+- Warns if neither Google Chrome nor Microsoft Edge is found (Edge ships with Windows).
+- Prints, via `node server.mjs --print-config`, ready-to-paste configuration for Claude Desktop (JSON) and ChatGPT Desktop / Codex (`~/.codex/config.toml`, or Settings → MCP servers → Add server → STDIO), filled with the absolute path of that exact Node.js binary and the installed `server.mjs`, and names each platform's config file (Claude Desktop: `%APPDATA%\Claude\claude_desktop_config.json` on Windows, `~/Library/Application Support/Claude/claude_desktop_config.json` on macOS; Codex / ChatGPT Desktop: `%USERPROFILE%\.codex\config.toml` on Windows, `~/.codex/config.toml` on macOS/Linux). When `FILM_X_SITE_URL` is not the default, the snippets include it.
+
+It changes no agent configuration and uploads nothing. On Windows, set any environment variables first, e.g. `$env:FILM_X_MCP_HOME = 'D:\film-x-mcp'`. On failure the PowerShell installer throws an error instead of exiting, so your PowerShell window stays open. `FILM_X_SITE_URL` selects the site to install from and render with (default `https://filmx.nya.run/`; https only, http just for localhost).
+
+- Update: run the same command again. Run it again after upgrading Node.js too, because the configuration points at that exact binary.
+- Uninstall: delete the install folder and remove the configuration entry.
+- To re-create a configuration later, run `node server.mjs --print-config`; `server.mjs` also supports `--version` / `--help`.
+
+### Build from Source (Developers)
+
+```bash
+mise exec -- pnpm install
+mise exec -- pnpm mcp:build
+```
+
+This produces only `packages/mcp/dist/server.mjs`.
+
+GUI apps do not inherit the shell's PATH (mise, fish, and so on), so the configuration must use the absolute path of node (printed by `mise which node`, for example `/Users/you/.local/share/mise/installs/node/24/bin/node`) and the absolute path of `dist/server.mjs`.
+
+### Claude Desktop
+
+The installer prints this configuration already filled in.
+
+Edit the config file (`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS, also reachable via Settings → Developer → Edit Config), then restart Claude Desktop:
+
+```json
+{
+  "mcpServers": {
+    "film-x": {
+      "command": "/absolute/path/to/node",
+      "args": ["/absolute/path/to/film-x/packages/mcp/dist/server.mjs"],
+      "env": {
+        "FILM_X_IMAGE_DIR": "/Users/you/Pictures/Scans",
+        "FILM_X_SITE_URL": "https://filmx.nya.run/"
+      }
+    }
+  }
+}
+```
+
+### ChatGPT Desktop / Codex CLI
+
+The installer prints this configuration already filled in.
+
+ChatGPT Desktop uses the Codex host's MCP configuration, shared with Codex CLI and the IDE extension. Either add a server under Settings → MCP servers → Add server → STDIO (command and args), or edit `~/.codex/config.toml`:
+
+```toml
+[mcp_servers.film-x]
+command = "/absolute/path/to/node"
+args = ["/absolute/path/to/film-x/packages/mcp/dist/server.mjs"]
+startup_timeout_sec = 30
+# Large TIFF batches can take longer than the 60 s default.
+tool_timeout_sec = 600
+env = { FILM_X_IMAGE_DIR = "/Users/you/Pictures/Scans", FILM_X_SITE_URL = "https://filmx.nya.run/" }
+```
+
+Known issue: in some ChatGPT Desktop builds, local MCP tools are discovered but not exposed in normal Chat sessions (see [openai/codex#38162](https://github.com/openai/codex/issues/38162)); they work in Codex CLI and the desktop Work surface.
+
+### Environment Variables
+
+- `FILM_X_IMAGE_DIR`: The default folder for `list_images`.
+- `FILM_X_SITE_URL`: The site's base URL, default `https://filmx.nya.run/`. It must be https; plain http is allowed only for `localhost` / `127.0.0.1` / `[::1]`, for local testing. Sub-path deployments work, e.g. `https://example.com/film-x/`.
+- `FILM_X_BROWSER_PATH`: Path to a browser executable, overriding the automatically found Chrome or Edge.
+- `FILM_X_MCP_HOME`: The install folder, default `~/.film-x-mcp` (used only by the installer).
+
+### Tools
+
+- `list_images`: Lists supported images (TIFF, JPEG, PNG, WebP) in a folder, optionally recursively.
+- `read_photo_exif`: Reads EXIF, the detected brand, the digital or film source, and caption fields, as the frame tool would fill them.
+- `split_half_frame`: Splits one or more half-frame scans into `<name>_01` / `<name>_02` (JPEG, PNG, WebP, or TIF). The gutter is detected automatically unless the center and gap are given; each side can be rotated.
+- `compose_film`: Composes 1–2 photos into a half-frame or full-frame layout, with direction, ratio (such as `auto` or `4:5`), padding, gap, background, pattern, fit, sprocket band with edge text, and film texture. By default it writes `film-x-layout.jpg|png` next to the first photo.
+- `frame_photo`: Frames one photo with a template, brand, partial settings, and/or an `FXF1.` preset code from the web app, with EXIF auto-fill (on by default) and caption overrides. It writes `<name>-frame.jpg|png` and returns the preset code of the resolved settings, which can be pasted into the web app.
+- `frame_preset`: Resolves frame settings or preset codes without rendering (read-only).
+
+Usage notes:
+
+- Inputs are absolute paths or `~/…`. Chat attachments are not visible to the server, so give file or folder paths directly.
+- Render tools never overwrite existing files unless `overwrite: true` is set and never write over an input. They return the output paths, pixel sizes, and a small JPEG preview (long side up to 1024 px) that the agent can look at (`preview: false` disables it).
+- Canvas limits are the same as the web app: 8000 px on the long side and a 24–240 px sprocket band.
+
 ## Tech Stack
 
 App framework and UI: Nuxt 4 + Vue 3 + shadcn-vue + Reka UI + Tailwind CSS
@@ -76,6 +189,8 @@ Frame fonts: `@fontsource` (OFL open-source fonts, bundling Latin subsets only)
 Installation, offline support, and updates: `@vite-pwa/nuxt` + Workbox
 
 Linting and formatting: TypeScript + Oxlint + Oxfmt
+
+MCP: `@modelcontextprotocol/sdk` + `playwright-core` (system Chrome / Edge)
 
 ## Local Development
 
@@ -94,10 +209,13 @@ The development server runs at `http://localhost:3000` by default.
 ```bash
 mise exec -- pnpm check
 mise exec -- pnpm test:pwa
+mise exec -- pnpm test:mcp
 mise exec -- pnpm build
 ```
 
 `test:pwa` uses native Node regression tests to verify update activation conditions across idle, busy, unresponsive, and closed windows, scopes, retries, and concurrent messages.
+
+`test:mcp` first runs `pnpm generate` (which builds the MCP package), then `packages/mcp/tests/*.test.mjs`: it serves the generated `.output/public` on a local port and runs the tests through the proxy against it. This includes `install.test.mjs`, which runs the real `curl … | sh` one-liner against the generated site into a temp folder, checks the printed configuration, starts the installed server, and checks update-in-place and the refusal of foreign folders. When PowerShell is available (`FILM_X_PWSH` or `pwsh` on PATH), it also runs `install.ps1` with `irm … | iex`; otherwise that case is skipped (the npm install needs network access to the registry). It also uses the first image in the git-ignored `sample/` folder (or `FILM_X_SAMPLE`); it is skipped when no image is available. Setting `FILM_X_SITE_URL` makes the tests run against a deployed site instead.
 
 `check` runs formatting checks, Oxlint, and Nuxt type checking in sequence. To generate a static site or preview the build output, use:
 
@@ -113,6 +231,7 @@ Development mode does not register a Service Worker. To test the production PWA,
 - Deployment supports both the root path and subpaths configured with `NUXT_APP_BASE_URL`. Use the same base path for building and deployment.
 - Set `Cache-Control: no-cache` for `sw.js`, `pwa-update-guard.js`, `manifest.webmanifest`, and HTML so browsers revalidate updates promptly. Configure these response headers yourself on static hosting platforms.
 - Publish new static assets and the Service Worker in the same release, with assets published before the worker. Retain old hashed `_nuxt` assets during rolling deployments so windows running an older version can still load them.
+- The build (`pnpm generate` and `pnpm build` both run `pnpm mcp:build` first) publishes the MCP installer files (`install.sh`, `install.ps1`, `server.mjs`, `package.json`, `SHA256SUMS`) under `/mcp/`; the PWA service worker does not precache them. The Pages build command must therefore be `pnpm generate` (or `pnpm build`), not a raw `nuxt generate`. `public/_headers` makes Pages serve both installers as plain text and always revalidate the files under `/mcp/`.
 
 ## Project Structure
 
@@ -124,12 +243,15 @@ Development mode does not register a Service Worker. To test the production PWA,
 - `app/assets/css`: Global theme, colors, base control styles, and frame font imports.
 - `app/assets/frame-logos`: Camera brand logo SVGs used by the photo frame, along with their source notes.
 - `public`: Public static assets, including the favicon, PWA icons, and the `pwa-update-guard.js` update guard.
+- `packages/mcp`: The local MCP server (Node): loopback proxy, file transfer, and tool definitions; `install.sh` / `install.ps1` are the one-click installers and `scripts/build-site.mjs` generates the installer files into `dist/site`, which the site build publishes under `/mcp/`.
+- The renderer page it uses is `app/pages/mcp-renderer.vue` with `app/utils/agentRenderer.ts`.
 
 The half-frame splitting workflow reuses source code from the personal project [Full2Half](https://github.com/haizakura/full2half), reorganized within Film X's unified page structure and theme system.
 
 ## Image Processing Notes
 
 - All image processing happens entirely in the browser; nothing is uploaded to a server.
+- The local MCP server loads its code from the configured site and processes images in a headless browser on this computer; nothing is uploaded.
 - When the photo frame reads EXIF, it reads only the metadata segments of the file on demand and never loads a large TIFF in full for this; the preview is drawn from a downscaled copy, and the export redraws from the original image at the selected size.
 - Auto-splitting analyzes vertical brightness, texture, and edge changes in the central region. When the gutter cannot be reliably detected, no pixels are removed.
 - TIFF files are decoded in the browser. The half-frame splitter can output JPEG, PNG, WebP, and TIF. TIF output uses uncompressed 8-bit RGBA pixels for splitting and 90° integer rotations, avoiding another round of lossy encoding. High-bit-depth TIFF input is still limited by browser-side decoding to 8-bit RGBA.
