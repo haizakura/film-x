@@ -7,12 +7,13 @@ import type {
   FrameWordmarkPreset
 } from '~/types/frame'
 import { getCameraBrand } from '~/utils/cameraBrands'
-import { decodeFramePreset, encodeFramePreset } from '~/utils/framePreset'
+import { encodeFramePreset } from '~/utils/framePreset'
 import {
+  applyBrand,
   applyFrameSourceType,
   applyFrameTemplate,
+  applyPresetCode,
   createDefaultFrameSettings,
-  getBrandLogo,
   getWordmarkTypography
 } from '~/utils/frameSettings'
 
@@ -46,12 +47,10 @@ export const useFrameSettings = () => {
 
   const selectBrand = (id: CameraBrandId, source: FrameChoiceSource = 'user') => {
     if (source === 'auto' && (brandChosen || id === settings.value.logo.brand)) return
-    const next = getCameraBrand(id)
     applyingBrand = true
-    Object.assign(settings.value.logo, getBrandLogo(next, settings.value.logo))
+    applyBrand(settings.value, id, taglineEdited)
     applyingBrand = false
     brandChosen = source === 'user'
-    if (!taglineEdited) settings.value.tagline = next.tagline ?? ''
   }
 
   const setTagline = (text: string) => {
@@ -73,15 +72,9 @@ export const useFrameSettings = () => {
 
   /** Applies a preset code as a manual choice; the caption text and tagline are kept. */
   const importPreset = (code: string) => {
-    const current = settings.value
-    const preset = decodeFramePreset(code, current)
-    const brandChanged = preset.logo.brand !== current.logo.brand
-    settings.value = { ...preset, tagline: current.tagline, outputQuality: current.outputQuality }
+    settings.value = applyPresetCode(settings.value, code, taglineEdited)
     brandChosen = true
     sourceChosen = true
-    if (brandChanged && !taglineEdited) {
-      settings.value.tagline = getCameraBrand(preset.logo.brand).tagline ?? ''
-    }
   }
 
   return {

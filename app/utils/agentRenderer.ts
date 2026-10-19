@@ -19,16 +19,15 @@ import type {
 import { getCompositionOutputGeometry } from '~/types/composition'
 import type { CompositionImage } from '~/types/composition'
 import { FRAME_INFO_FIELDS, MAX_FRAME_TEXT_LENGTH } from '~/types/frame'
-import type { CameraBrandId, FrameInfoFields, FrameSettings, FrameSourceType } from '~/types/frame'
-import type { CropRect, DecodedImage, Rotation } from '~/types/image'
-import { getCameraBrand } from '~/utils/cameraBrands'
+import type { FrameInfoFields, FrameSourceType } from '~/types/frame'
+import type { DecodedImage } from '~/types/image'
 import { drawComposition, hasSupportedCanvasDimensions } from '~/utils/compositionCanvas'
 import { getCompositionGeometry } from '~/utils/compositionGeometry'
 import {
   createDefaultCompositionSettings,
   sanitizeCompositionSettings
 } from '~/utils/compositionSettings'
-import { canvasToBlob } from '~/utils/download'
+import { canvasToBlob, releaseCanvas } from '~/utils/download'
 import { AppError } from '~/utils/errors'
 import { readPhotoExif } from '~/utils/exif'
 import { createFilmGrainTiles, releaseFilmGrainTiles } from '~/utils/filmTexture'
@@ -40,14 +39,22 @@ import {
   detectFrameSourceType,
   getFrameExifFill
 } from '~/utils/frameMetadata'
-import { decodeFramePreset, encodeFramePreset, sanitizeFrameSettings } from '~/utils/framePreset'
+import { encodeFramePreset, sanitizeFrameSettings } from '~/utils/framePreset'
 import {
+  applyBrand,
   applyFrameSourceType,
   applyFrameTemplate,
-  createDefaultFrameSettings,
-  getBrandLogo
+  applyPresetCode,
+  createDefaultFrameSettings
 } from '~/utils/frameSettings'
-import { calculateCropRects, decodeImage, DEFAULT_SETTINGS, renderCrop } from '~/utils/image'
+import {
+  calculateCropRects,
+  decodeImage,
+  DEFAULT_SETTINGS,
+  drawRotatedCrop,
+  renderCrop,
+  rotatedSize
+} from '~/utils/image'
 import {
   buildFrameCaption,
   drawFrame,
@@ -91,11 +98,6 @@ const createCanvas = (width: number, height: number) => {
   return { canvas, context }
 }
 
-const releaseCanvas = (canvas: HTMLCanvasElement) => {
-  canvas.width = 0
-  canvas.height = 0
-}
-
 const toBase64 = async (blob: Blob) => {
   const bytes = new Uint8Array(await blob.arrayBuffer())
   let binary = ''
@@ -131,39 +133,6 @@ const encodePreview = async (
 }
 
 const PREVIEW_GAP = 16
-
-const rotatedSize = (rect: CropRect, rotation: Rotation): PixelSize =>
-  rotation === 90 || rotation === 270
-    ? { width: rect.height, height: rect.width }
-    : { width: rect.width, height: rect.height }
-
-/** Draws a crop into a box that already has the rotated proportions. */
-const drawRotatedCrop = (
-  context: CanvasRenderingContext2D,
-  source: CanvasImageSource,
-  rect: CropRect,
-  rotation: Rotation,
-  box: { x: number; y: number; width: number; height: number }
-) => {
-  const swapped = rotation === 90 || rotation === 270
-  const width = swapped ? box.height : box.width
-  const height = swapped ? box.width : box.height
-  context.save()
-  context.translate(box.x + box.width / 2, box.y + box.height / 2)
-  context.rotate((rotation * Math.PI) / 180)
-  context.drawImage(
-    source,
-    rect.x,
-    rect.y,
-    rect.width,
-    rect.height,
-    -width / 2,
-    -height / 2,
-    width,
-    height
-  )
-  context.restore()
-}
 
 const split = async (request: SplitRequest): Promise<SplitResponse> => {
   const image = await decodeImage(await fetchInput(request.input))
@@ -288,13 +257,6 @@ const SOURCE_TYPES: readonly FrameSourceType[] = ['digital', 'film']
 const isSourceType = (value: unknown): value is FrameSourceType =>
   SOURCE_TYPES.includes(value as FrameSourceType)
 
-/** Mirrors selectBrand in the web editor: the logo follows the brand, so does the tagline. */
-const selectBrand = (settings: FrameSettings, id: CameraBrandId, keepTagline: boolean) => {
-  const brand = getCameraBrand(id)
-  Object.assign(settings.logo, getBrandLogo(brand, settings.logo))
-  if (!keepTagline) settings.tagline = brand.tagline ?? ''
-}
-
 /**
  * Builds settings the way the web editor would after the same choices: defaults, then the
  * preset code, template, brand and finally individual values, each sanitised like a preset.
@@ -302,13 +264,10 @@ const selectBrand = (settings: FrameSettings, id: CameraBrandId, keepTagline: bo
 const resolveSettings = (request: FrameSettingsRequest) => {
   let settings = createDefaultFrameSettings()
   if (request.preset) {
-    const preset = decodeFramePreset(request.preset, settings)
-    const brandChanged = preset.logo.brand !== settings.logo.brand
-    settings = { ...preset, tagline: settings.tagline, outputQuality: settings.outputQuality }
-    if (brandChanged) settings.tagline = getCameraBrand(preset.logo.brand).tagline ?? ''
+    settings = applyPresetCode(settings, request.preset, false)
   }
   if (request.template) applyFrameTemplate(settings, request.template)
-  if (request.brand) selectBrand(settings, request.brand, false)
+  if (request.brand) applyBrand(settings, request.brand, false)
   if (request.settings) {
     // A source change swaps the film and exposure lines unless the lines are given too.
     if (isSourceType(request.settings.sourceType)) {
@@ -345,7 +304,7 @@ const frame = async (request: FrameRequest): Promise<FrameResponse> => {
       if (detected && !sourceChosen) applyFrameSourceType(settings, detected)
       const fill = getFrameExifFill(exif, settings.sourceType, false)
       if (fill.brandId && !brandChosen && fill.brandId !== settings.logo.brand) {
-        selectBrand(settings, fill.brandId, typeof request.settings?.tagline === 'string')
+        applyBrand(settings, fill.brandId, typeof request.settings?.tagline === 'string')
       }
       Object.assign(fields, fill.values)
     }

@@ -532,6 +532,3 @@ export interface CameraBrand {
   /** Matches the normalized EXIF Make (and Model for sub-brands). */
   exifPattern?: RegExp
 }
-
-export const clampFrameValue = (value: number, minimum: number, maximum: number) =>
-  Number.isFinite(value) ? Math.min(maximum, Math.max(minimum, value)) : minimum

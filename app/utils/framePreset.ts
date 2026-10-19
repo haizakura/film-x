@@ -1,6 +1,5 @@
 import { deflateSync, inflateSync, strFromU8, strToU8 } from 'fflate'
 import { MAX_CANVAS_RATIO, MAX_CANVAS_RATIO_TERM, MIN_CANVAS_RATIO } from '~/types/canvas'
-import type { CanvasRatioMode } from '~/types/canvas'
 import {
   FRAME_FONTS,
   FRAME_INFO_LINES,
@@ -23,7 +22,6 @@ import type {
   FrameLogoColorMode,
   FrameLogoSettings,
   FrameLogoStyle,
-  FrameOutputFormat,
   FrameOutputSizeMode,
   FramePreset,
   FrameSettings,
@@ -35,25 +33,30 @@ import type {
 } from '~/types/frame'
 import { MAX_EXPORT_QUALITY, MIN_EXPORT_QUALITY } from '~/types/image'
 import { CAMERA_BRANDS, getCameraBrand } from '~/utils/cameraBrands'
-import { normalizeHexColor } from '~/utils/color'
 import { AppError } from '~/utils/errors'
 import { clampFrameOutputSide } from '~/utils/photoFrame'
+import {
+  color,
+  flag,
+  isRecord,
+  number,
+  OUTPUT_FORMATS,
+  options,
+  pick,
+  RATIO_MODES,
+  record
+} from '~/utils/settingsSanitize'
+import type { Raw } from '~/utils/settingsSanitize'
 
 // A preset code is "FXF<version>." followed by deflated JSON in base64url, so it stays short and
 // survives being pasted into chats and URLs. The version lets later formats migrate old codes.
 const PRESET_VERSION = 1
 const PRESET_PATTERN = /^FXF(\d+)\.([\w-]+)$/
 
-type Raw = Record<string, unknown>
-
-/** Every member of a string union, checked for completeness by the record keys. */
-const options = <T extends string>(members: Record<T, true>) => Object.keys(members) as T[]
-
 const TEMPLATES = Object.keys(FRAME_TEMPLATES) as FrameTemplate[]
 const SHADOW_PRESETS = Object.keys(FRAME_SHADOW_PRESETS) as FrameShadowPreset[]
 const FONTS = Object.keys(FRAME_FONTS) as FrameFontId[]
 const BRANDS = CAMERA_BRANDS.map((brand) => brand.id)
-const RATIO_MODES = options<CanvasRatioMode>({ preset: true, custom: true, auto: true })
 const LOGO_STYLES = options<FrameLogoStyle>({
   mark: true,
   wordmark: true,
@@ -62,7 +65,6 @@ const LOGO_STYLES = options<FrameLogoStyle>({
 })
 const LOGO_COLOR_MODES = options<FrameLogoColorMode>({ original: true, text: true, custom: true })
 const SOURCE_TYPES = options<FrameSourceType>({ digital: true, film: true })
-const OUTPUT_FORMATS = options<FrameOutputFormat>({ jpeg: true, png: true })
 const OUTPUT_SIZE_MODES = options<FrameOutputSizeMode>({ original: true, custom: true })
 const BORDER_EDGES = options<keyof FrameBorder>({
   top: true,
@@ -71,18 +73,6 @@ const BORDER_EDGES = options<keyof FrameBorder>({
   left: true
 })
 
-const isRecord = (value: unknown): value is Raw =>
-  typeof value === 'object' && value !== null && !Array.isArray(value)
-const record = (value: unknown): Raw => (isRecord(value) ? value : {})
-const pick = <T extends string>(value: unknown, allowed: readonly T[], fallback: T): T =>
-  allowed.find((option) => option === value) ?? fallback
-const flag = (value: unknown, fallback: boolean) => (typeof value === 'boolean' ? value : fallback)
-const number = (value: unknown, min: number, max: number, fallback: number) =>
-  typeof value === 'number' && Number.isFinite(value)
-    ? Math.min(max, Math.max(min, value))
-    : fallback
-const color = (value: unknown, fallback: string) =>
-  (typeof value === 'string' && normalizeHexColor(value)) || fallback
 const text = (value: unknown, fallback: string) =>
   typeof value === 'string' ? value.slice(0, MAX_FRAME_TEXT_LENGTH) : fallback
 const scale = (value: unknown, fallback: number) =>
