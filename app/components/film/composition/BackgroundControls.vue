@@ -35,6 +35,8 @@ const patterns = computed<Array<{ label: string; value: CompositionPattern; icon
             ? 'border-primary bg-accent text-accent-foreground'
             : 'border-border text-muted-foreground hover:border-primary/50 hover:bg-accent/60'
         "
+        type="button"
+        :aria-pressed="settings.pattern === option.value"
         @click="settings.pattern = option.value"
       >
         <component :is="option.icon" class="size-4" aria-hidden="true" />

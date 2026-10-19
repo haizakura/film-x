@@ -2,10 +2,7 @@
 import { RotateCcw } from '@lucide/vue'
 import type { CompositionImage } from '~/types/composition'
 
-const props = defineProps<{
-  enabled: boolean
-  images: Array<CompositionImage | undefined>
-}>()
+const props = defineProps<{ images: Array<CompositionImage | undefined> }>()
 const emit = defineEmits<{
   scale: [payload: { index: number; value: number }]
   reset: [index: number]
@@ -14,7 +11,14 @@ const { t } = useI18n()
 
 const selectedIndex = ref(0)
 const selectedImage = computed(() => props.images[selectedIndex.value])
-const canAdjust = computed(() => props.enabled && Boolean(selectedImage.value))
+const canAdjust = computed(() => Boolean(selectedImage.value))
+const frameOptions = computed(() =>
+  props.images.map((image, index) => ({
+    value: index,
+    label: t('composition.transform.frame', { number: `0${index + 1}` }),
+    disabled: !image
+  }))
+)
 
 watch(
   () => props.images,
@@ -25,10 +29,6 @@ watch(
   },
   { immediate: true }
 )
-
-const selectImage = (index: number) => {
-  if (props.images[index]) selectedIndex.value = index
-}
 
 const updateScale = (event: Event) => {
   if (!selectedImage.value) return
@@ -41,7 +41,7 @@ const updateScale = (event: Event) => {
 </script>
 
 <template>
-  <div class="border-b border-border p-5" :class="{ 'opacity-60': !enabled }">
+  <div class="border-b border-border p-5">
     <div class="flex items-center justify-between gap-3">
       <p class="text-xs font-medium">{{ t('composition.transform.heading') }}</p>
       <button
@@ -56,23 +56,12 @@ const updateScale = (event: Event) => {
       </button>
     </div>
 
-    <div v-if="images.length > 1" class="mt-4 grid grid-cols-2 gap-1 rounded-lg bg-muted p-1">
-      <button
-        v-for="(_, index) in images"
-        :key="index"
-        class="rounded-md py-2 text-[10px] transition disabled:cursor-not-allowed disabled:opacity-40"
-        :class="
-          selectedIndex === index
-            ? 'bg-primary font-medium text-primary-foreground shadow-sm'
-            : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-        "
-        type="button"
-        :disabled="!images[index]"
-        @click="selectImage(index)"
-      >
-        {{ t('composition.transform.frame', { number: `0${index + 1}` }) }}
-      </button>
-    </div>
+    <FilmSegmented
+      v-if="images.length > 1"
+      v-model="selectedIndex"
+      class="mt-4"
+      :options="frameOptions"
+    />
 
     <div class="mt-4">
       <div class="mb-2 flex items-center justify-between gap-2 text-xs">
@@ -108,9 +97,5 @@ const updateScale = (event: Event) => {
         @input="updateScale"
       />
     </div>
-
-    <p v-if="!enabled" class="mt-3 text-[10px] leading-relaxed text-muted-foreground">
-      {{ t('composition.transform.autoHint') }}
-    </p>
   </div>
 </template>

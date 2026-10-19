@@ -45,7 +45,6 @@ const emit = defineEmits<{
       />
       <FilmCompositionImageTransformControls
         v-if="settings.canvasSizeMode === 'manual'"
-        :enabled="settings.canvasSizeMode === 'manual'"
         :images="images"
         @scale="emit('image-scale', $event.index, $event.value)"
         @reset="emit('reset-image', $event)"
