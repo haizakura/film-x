@@ -13,6 +13,10 @@ const emit = defineEmits<{
 }>()
 const { t } = useI18n()
 
+const modeOptions = computed(() => [
+  { value: 'auto' as const, label: t('composition.size.auto') },
+  { value: 'manual' as const, label: t('composition.size.manual') }
+])
 const updateWidth = (event: Event) => emit('update:width', (event.target as HTMLInputElement).value)
 const updateHeight = (event: Event) =>
   emit('update:height', (event.target as HTMLInputElement).value)
@@ -21,30 +25,13 @@ const updateHeight = (event: Event) =>
 <template>
   <div class="border-b border-border p-5">
     <p class="text-xs font-medium">{{ t('composition.size.heading') }}</p>
-    <div class="mt-4 grid grid-cols-2 gap-1 rounded-lg bg-muted p-1">
-      <button
-        class="rounded-md py-2 text-[11px] transition"
-        :class="
-          mode === 'auto'
-            ? 'bg-primary font-medium text-primary-foreground shadow-sm'
-            : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-        "
-        @click="emit('update:mode', 'auto')"
-      >
-        {{ t('composition.size.auto') }}
-      </button>
-      <button
-        class="rounded-md py-2 text-[11px] transition"
-        :class="
-          mode === 'manual'
-            ? 'bg-primary font-medium text-primary-foreground shadow-sm'
-            : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-        "
-        @click="emit('update:mode', 'manual')"
-      >
-        {{ t('composition.size.manual') }}
-      </button>
-    </div>
+    <FilmSegmented
+      class="mt-4"
+      :model-value="mode"
+      :options="modeOptions"
+      :label="t('composition.size.heading')"
+      @update:model-value="emit('update:mode', $event)"
+    />
     <div class="mt-4 grid grid-cols-2 gap-2">
       <label class="rounded-md border border-border bg-card px-3 py-2">
         <span class="block text-[10px] text-muted-foreground">{{

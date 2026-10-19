@@ -300,7 +300,7 @@ const colorMode = computed({
     <template v-if="settings.logo.style !== 'none'">
       <div v-if="tintable" class="space-y-2">
         <p class="text-[10px] text-muted-foreground">{{ t('frame.brand.color') }}</p>
-        <FilmFrameSegmented
+        <FilmSegmented
           v-model="colorMode"
           :options="colorOptions"
           :label="t('frame.brand.color')"
@@ -316,7 +316,7 @@ const colorMode = computed({
       <p v-else class="text-[10px] leading-relaxed text-muted-foreground">
         {{ t('frame.brand.multicolorHint') }}
       </p>
-      <FilmFrameRangeField
+      <FilmRangeField
         v-model="settings.logo.scale"
         :label="t('frame.brand.size')"
         :input-label="t('frame.brand.sizeInput')"

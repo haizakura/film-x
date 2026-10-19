@@ -27,7 +27,7 @@ const slide = (event: Event) => {
   <div>
     <div class="mb-2 flex items-center justify-between gap-3 text-[10px] text-muted-foreground">
       <span>{{ label }}</span>
-      <FilmFrameNumberField
+      <FilmNumberField
         v-model="model"
         :label="inputLabel"
         :min="min"

@@ -1,6 +1,6 @@
 {
   "name": "film-x-mcp",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "private": true,
   "description": "Local stdio MCP server that runs Film X image tools in headless Chrome",
   "license": "Apache-2.0",

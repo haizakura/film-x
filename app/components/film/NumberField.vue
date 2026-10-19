@@ -21,7 +21,9 @@ const commit = (event: Event) => {
   const input = event.target as HTMLInputElement
   const parsed = Number(input.value)
   if (Number.isFinite(parsed) && input.value !== '') {
-    model.value = Math.min(props.max, Math.max(props.min, parsed)) / props.factor
+    // Rounded to the step's precision, so the model holds the value the field shows.
+    const rounded = Number(parsed.toFixed(digits.value))
+    model.value = Math.min(props.max, Math.max(props.min, rounded)) / props.factor
   }
   // Show the clamped value even when the model did not change.
   input.value = String(display.value)

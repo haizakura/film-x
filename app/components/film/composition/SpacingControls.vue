@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { Check } from '@lucide/vue'
-import { Switch } from '@/components/ui/switch'
 import { MAX_COMPOSITION_GAP, MAX_COMPOSITION_PADDING } from '~/types/composition'
 import type { CompositionSettings } from '~/types/composition'
 
@@ -13,24 +11,16 @@ const clampSpacing = (value: number | string, maximum: number) => {
   return Number.isFinite(parsed) ? Math.min(maximum, Math.max(0, Math.round(parsed))) : 0
 }
 
-const spacingModel = (getValue: () => number, setValue: (value: number) => void, maximum: number) =>
-  computed({
-    get: getValue,
-    set: (value: number | string) => setValue(clampSpacing(value, maximum))
-  })
-
 const paddingModel = computed({
   get: () => settings.value.padding.top,
-  set: (value: number | string) => {
-    const next = clampSpacing(value, MAX_COMPOSITION_PADDING)
-    settings.value.padding = { top: next, right: next, bottom: next, left: next }
+  set: (value: number) => {
+    settings.value.padding = { top: value, right: value, bottom: value, left: value }
   }
 })
-const gapModel = spacingModel(
-  () => settings.value.gap,
-  (value) => (settings.value.gap = value),
-  MAX_COMPOSITION_GAP
-)
+const fitOptions = computed(() => [
+  { value: 'cover' as const, label: t('composition.spacing.cover') },
+  { value: 'contain' as const, label: t('composition.spacing.contain') }
+])
 const paddingControls = computed(() => [
   {
     key: 'top' as const,
@@ -70,46 +60,24 @@ const isMixedPadding = computed(() => {
     <div>
       <div class="flex items-center justify-between gap-3 text-xs">
         <span class="font-medium">{{ t('composition.spacing.padding') }}</span>
-        <label class="flex items-center gap-2 text-[10px] text-muted-foreground">
-          {{ t('composition.spacing.individual') }}
-          <Switch
-            v-model="advancedPadding"
-            size="sm"
-            :aria-label="t('composition.spacing.individualLabel')"
-          >
-            <template #thumb="{ checked }">
-              <Check v-if="checked" class="size-2 stroke-3" aria-hidden="true" />
-            </template>
-          </Switch>
-        </label>
+        <FilmToggleField
+          v-model="advancedPadding"
+          :label="t('composition.spacing.individual')"
+          :aria-label="t('composition.spacing.individualLabel')"
+        />
       </div>
 
-      <div v-if="!advancedPadding && !isMixedPadding" class="mt-4 flex items-center gap-3">
-        <input
-          v-model.number="paddingModel"
-          class="range min-w-0 flex-1"
-          type="range"
-          min="0"
-          :max="MAX_COMPOSITION_PADDING"
-          step="4"
-          :aria-label="t('composition.spacing.uniform')"
-        />
-        <label
-          class="flex shrink-0 items-center gap-1 rounded-md border border-border bg-card px-2"
-        >
-          <span class="sr-only">{{ t('composition.spacing.uniformInput') }}</span>
-          <input
-            v-model.number="paddingModel"
-            class="w-12 bg-transparent py-1.5 text-right font-mono text-[10px] outline-none"
-            type="number"
-            min="0"
-            :max="MAX_COMPOSITION_PADDING"
-            step="1"
-            :aria-label="t('composition.spacing.uniformInput')"
-          />
-          <span class="font-mono text-[9px] text-muted-foreground/70">px</span>
-        </label>
-      </div>
+      <FilmRangeField
+        v-if="!advancedPadding && !isMixedPadding"
+        v-model="paddingModel"
+        class="mt-4"
+        :label="t('composition.spacing.uniform')"
+        :input-label="t('composition.spacing.uniformInput')"
+        :min="0"
+        :max="MAX_COMPOSITION_PADDING"
+        unit="px"
+        :factor="1"
+      />
 
       <div
         v-else-if="!advancedPadding"
@@ -126,6 +94,7 @@ const isMixedPadding = computed(() => {
           }}
         </p>
         <button
+          type="button"
           class="shrink-0 text-[10px] font-medium text-foreground/80 hover:text-foreground"
           @click="advancedPadding = true"
         >
@@ -155,61 +124,17 @@ const isMixedPadding = computed(() => {
       </div>
     </div>
 
-    <div v-if="settings.frameCount > 1">
-      <div class="mb-3 flex items-center justify-between text-xs">
-        <span class="font-medium">{{ t('composition.spacing.gap') }}</span>
-      </div>
-      <div class="flex items-center gap-3">
-        <input
-          v-model.number="gapModel"
-          class="range min-w-0 flex-1"
-          type="range"
-          min="0"
-          :max="MAX_COMPOSITION_GAP"
-          step="4"
-          :aria-label="t('composition.spacing.gap')"
-        />
-        <label
-          class="flex shrink-0 items-center gap-1 rounded-md border border-border bg-card px-2"
-        >
-          <span class="sr-only">{{ t('composition.spacing.gapInput') }}</span>
-          <input
-            v-model.number="gapModel"
-            class="w-12 bg-transparent py-1.5 text-right font-mono text-[10px] outline-none"
-            type="number"
-            min="0"
-            :max="MAX_COMPOSITION_GAP"
-            step="1"
-            :aria-label="t('composition.spacing.gapInput')"
-          />
-          <span class="font-mono text-[9px] text-muted-foreground/70">px</span>
-        </label>
-      </div>
-    </div>
+    <FilmRangeField
+      v-if="settings.frameCount > 1"
+      v-model="settings.gap"
+      :label="t('composition.spacing.gap')"
+      :input-label="t('composition.spacing.gapInput')"
+      :min="0"
+      :max="MAX_COMPOSITION_GAP"
+      unit="px"
+      :factor="1"
+    />
 
-    <div class="grid grid-cols-2 gap-2 rounded-lg bg-muted p-1">
-      <button
-        class="rounded-md py-2 text-[11px]"
-        :class="
-          settings.fit === 'cover'
-            ? 'bg-primary font-medium text-primary-foreground shadow-sm'
-            : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-        "
-        @click="settings.fit = 'cover'"
-      >
-        {{ t('composition.spacing.cover') }}
-      </button>
-      <button
-        class="rounded-md py-2 text-[11px]"
-        :class="
-          settings.fit === 'contain'
-            ? 'bg-primary font-medium text-primary-foreground shadow-sm'
-            : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-        "
-        @click="settings.fit = 'contain'"
-      >
-        {{ t('composition.spacing.contain') }}
-      </button>
-    </div>
+    <FilmSegmented v-model="settings.fit" :options="fitOptions" />
   </div>
 </template>

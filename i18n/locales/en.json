@@ -158,8 +158,7 @@
       "frame": "Frame {number}",
       "scale": "Scale",
       "scaleInput": "Enter scale value",
-      "reset": "Reset",
-      "autoHint": "Switch to a manual canvas size to scale or drag an image into position."
+      "reset": "Reset"
     },
     "layout": {
       "heading": "Frame layout",
@@ -492,6 +491,8 @@
   "errors": {
     "imageEncodeFailed": "Image encoding failed",
     "tiffImageMissing": "The TIFF file does not contain a readable image",
+    "tiffCorrupt": "The TIFF file is damaged or incomplete",
+    "tiffUnsupported": "This TIFF format is not supported",
     "canvasUnavailable": "The browser could not create an image canvas",
     "exportCanvasUnavailable": "The browser could not create an export canvas",
     "imageReadFailed": "Could not read the image",

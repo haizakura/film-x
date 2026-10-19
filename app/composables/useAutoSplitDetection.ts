@@ -2,8 +2,7 @@ import type { DecodedImage, ImageQueueItem } from '~/types/image'
 import { decodeImage } from '~/utils/image'
 import { detectSplit } from '~/utils/splitDetection'
 
-export const useAutoSplitDetection = () => {
-  const analyzingCount = ref(0)
+export const useAutoSplitDetection = (isQueued: (item: ImageQueueItem) => boolean) => {
   const pendingJobs = ref(0)
   usePwaUpdateBlocker('splitter-analysis', () => pendingJobs.value > 0)
 
@@ -39,8 +38,9 @@ export const useAutoSplitDetection = () => {
     // Decode serially: large TIFF batches otherwise retain several full-size buffers at once.
     // oxlint-disable no-await-in-loop
     for (const item of items) {
+      // Removed items and ones the active preview already analysed need no extra decode.
+      if (!isQueued(item) || (!force && item.analysisStatus === 'done')) continue
       item.analysisStatus = 'analyzing'
-      analyzingCount.value += 1
       let image: Awaited<ReturnType<typeof decodeImage>> | undefined
 
       try {
@@ -50,7 +50,6 @@ export const useAutoSplitDetection = () => {
         item.analysisStatus = 'failed'
       } finally {
         image?.dispose()
-        analyzingCount.value -= 1
       }
 
       await new Promise((resolve) => setTimeout(resolve, 0))
@@ -89,5 +88,5 @@ export const useAutoSplitDetection = () => {
     return completed
   }
 
-  return { analyzingCount: readonly(analyzingCount), analyzeDecodedItem, analyzeItems }
+  return { analyzeDecodedItem, analyzeItems }
 }

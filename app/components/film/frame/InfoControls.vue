@@ -47,7 +47,7 @@ const updateField = (field: FrameInfoField, event: Event) =>
     <p class="text-xs font-medium">{{ t('frame.info.heading') }}</p>
 
     <div class="space-y-2">
-      <FilmFrameSegmented
+      <FilmSegmented
         v-model="sourceType"
         :options="sourceOptions"
         :label="t('frame.info.source')"
@@ -82,13 +82,13 @@ const updateField = (field: FrameInfoField, event: Event) =>
 
     <div v-for="line in FRAME_INFO_LINES" :key="line" class="space-y-2">
       <div class="flex items-center gap-3">
-        <FilmFrameToggleField
+        <FilmToggleField
           v-model="settings.lines[line]"
           class="min-w-0 flex-1"
           :label="lineLabel(line)"
           :aria-label="t('frame.info.show', { line: lineLabel(line) })"
         />
-        <FilmFrameNumberField
+        <FilmNumberField
           v-model="settings.lineScales[line]"
           :label="t('frame.info.size', { line: lineLabel(line) })"
           :min="MIN_FRAME_SCALE * 100"
@@ -127,13 +127,13 @@ const updateField = (field: FrameInfoField, event: Event) =>
 
     <div v-if="stacked" class="space-y-2 border-t border-border pt-4">
       <div class="flex items-center gap-3">
-        <FilmFrameToggleField
+        <FilmToggleField
           v-model="settings.showTagline"
           class="min-w-0 flex-1"
           :label="t('frame.info.tagline')"
           :aria-label="t('frame.info.taglineShow')"
         />
-        <FilmFrameNumberField
+        <FilmNumberField
           v-model="settings.taglineScale"
           :label="t('frame.info.size', { line: t('frame.info.tagline') })"
           :min="MIN_FRAME_SCALE * 100"

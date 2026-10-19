@@ -1,7 +1,7 @@
 <script setup lang="ts" generic="T extends string | number">
 defineProps<{
   options: ReadonlyArray<{ value: T; label: string; disabled?: boolean }>
-  label: string
+  label?: string
 }>()
 const model = defineModel<T>({ required: true })
 </script>

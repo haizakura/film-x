@@ -1,3 +1,4 @@
+import type { Dirent } from 'node:fs'
 import { mkdir, readdir, stat } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import path from 'node:path'
@@ -67,21 +68,31 @@ export const listImages = async (dir: string, recursive: boolean, limit: number)
   }
   if (!info.isDirectory()) throw new UserError(`Not a folder: ${root}`)
 
-  const entries = await readdir(root, { recursive, withFileTypes: true })
-  const files = entries
-    .map((entry) => ({ entry, full: path.join(entry.parentPath, entry.name) }))
-    // Hidden files and anything inside a hidden folder are skipped.
-    .filter(
-      ({ entry, full }) =>
-        entry.isFile() &&
-        isSupportedImagePath(entry.name) &&
-        !path
-          .relative(root, full)
-          .split(path.sep)
-          .some((part) => part.startsWith('.'))
-    )
-    .map(({ full }) => full)
-    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
+  // Breadth first: each folder's files come before its sub-folders, in natural name order.
+  // Sub-folders that cannot be read are skipped; symlinked folders are not followed.
+  const byName = (a: Dirent, b: Dirent) =>
+    a.name.localeCompare(b.name, undefined, { numeric: true })
+  const files: string[] = []
+  const queue = [root]
+  for (
+    let next = queue.shift();
+    next !== undefined && files.length <= limit;
+    next = queue.shift()
+  ) {
+    let entries: Dirent[]
+    try {
+      // oxlint-disable-next-line no-await-in-loop
+      entries = await readdir(next, { withFileTypes: true })
+    } catch {
+      if (next === root) throw new UserError(`Could not read the folder: ${root}`)
+      continue
+    }
+    for (const entry of entries.filter((item) => !item.name.startsWith('.')).sort(byName)) {
+      const full = path.join(next, entry.name)
+      if (entry.isFile() && isSupportedImagePath(entry.name)) files.push(full)
+      else if (recursive && entry.isDirectory()) queue.push(full)
+    }
+  }
   const listed = await Promise.all(
     files.slice(0, limit).map(async (full): Promise<ListedImage | undefined> => {
       try {
@@ -132,8 +143,6 @@ export const resolveExplicitOutput = (value: string, format: ExportFormat) => {
   return file
 }
 
-export const resolveOutputDir = (value: string) => resolveUserPath(value, 'output folder')
-
 export const ensureDir = async (dir: string) => {
   try {
     await mkdir(dir, { recursive: true })
@@ -169,8 +178,16 @@ export const checkOutputs = async (
       throw new UserError(`Another output in this call already targets ${file}.`)
     }
   }
+  // Different spellings (case-insensitive disks, symlinks, hard links) can reach one file.
+  const statAll = (files: string[]) =>
+    Promise.all(files.map((file) => stat(file, { bigint: true }).catch(() => undefined)))
+  const [inputInfos, existing] = await Promise.all([statAll(inputs), statAll(outputs)])
+  for (const [index, info] of existing.entries()) {
+    if (info && inputInfos.some((item) => item?.dev === info.dev && item?.ino === info.ino)) {
+      throw new UserError(`Refusing to write over the input image: ${outputs[index]}`)
+    }
+  }
   if (!overwrite) {
-    const existing = await Promise.all(outputs.map(pathExists))
     const taken = outputs.find((_, index) => existing[index])
     if (taken) {
       throw new UserError(`Output already exists: ${taken}. Pass overwrite: true to replace it.`)

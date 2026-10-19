@@ -27,25 +27,25 @@ const hasItalic = (typography: FrameTypography) => FRAME_FONTS[typography.font].
         :label="t('frame.typography.wordmarkFont')"
       />
       <div class="grid grid-cols-3 gap-3">
-        <FilmFrameToggleField
+        <FilmToggleField
           v-model="settings.logo.typography.bold"
           :label="t('frame.typography.bold')"
           :aria-label="t('frame.typography.wordmarkBold')"
           :disabled="!hasBold(settings.logo.typography)"
         />
-        <FilmFrameToggleField
+        <FilmToggleField
           v-model="settings.logo.typography.italic"
           :label="t('frame.typography.italic')"
           :aria-label="t('frame.typography.wordmarkItalic')"
           :disabled="!hasItalic(settings.logo.typography)"
         />
-        <FilmFrameToggleField
+        <FilmToggleField
           v-model="settings.logo.typography.uppercase"
           :label="t('frame.typography.uppercase')"
           :aria-label="t('frame.typography.wordmarkUppercase')"
         />
       </div>
-      <FilmFrameRangeField
+      <FilmRangeField
         v-model="settings.logo.typography.letterSpacing"
         :label="t('frame.typography.letterSpacing')"
         :input-label="t('frame.typography.wordmarkLetterSpacingInput')"
@@ -66,25 +66,25 @@ const hasItalic = (typography: FrameTypography) => FRAME_FONTS[typography.font].
         :label="t('frame.typography.captionFont')"
       />
       <div class="grid grid-cols-3 gap-3">
-        <FilmFrameToggleField
+        <FilmToggleField
           v-model="settings.text.bold"
           :label="t('frame.typography.bold')"
           :aria-label="t('frame.typography.captionBold')"
           :disabled="!hasBold(settings.text)"
         />
-        <FilmFrameToggleField
+        <FilmToggleField
           v-model="settings.text.italic"
           :label="t('frame.typography.italic')"
           :aria-label="t('frame.typography.captionItalic')"
           :disabled="!hasItalic(settings.text)"
         />
-        <FilmFrameToggleField
+        <FilmToggleField
           v-model="settings.text.uppercase"
           :label="t('frame.typography.uppercase')"
           :aria-label="t('frame.typography.captionUppercase')"
         />
       </div>
-      <FilmFrameRangeField
+      <FilmRangeField
         v-model="settings.text.letterSpacing"
         :label="t('frame.typography.letterSpacing')"
         :input-label="t('frame.typography.captionLetterSpacingInput')"
@@ -94,7 +94,7 @@ const hasItalic = (typography: FrameTypography) => FRAME_FONTS[typography.font].
         :factor="1"
         unit="em"
       />
-      <FilmFrameRangeField
+      <FilmRangeField
         v-model="settings.textScale"
         :label="t('frame.typography.size')"
         :input-label="t('frame.typography.sizeInput')"

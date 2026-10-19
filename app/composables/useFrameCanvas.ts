@@ -3,7 +3,7 @@ import { FRAME_PLACEHOLDER_SIZE, FRAME_PREVIEW_SIDE } from '~/types/frame'
 import type { FrameInfoFields, FrameSettings } from '~/types/frame'
 import type { DecodedImage } from '~/types/image'
 import type { FrameImageEntry } from '~/composables/useFrameImage'
-import { canvasToBlob, downloadBlob } from '~/utils/download'
+import { canvasToBlob, downloadBlob, releaseCanvas } from '~/utils/download'
 import { AppError, errorMessageKey } from '~/utils/errors'
 import { isFrameFontReady, loadFrameFonts } from '~/utils/frameFonts'
 import { resolveFrameLogoAsset } from '~/utils/frameLogos'
@@ -24,11 +24,6 @@ interface FrameCanvasSources {
   customLogo: () => FrameImageEntry | undefined
   settings: () => FrameSettings
   fields: () => FrameInfoFields
-}
-
-const releaseCanvas = (canvas: HTMLCanvasElement) => {
-  canvas.width = 0
-  canvas.height = 0
 }
 
 export const useFrameCanvas = (sources: FrameCanvasSources) => {

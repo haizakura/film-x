@@ -29,7 +29,9 @@ const {
   resetActiveSettings
 } = useImageQueue()
 
-const { analyzeDecodedItem, analyzeItems } = useAutoSplitDetection()
+const { analyzeDecodedItem, analyzeItems } = useAutoSplitDetection((item) =>
+  queue.value.includes(item)
+)
 
 const { decoded, isLoading } = useImagePreview(activeItem, {
   onError: (item, message) => {
@@ -119,7 +121,9 @@ const runExport = async (items: ImageQueueItem[], archiveName: string) => {
   }
 }
 
-const exportAll = () => runExport(queue.value, `full2half-${new Date().toISOString().slice(0, 10)}`)
+// Snapshot so removing an item mid-export cannot shift the loop past the next one.
+const exportAll = () =>
+  runExport([...queue.value], `full2half-${new Date().toISOString().slice(0, 10)}`)
 
 const exportCurrent = () => {
   if (activeItem.value) runExport([activeItem.value], baseName(activeItem.value.name))

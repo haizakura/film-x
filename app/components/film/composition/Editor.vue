@@ -30,7 +30,7 @@ const placeActiveDroppedFiles = (files: File[]) =>
   placeDroppedFiles(files, settings.value.frameCount)
 const changeFrameCount = (count: CompositionFrameCount) => {
   // Keep the only visible slot filled when the first slot is empty.
-  if (count === 1 && !images.value[0] && images.value[1]) swapImages()
+  if (count === 1 && !images.value[0] && images.value[1] && !swapImages()) return
   setFrameCount(count)
 }
 const setImageScale = (index: number, scale: number) => updateImageTransform(index, { scale })

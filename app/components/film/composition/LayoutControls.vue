@@ -9,7 +9,11 @@ const { t } = useI18n()
 <template>
   <div class="border-b border-border p-5">
     <p class="text-xs font-medium">{{ t('composition.layout.heading') }}</p>
-    <div class="mt-4 grid grid-cols-2 gap-1 rounded-lg bg-muted p-1">
+    <div
+      class="mt-4 grid grid-cols-2 gap-1 rounded-lg bg-muted p-1"
+      role="group"
+      :aria-label="t('composition.layout.heading')"
+    >
       <button
         class="flex items-center justify-center gap-2 rounded-md py-2 text-[11px] transition"
         :class="
@@ -17,6 +21,8 @@ const { t } = useI18n()
             ? 'bg-primary font-medium text-primary-foreground shadow-sm'
             : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
         "
+        type="button"
+        :aria-pressed="settings.layoutDirection === 'horizontal'"
         @click="settings.layoutDirection = 'horizontal'"
       >
         <Columns2 class="size-3.5" aria-hidden="true" />
@@ -29,6 +35,8 @@ const { t } = useI18n()
             ? 'bg-primary font-medium text-primary-foreground shadow-sm'
             : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
         "
+        type="button"
+        :aria-pressed="settings.layoutDirection === 'vertical'"
         @click="settings.layoutDirection = 'vertical'"
       >
         <Rows2 class="size-3.5" aria-hidden="true" />

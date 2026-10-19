@@ -1,6 +1,7 @@
 import UTIF from 'utif'
 
 import type { CropRect, DecodedImage, ExportFormat, Rotation, SplitSettings } from '~/types/image'
+import { canvasToBlob, releaseCanvas } from '~/utils/download'
 import { AppError } from '~/utils/errors'
 
 export const DEFAULT_SETTINGS: SplitSettings = {
@@ -34,24 +35,71 @@ export const formatBytes = (bytes: number) => {
   return `${value >= 10 || index === 0 ? value.toFixed(0) : value.toFixed(1)} ${units[index]}`
 }
 
+const TIFF_ENTRY_SIZE = 12
+// PhotometricInterpretation values UTIF.toRGBA8 renders; it returns black for anything else.
+const TIFF_RENDERABLE_PHOTOMETRIC = new Set([0, 1, 2, 3, 5])
+
+/** Walks the IFD chain UTIF.decode follows, which has no cycle check of its own. */
+const assertTiffChain = (buffer: ArrayBuffer) => {
+  const bytes = new Uint8Array(buffer)
+  const littleEndian = bytes[0] === 0x49 && bytes[1] === 0x49
+  if (!littleEndian && !(bytes[0] === 0x4d && bytes[1] === 0x4d)) {
+    throw new AppError('tiffCorrupt')
+  }
+  // Bytes past the end read as zeros, as in utif, so a dangling pointer ends both chains alike.
+  const read = (offset: number, size: number) => {
+    let value = 0
+    for (let index = 0; index < size; index += 1) {
+      value = value * 256 + (bytes[offset + (littleEndian ? size - 1 - index : index)] ?? 0)
+    }
+    return value
+  }
+  // utif only reads classic TIFF (42); BigTIFF (43) would be parsed as garbage.
+  if (read(2, 2) !== 42) throw new AppError('tiffUnsupported')
+
+  let offset = read(4, 4)
+  // The first IFD describes the image, so it has to lie inside the file.
+  if (offset < 8 || offset + 2 + read(offset, 2) * TIFF_ENTRY_SIZE + 4 > bytes.length) {
+    throw new AppError('tiffCorrupt')
+  }
+  const visited = new Set<number>()
+  while (offset !== 0) {
+    if (visited.has(offset)) throw new AppError('tiffCorrupt')
+    visited.add(offset)
+    offset = read(offset + 2 + read(offset, 2) * TIFF_ENTRY_SIZE, 4)
+  }
+}
+
 const decodeImageRaw = async (file: File): Promise<DecodedImage> => {
   if (isTiff(file)) {
     const buffer = await file.arrayBuffer()
+    assertTiffChain(buffer)
     const ifds = UTIF.decode(buffer)
     const ifd = ifds[0]
 
     if (!ifd) throw new AppError('tiffImageMissing')
 
     UTIF.decodeImage(buffer, ifd)
+    // Read after decodeImage: JPEG-compressed YCbCr (6) is rewritten to RGB (2) there.
+    const photometric = (ifd.t262 as number[] | undefined)?.[0] ?? 2
+    if (!TIFF_RENDERABLE_PHOTOMETRIC.has(photometric)) throw new AppError('tiffUnsupported')
+
+    // toRGBA8 returns a fresh, unshared array, so a view avoids a second full-size copy.
     const rgba = UTIF.toRGBA8(ifd)
-    const pixels = new Uint8ClampedArray(rgba.byteLength)
-    pixels.set(rgba)
+    const pixels = new Uint8ClampedArray(
+      rgba.buffer as ArrayBuffer,
+      rgba.byteOffset,
+      rgba.byteLength
+    )
     const canvas = document.createElement('canvas')
     canvas.width = ifd.width
     canvas.height = ifd.height
     const context = canvas.getContext('2d')
 
-    if (!context) throw new AppError('canvasUnavailable')
+    if (!context) {
+      releaseCanvas(canvas)
+      throw new AppError('canvasUnavailable')
+    }
 
     context.putImageData(new ImageData(pixels, ifd.width, ifd.height), 0, 0)
 
@@ -60,10 +108,7 @@ const decodeImageRaw = async (file: File): Promise<DecodedImage> => {
       width: ifd.width,
       height: ifd.height,
       pixels,
-      dispose: () => {
-        canvas.width = 0
-        canvas.height = 0
-      }
+      dispose: () => releaseCanvas(canvas)
     }
   }
 
@@ -105,14 +150,38 @@ export const calculateCropRects = (
   ]
 }
 
-const canvasToBlob = (canvas: HTMLCanvasElement, format: ExportFormat, quality: number) =>
-  new Promise<Blob>((resolve, reject) => {
-    canvas.toBlob(
-      (blob) => (blob ? resolve(blob) : reject(new AppError('imageEncodeFailed'))),
-      `image/${format}`,
-      format === 'png' ? undefined : quality
-    )
-  })
+export const rotatedSize = (rect: CropRect, rotation: Rotation) =>
+  rotation === 90 || rotation === 270
+    ? { width: rect.height, height: rect.width }
+    : { width: rect.width, height: rect.height }
+
+/** Draws a crop into a box that already has the rotated proportions. */
+export const drawRotatedCrop = (
+  context: CanvasRenderingContext2D,
+  source: CanvasImageSource,
+  rect: CropRect,
+  rotation: Rotation,
+  box: { x: number; y: number; width: number; height: number }
+) => {
+  const swapped = rotation === 90 || rotation === 270
+  const width = swapped ? box.height : box.width
+  const height = swapped ? box.width : box.height
+  context.save()
+  context.translate(box.x + box.width / 2, box.y + box.height / 2)
+  context.rotate((rotation * Math.PI) / 180)
+  context.drawImage(
+    source,
+    rect.x,
+    rect.y,
+    rect.width,
+    rect.height,
+    -width / 2,
+    -height / 2,
+    width,
+    height
+  )
+  context.restore()
+}
 
 const rotateRgbaCrop = (
   source: Uint8ClampedArray,
@@ -120,10 +189,12 @@ const rotateRgbaCrop = (
   rect: CropRect,
   rotation: Rotation
 ) => {
-  const swapped = rotation === 90 || rotation === 270
-  const width = swapped ? rect.height : rect.width
-  const height = swapped ? rect.width : rect.height
+  const { width, height } = rotatedSize(rect, rotation)
   const pixels = new Uint8Array(width * height * 4)
+  // Copy one RGBA pixel per element; Uint32Array views need a 4-byte aligned offset.
+  const aligned = source.byteOffset % 4 === 0 ? source : source.slice()
+  const input = new Uint32Array(aligned.buffer, aligned.byteOffset, aligned.length >> 2)
+  const output = new Uint32Array(pixels.buffer)
 
   for (let y = 0; y < rect.height; y += 1) {
     for (let x = 0; x < rect.width; x += 1) {
@@ -141,9 +212,7 @@ const rotateRgbaCrop = (
         outputY = rect.width - 1 - x
       }
 
-      const sourceIndex = ((rect.y + y) * sourceWidth + rect.x + x) * 4
-      const outputIndex = (outputY * width + outputX) * 4
-      pixels.set(source.subarray(sourceIndex, sourceIndex + 4), outputIndex)
+      output[outputY * width + outputX] = input[(rect.y + y) * sourceWidth + rect.x + x] ?? 0
     }
   }
 
@@ -151,30 +220,19 @@ const rotateRgbaCrop = (
 }
 
 const renderCropCanvas = (decoded: DecodedImage, rect: CropRect, rotation: Rotation) => {
-  const swapped = rotation === 90 || rotation === 270
+  const { width, height } = rotatedSize(rect, rotation)
   const canvas = document.createElement('canvas')
-  canvas.width = swapped ? rect.height : rect.width
-  canvas.height = swapped ? rect.width : rect.height
+  canvas.width = width
+  canvas.height = height
   const context = canvas.getContext('2d')
 
-  if (!context) throw new AppError('exportCanvasUnavailable')
+  if (!context) {
+    releaseCanvas(canvas)
+    throw new AppError('exportCanvasUnavailable')
+  }
 
   context.imageSmoothingEnabled = false
-  context.save()
-  context.translate(canvas.width / 2, canvas.height / 2)
-  context.rotate((rotation * Math.PI) / 180)
-  context.drawImage(
-    decoded.source,
-    rect.x,
-    rect.y,
-    rect.width,
-    rect.height,
-    -rect.width / 2,
-    -rect.height / 2,
-    rect.width,
-    rect.height
-  )
-  context.restore()
+  drawRotatedCrop(context, decoded.source, rect, rotation, { x: 0, y: 0, width, height })
 
   return { canvas, context }
 }
@@ -186,18 +244,20 @@ const renderTiffCrop = (decoded: DecodedImage, rect: CropRect, rotation: Rotatio
     rendered = rotateRgbaCrop(decoded.pixels, decoded.width, rect, rotation)
   } else {
     const { canvas, context } = renderCropCanvas(decoded, rect, rotation)
-    const imageData = context.getImageData(0, 0, canvas.width, canvas.height)
-    rendered = {
-      pixels: new Uint8Array(
-        imageData.data.buffer,
-        imageData.data.byteOffset,
-        imageData.data.byteLength
-      ),
-      width: canvas.width,
-      height: canvas.height
+    try {
+      const imageData = context.getImageData(0, 0, canvas.width, canvas.height)
+      rendered = {
+        pixels: new Uint8Array(
+          imageData.data.buffer,
+          imageData.data.byteOffset,
+          imageData.data.byteLength
+        ),
+        width: canvas.width,
+        height: canvas.height
+      }
+    } finally {
+      releaseCanvas(canvas)
     }
-    canvas.width = 0
-    canvas.height = 0
   }
 
   const buffer = UTIF.encodeImage(rendered.pixels, rendered.width, rendered.height)
@@ -214,10 +274,11 @@ export const renderCrop = async (
   if (format === 'tiff') return renderTiffCrop(decoded, rect, rotation)
 
   const { canvas } = renderCropCanvas(decoded, rect, rotation)
-  const blob = await canvasToBlob(canvas, format, quality)
-  canvas.width = 0
-  canvas.height = 0
-  return blob
+  try {
+    return await canvasToBlob(canvas, format, quality)
+  } finally {
+    releaseCanvas(canvas)
+  }
 }
 
 export const baseName = (name: string) => name.replace(/\.[^.]+$/, '')

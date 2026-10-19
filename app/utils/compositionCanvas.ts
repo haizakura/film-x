@@ -158,14 +158,16 @@ export const drawComposition = (
     drawFilmGrain(context, grainTiles, outputGeometry.width, outputGeometry.height)
   }
 
+  // Shadows ignore the context transform, so a scaled-down preview scales them itself.
+  const shadowScale = context.getTransform().a
   context.save()
   context.translate(outputGeometry.contentOffsetX, outputGeometry.contentOffsetY)
   currentGeometry.frames.forEach((frame, index) => {
     const entry = currentImages[index]
     context.save()
     context.shadowColor = 'rgba(0,0,0,.18)'
-    context.shadowBlur = 30
-    context.shadowOffsetY = 12
+    context.shadowBlur = 30 * shadowScale
+    context.shadowOffsetY = 12 * shadowScale
     if (entry) drawPlacedImage(context, entry, frame, currentSettings)
     else {
       drawPlaceholder(context, frame, currentSettings.background, placeholderLabel(index))

@@ -209,11 +209,14 @@ mise exec -- pnpm dev
 ```bash
 mise exec -- pnpm check
 mise exec -- pnpm test:pwa
+mise exec -- pnpm test:app
 mise exec -- pnpm test:mcp
 mise exec -- pnpm build
 ```
 
 `test:pwa` 使用 Node 原生回归测试验证多窗口空闲、忙碌、无响应、关闭、作用域、重试及并发消息下的更新激活条件。
+
+`test:app` 用 Node 原生测试直接运行 `app/utils` 中的纯逻辑（切分矩形、EXIF 解析、相框预设码、拼图尺寸边界），无需浏览器；`test` 依次运行 `test:pwa` 与 `test:app`。
 
 `test:mcp` 会先运行 `pnpm generate`（其中会构建 MCP 包），再运行 `packages/mcp/tests/*.test.mjs`：在本地端口上提供生成的 `.output/public`，通过代理对其运行测试，其中 `install.test.mjs` 会针对生成的站点在临时文件夹中运行真实的 `curl … | sh` 一键安装命令，检查打印的配置、启动已安装的服务，并验证原地更新以及对非安装脚本创建的文件夹的拒绝；能找到 PowerShell（`FILM_X_PWSH` 或 PATH 中的 `pwsh`）时，还会以 `irm … | iex` 运行 `install.ps1`，否则跳过这一项（npm 安装需要能访问 npm 仓库）。测试并使用 git 忽略的 `sample/` 文件夹（或 `FILM_X_SAMPLE`）中的第一张图片进行验证；没有可用图片时会跳过。设置 `FILM_X_SITE_URL` 后，测试会改为针对已部署的网站运行。
 

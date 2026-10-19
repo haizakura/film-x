@@ -209,11 +209,14 @@ mise exec -- pnpm dev
 ```bash
 mise exec -- pnpm check
 mise exec -- pnpm test:pwa
+mise exec -- pnpm test:app
 mise exec -- pnpm test:mcp
 mise exec -- pnpm build
 ```
 
 `test:pwa` は Node 標準の回帰テストで、複数ウィンドウの待機中・処理中・無応答・終了、スコープ、再試行、同時メッセージにおける更新の有効化条件を検証します。
+
+`test:app` は Node 標準のテストで `app/utils` の純粋なロジック（分割矩形、EXIF 解析、フレームのプリセットコード、レイアウトのサイズ上限）をブラウザーなしで直接検証します。`test` は `test:pwa` と `test:app` を順に実行します。
 
 `test:mcp` はまず `pnpm generate`（MCP パッケージのビルドを含む）を実行し、続いて `packages/mcp/tests/*.test.mjs` を実行します。生成された `.output/public` をローカルポートで配信し、プロキシ経由でそれに対してテストします。その中の `install.test.mjs` は、生成されたサイトに対して実際の `curl … | sh` のワンライナーを一時フォルダーへ実行し、表示される設定の確認、インストール済みサーバーの起動、その場での更新、およびインストーラーが作成していないフォルダーの拒否を検証します。PowerShell（`FILM_X_PWSH` または PATH 上の `pwsh`）が見つかる場合は `install.ps1` も `irm … | iex` で実行し、見つからない場合はその項目をスキップします（npm のインストールにはレジストリへのネットワークアクセスが必要）。検証には git 管理外の `sample/` フォルダー（または `FILM_X_SAMPLE`）の最初の画像を使い、使える画像がない場合はスキップされます。`FILM_X_SITE_URL` を設定すると、テストはデプロイ済みのサイトに対して実行されます。
 

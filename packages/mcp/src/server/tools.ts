@@ -7,7 +7,12 @@ import type {
   ServerRequest
 } from '@modelcontextprotocol/sdk/types.js'
 import { z } from 'zod'
-import { CANVAS_RATIO_PRESETS, MAX_CANVAS_RATIO, MIN_CANVAS_RATIO } from '~/types/canvas'
+import {
+  CANVAS_RATIO_PRESETS,
+  MAX_CANVAS_RATIO,
+  MAX_CANVAS_RATIO_TERM,
+  MIN_CANVAS_RATIO
+} from '~/types/canvas'
 import {
   COMPOSITION_FRAME_FORMATS,
   COMPOSITION_SPROCKET_TEXT_COLORS,
@@ -28,6 +33,7 @@ import {
   MIN_FRAME_OUTPUT_SIDE
 } from '~/types/frame'
 import type { ExportFormat, Rotation } from '~/types/image'
+import { MAX_SPLIT_CENTER, MAX_SPLIT_GAP, MIN_SPLIT_CENTER } from '~/types/image'
 import { CAMERA_BRANDS } from '~/utils/cameraBrands'
 import type { RendererMethod, RendererRequest, RendererResponse } from '~/types/agent'
 import type { Bridge } from './bridge'
@@ -41,7 +47,7 @@ import {
   listImages,
   resolveExplicitOutput,
   resolveInput,
-  resolveOutputDir
+  resolveUserPath
 } from './paths'
 import type { ResolvedInput } from './paths'
 
@@ -141,17 +147,16 @@ class Job {
   }
 }
 
-const render = async <M extends RendererMethod, T>(
+const render = async <M extends RendererMethod>(
   ctx: ToolContext,
   method: M,
-  build: (job: Job) => RendererRequest<M>,
-  finish: (response: RendererResponse<M>) => T
-): Promise<T> => {
+  build: (job: Job) => RendererRequest<M>
+): Promise<RendererResponse<M>> => {
   const job = new Job(await ctx.host.ensureBridge())
   try {
     const response = await ctx.host.call(method, build(job))
     await job.flush()
-    return finish(response)
+    return response
   } finally {
     job.release()
   }
@@ -178,7 +183,9 @@ export const registerTools = (server: McpServer, ctx: ToolContext) => {
         recursive: z
           .boolean()
           .default(false)
-          .describe('Also list sub-folders (breadth first). Default false.'),
+          .describe(
+            'Also list sub-folders, breadth first: nearer folders come first, each in name order. Default false.'
+          ),
         limit: z
           .number()
           .int()
@@ -223,12 +230,7 @@ export const registerTools = (server: McpServer, ctx: ToolContext) => {
     async ({ path: value }) => {
       try {
         const input = await resolveInput(value)
-        const result = await render(
-          ctx,
-          'readExif',
-          (job) => ({ input: job.input(input) }),
-          (response) => response
-        )
+        const result = await render(ctx, 'readExif', (job) => ({ input: job.input(input) }))
         return { content: [json({ path: input.path, ...result })] }
       } catch (error) {
         return toolError(error)
@@ -257,19 +259,19 @@ export const registerTools = (server: McpServer, ctx: ToolContext) => {
           .describe(`1 to ${MAX_SPLIT_FILES} absolute scan paths (or starting with "~/").`),
         center: z
           .number()
-          .min(0.4)
-          .max(0.6)
+          .min(MIN_SPLIT_CENTER)
+          .max(MAX_SPLIT_CENTER)
           .optional()
           .describe(
-            'Centre of the gutter as a fraction of the width (0.4 to 0.6). Default: detect.'
+            `Centre of the gutter as a fraction of the width (${MIN_SPLIT_CENTER} to ${MAX_SPLIT_CENTER}). Default: detect.`
           ),
         gap: z
           .number()
           .min(0)
-          .max(0.08)
+          .max(MAX_SPLIT_GAP)
           .optional()
           .describe(
-            'Gutter width cut away, as a fraction of the width (0 to 0.08). Default: detect.'
+            `Gutter width cut away, as a fraction of the width (0 to ${MAX_SPLIT_GAP}). Default: detect.`
           ),
         leftRotation: rotationSchema
           .optional()
@@ -304,17 +306,19 @@ export const registerTools = (server: McpServer, ctx: ToolContext) => {
           else failures.set(index, describeError(outcome.reason))
         }
         const allInputPaths = inputs.map(({ file }) => file.path)
-        const outputDir = args.outputDir ? resolveOutputDir(args.outputDir) : undefined
+        const outputDir = args.outputDir
+          ? resolveUserPath(args.outputDir, 'output folder')
+          : undefined
         const claimed = new Set<string>()
         const format = args.format
         const results: Array<Record<string, unknown>> = []
         let previewData: string | undefined
-        let previewTaken = false
 
         // Scans are split one at a time, like the web export, so only one full-size image is
         // decoded at once.
         // oxlint-disable no-await-in-loop
         for (const [index, value] of args.paths.entries()) {
+          if (extra.signal.aborted) break
           const failure = failures.get(index)
           if (failure !== undefined) {
             results.push({ input: value, status: 'error', error: failure })
@@ -330,27 +334,20 @@ export const registerTools = (server: McpServer, ctx: ToolContext) => {
             ] as [string, string]
             await checkOutputs(targets, allInputPaths, args.overwrite, claimed)
             await ensureDir(dir)
-            const wantPreview = args.preview && !previewTaken
-            previewTaken = true
-            const response = await render(
-              ctx,
-              'split',
-              (job) => ({
-                input: job.input(file),
-                center: args.center,
-                gap: args.gap,
-                leftRotation: (args.leftRotation ?? 0) as Rotation,
-                rightRotation: (args.rightRotation ?? 0) as Rotation,
-                format,
-                quality: args.quality,
-                outputs: [
-                  job.output(targets[0], args.overwrite),
-                  job.output(targets[1], args.overwrite)
-                ],
-                preview: wantPreview ? { maxSide: PREVIEW_MAX_SIDE } : undefined
-              }),
-              (data) => data
-            )
+            const response = await render(ctx, 'split', (job) => ({
+              input: job.input(file),
+              center: args.center,
+              gap: args.gap,
+              leftRotation: (args.leftRotation ?? 0) as Rotation,
+              rightRotation: (args.rightRotation ?? 0) as Rotation,
+              format,
+              quality: args.quality,
+              outputs: [
+                job.output(targets[0], args.overwrite),
+                job.output(targets[1], args.overwrite)
+              ],
+              preview: args.preview && !previewData ? { maxSide: PREVIEW_MAX_SIDE } : undefined
+            }))
             if (response.preview) previewData = response.preview
             results.push({
               input: file.path,
@@ -416,10 +413,10 @@ export const registerTools = (server: McpServer, ctx: ToolContext) => {
           .describe('How two frames are arranged. Default follows frameFormat.'),
         ratio: z
           .string()
-          .regex(/^(auto|\d+(\.\d+)?:\d+(\.\d+)?)$/)
+          .regex(/^(auto|[1-9]\d?:[1-9]\d?)$/)
           .default('auto')
           .describe(
-            `Canvas aspect ratio: "auto" (fit the frames) or "W:H" such as ${CANVAS_RATIO_PRESETS.map((preset) => `"${preset.label}"`).join(', ')}. ` +
+            `Canvas aspect ratio: "auto" (fit the frames) or "W:H" with whole numbers from 1 to ${MAX_CANVAS_RATIO_TERM}, such as ${CANVAS_RATIO_PRESETS.map((preset) => `"${preset.label}"`).join(', ')}. ` +
               `W/H must be between ${MIN_CANVAS_RATIO} and ${MAX_CANVAS_RATIO}. Frames are padded, never cropped. Default auto.`
           ),
         canvasWidth: z
@@ -577,17 +574,12 @@ export const registerTools = (server: McpServer, ctx: ToolContext) => {
           outputFormat: format,
           outputQuality: args.quality
         }
-        const result = await render(
-          ctx,
-          'compose',
-          (job) => ({
-            inputs: inputs.map((file) => job.input(file)),
-            settings: stripUndefined(settings),
-            output: job.output(target, args.overwrite),
-            preview: args.preview ? { maxSide: PREVIEW_MAX_SIDE } : undefined
-          }),
-          (response) => response
-        )
+        const result = await render(ctx, 'compose', (job) => ({
+          inputs: inputs.map((file) => job.input(file)),
+          settings: stripUndefined(settings),
+          output: job.output(target, args.overwrite),
+          preview: args.preview ? { maxSide: PREVIEW_MAX_SIDE } : undefined
+        }))
         return withPreview(
           {
             output: target,
@@ -724,17 +716,12 @@ export const registerTools = (server: McpServer, ctx: ToolContext) => {
           format = settings.outputFormat
         }
         if (!format) {
-          const resolved = await render(
-            ctx,
-            'framePreset',
-            () => ({
-              preset: args.preset,
-              template: args.template,
-              brand: args.brand,
-              settings: stripUndefined(settings)
-            }),
-            (response) => response
-          )
+          const resolved = await render(ctx, 'framePreset', () => ({
+            preset: args.preset,
+            template: args.template,
+            brand: args.brand,
+            settings: stripUndefined(settings)
+          }))
           format = resolved.settings.outputFormat
         }
         settings.outputFormat = format
@@ -745,23 +732,18 @@ export const registerTools = (server: McpServer, ctx: ToolContext) => {
         await checkOutputs([target], [input.path, ...(logo ? [logo.path] : [])], args.overwrite)
         await ensureDir(path.dirname(target))
 
-        const result = await render(
-          ctx,
-          'frame',
-          (job) => ({
-            input: job.input(input),
-            customLogo: logo && job.input(logo),
-            preset: args.preset,
-            template: args.template,
-            brand: args.brand,
-            settings: stripUndefined(settings),
-            autoExif: args.autoExif,
-            fields: args.fields && stripUndefined(args.fields),
-            output: job.output(target, args.overwrite),
-            preview: args.preview ? { maxSide: PREVIEW_MAX_SIDE } : undefined
-          }),
-          (response) => response
-        )
+        const result = await render(ctx, 'frame', (job) => ({
+          input: job.input(input),
+          customLogo: logo && job.input(logo),
+          preset: args.preset,
+          template: args.template,
+          brand: args.brand,
+          settings: stripUndefined(settings),
+          autoExif: args.autoExif,
+          fields: args.fields && stripUndefined(args.fields),
+          output: job.output(target, args.overwrite),
+          preview: args.preview ? { maxSide: PREVIEW_MAX_SIDE } : undefined
+        }))
         const resolved = result.settings
         return withPreview(
           {
@@ -798,17 +780,12 @@ export const registerTools = (server: McpServer, ctx: ToolContext) => {
     },
     async (args) => {
       try {
-        const result = await render(
-          ctx,
-          'framePreset',
-          () => ({
-            preset: args.preset,
-            template: args.template,
-            brand: args.brand,
-            settings: args.settings
-          }),
-          (response) => response
-        )
+        const result = await render(ctx, 'framePreset', () => ({
+          preset: args.preset,
+          template: args.template,
+          brand: args.brand,
+          settings: args.settings
+        }))
         return { content: [json(result)] }
       } catch (error) {
         return toolError(error)

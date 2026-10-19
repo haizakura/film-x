@@ -42,7 +42,7 @@ mise exec -- pnpm mcp:build
 mise exec -- pnpm test:mcp
 ~~~
 
-其中 check 依序执行格式检查、Oxlint 和 Nuxt 类型检查。现有测试脚本只有 test:pwa 与 test:mcp，均使用 Node 内置的 node --test，没有测试框架依赖；不要假定存在其他单元测试或端到端测试。
+其中 check 依序执行格式检查、Oxlint 和 Nuxt 类型检查。现有测试脚本为 test:pwa、test:app（tests/app-*.test.mjs，经 tests/resolve-app.mjs 解析 ~/ 并以 --experimental-transform-types 直接运行 app/utils 的纯逻辑）与 test:mcp，test 依次运行 test:pwa 与 test:app；均使用 Node 内置的 node --test，没有测试框架依赖；不要假定存在其他单元测试或端到端测试。
 
 ## 3. 目录与分层
 

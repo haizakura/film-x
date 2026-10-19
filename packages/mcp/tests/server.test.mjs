@@ -1,5 +1,14 @@
 import assert from 'node:assert/strict'
-import { copyFileSync, existsSync, mkdtempSync, readdirSync, rmSync, statSync } from 'node:fs'
+import {
+  copyFileSync,
+  existsSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  statSync,
+  symlinkSync
+} from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { after, before, test } from 'node:test'
@@ -107,6 +116,21 @@ test('splits a scan, then refuses to overwrite it', { skip }, async () => {
 
   const second = await call('split_half_frame', { paths: [input], outputDir: workDir })
   assert.ok(second.result.isError || /exist/i.test(second.text), second.text)
+})
+
+test('refuses to overwrite an input reached through a symlink', { skip }, async () => {
+  const link = join(workDir, 'link')
+  symlinkSync(workDir, link, 'dir')
+  const photo = join(workDir, 'scan_01.jpg')
+  const bytes = readFileSync(photo)
+  const framed = await call('frame_photo', {
+    path: photo,
+    output: join(link, 'scan_01.jpg'),
+    overwrite: true
+  })
+  assert.ok(framed.result.isError, framed.text)
+  assert.match(framed.text, /input/i)
+  assert.deepEqual(readFileSync(photo), bytes)
 })
 
 test('composes two frames', { skip }, async () => {

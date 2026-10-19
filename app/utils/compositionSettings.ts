@@ -1,5 +1,4 @@
 import { MAX_CANVAS_RATIO, MAX_CANVAS_RATIO_TERM, MIN_CANVAS_RATIO } from '~/types/canvas'
-import type { CanvasRatioMode } from '~/types/canvas'
 import {
   clampCompositionSprocketWidth,
   COMPOSITION_FRAME_FORMATS,
@@ -16,7 +15,6 @@ import type {
   CompositionFrameCount,
   CompositionFrameFormat,
   CompositionLayoutDirection,
-  CompositionOutputFormat,
   CompositionPadding,
   CompositionPattern,
   CompositionSettings,
@@ -25,7 +23,17 @@ import type {
   CompositionSprocketTextColorPreset
 } from '~/types/composition'
 import { MAX_EXPORT_QUALITY, MIN_EXPORT_QUALITY } from '~/types/image'
-import { normalizeHexColor } from '~/utils/color'
+import {
+  color,
+  find,
+  flag,
+  number,
+  OUTPUT_FORMATS,
+  options,
+  pick,
+  RATIO_MODES,
+  record
+} from '~/utils/settingsSanitize'
 
 const CANVAS_WIDTH = 2400
 
@@ -60,20 +68,13 @@ export const createDefaultCompositionSettings = (): CompositionSettings => ({
   outputQuality: 0.92
 })
 
-type Raw = Record<string, unknown>
-
-/** Every member of a string union, checked for completeness by the record keys. */
-const options = <T extends string>(members: Record<T, true>) => Object.keys(members) as T[]
-
 const FRAME_FORMATS = Object.keys(COMPOSITION_FRAME_FORMATS) as CompositionFrameFormat[]
 const FRAME_COUNTS: readonly CompositionFrameCount[] = [1, 2]
-const RATIO_MODES = options<CanvasRatioMode>({ preset: true, custom: true, auto: true })
 const CANVAS_SIZE_ANCHORS = options<CompositionCanvasSizeAnchor>({ width: true, height: true })
 const CANVAS_SIZE_MODES = options<CompositionCanvasSizeMode>({ auto: true, manual: true })
 const LAYOUT_DIRECTIONS = options<CompositionLayoutDirection>({ horizontal: true, vertical: true })
 const PATTERNS = options<CompositionPattern>({ none: true, grid: true, dots: true })
 const FIT_MODES = options<CompositionFitMode>({ cover: true, contain: true })
-const OUTPUT_FORMATS = options<CompositionOutputFormat>({ jpeg: true, png: true })
 const SPROCKET_PLACEMENTS = options<CompositionSprocketPlacement>({
   'top-bottom': true,
   'left-right': true
@@ -89,24 +90,10 @@ const PADDING_EDGES = options<keyof CompositionPadding>({
   left: true
 })
 
-const isRecord = (value: unknown): value is Raw =>
-  typeof value === 'object' && value !== null && !Array.isArray(value)
-const record = (value: unknown): Raw => (isRecord(value) ? value : {})
-const find = <T extends string | number>(value: unknown, allowed: readonly T[]) =>
-  allowed.find((option) => option === value)
-const pick = <T extends string | number>(value: unknown, allowed: readonly T[], fallback: T): T =>
-  find(value, allowed) ?? fallback
-const flag = (value: unknown, fallback: boolean) => (typeof value === 'boolean' ? value : fallback)
-const number = (value: unknown, min: number, max: number, fallback: number) =>
-  typeof value === 'number' && Number.isFinite(value)
-    ? Math.min(max, Math.max(min, value))
-    : fallback
 const integer = (value: unknown, min: number, max: number, fallback: number) =>
   typeof value === 'number' && Number.isFinite(value)
     ? Math.min(max, Math.max(min, Math.round(value)))
     : fallback
-const color = (value: unknown, fallback: string) =>
-  (typeof value === 'string' && normalizeHexColor(value)) || fallback
 const textColor = (value: unknown, fallback: string) => {
   const preset = find(value, SPROCKET_TEXT_COLOR_PRESETS)
   return preset ? COMPOSITION_SPROCKET_TEXT_COLORS[preset] : color(value, fallback)

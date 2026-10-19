@@ -15,6 +15,7 @@ import type {
   FrameWordmarkPreset
 } from '~/types/frame'
 import { getCameraBrand } from '~/utils/cameraBrands'
+import { decodeFramePreset } from '~/utils/framePreset'
 
 export const DEFAULT_TEMPLATE: FrameTemplate = 'gallery'
 export const DEFAULT_BRAND: CameraBrandId = 'hasselblad'
@@ -46,6 +47,13 @@ export const getBrandLogo = (brand: CameraBrand, current?: FrameLogoSettings) =>
     wordmark: brand.wordmark ?? brand.name.toUpperCase(),
     typography: getWordmarkTypography(brand.wordmarkPreset)
   } satisfies Partial<FrameLogoSettings>
+}
+
+/** The logo follows the brand, and so does the tagline unless the caller keeps its own. */
+export const applyBrand = (settings: FrameSettings, id: CameraBrandId, keepTagline: boolean) => {
+  const brand = getCameraBrand(id)
+  Object.assign(settings.logo, getBrandLogo(brand, settings.logo))
+  if (!keepTagline) settings.tagline = brand.tagline ?? ''
 }
 
 export const createDefaultFrameSettings = (): FrameSettings => {
@@ -109,4 +117,18 @@ export const applyFrameSourceType = (settings: FrameSettings, type: FrameSourceT
     settings.lines.film = type === 'film'
     settings.lines.exposure = type === 'digital'
   }
+}
+
+/** Settings with a preset code applied; the tagline and quality stay, unless the brand changes. */
+export const applyPresetCode = (
+  settings: FrameSettings,
+  code: string,
+  keepTagline: boolean
+): FrameSettings => {
+  const preset = decodeFramePreset(code, settings)
+  const next = { ...preset, tagline: settings.tagline, outputQuality: settings.outputQuality }
+  if (preset.logo.brand !== settings.logo.brand && !keepTagline) {
+    next.tagline = getCameraBrand(preset.logo.brand).tagline ?? ''
+  }
+  return next
 }

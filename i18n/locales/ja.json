@@ -158,8 +158,7 @@
       "frame": "コマ {number}",
       "scale": "拡大・縮小",
       "scaleInput": "拡大率を入力",
-      "reset": "リセット",
-      "autoHint": "キャンバスのサイズを手動にすると、画像の拡大・縮小やドラッグによる位置調整ができます。"
+      "reset": "リセット"
     },
     "layout": {
       "heading": "コマの配置",
@@ -492,6 +491,8 @@
   "errors": {
     "imageEncodeFailed": "画像のエンコードに失敗しました",
     "tiffImageMissing": "TIFF ファイルに読み込める画像がありません",
+    "tiffCorrupt": "TIFF ファイルが破損しているか、不完全です",
+    "tiffUnsupported": "この TIFF 形式には対応していません",
     "canvasUnavailable": "ブラウザーで画像用キャンバスを作成できませんでした",
     "exportCanvasUnavailable": "ブラウザーで書き出し用キャンバスを作成できませんでした",
     "imageReadFailed": "画像を読み込めませんでした",

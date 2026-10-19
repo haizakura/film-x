@@ -1,4 +1,4 @@
-import { zip } from 'fflate'
+import { Zip, ZipPassThrough } from 'fflate'
 
 import type { ExportFormat, ImageQueueItem } from '~/types/image'
 import { downloadBlob } from '~/utils/download'
@@ -16,10 +16,33 @@ export interface ExportResult {
   failedCount: number
 }
 
-const makeZip = (files: Record<string, Uint8Array>) =>
-  new Promise<Uint8Array>((resolve, reject) => {
-    zip(files, { level: 0 }, (error, data) => (error ? reject(error) : resolve(data)))
+/** Stored (uncompressed) ZIP built entry by entry, so frames are not held a second time. */
+const createArchive = () => {
+  const parts: Blob[] = []
+  const archive = new Zip()
+  const blob = new Promise<Blob>((resolve, reject) => {
+    archive.ondata = (error, chunk, final) => {
+      if (error) return reject(error)
+      // A Blob per chunk lets the frame's buffer go; the browser may keep blob data off the heap.
+      parts.push(new Blob([chunk as BlobPart]))
+      if (final) resolve(new Blob(parts, { type: 'application/zip' }))
+    }
   })
+  // Errors surface when the archive is awaited; this only prevents an unhandled rejection.
+  blob.catch(() => undefined)
+
+  return {
+    add: (name: string, data: Uint8Array) => {
+      const entry = new ZipPassThrough(name)
+      archive.add(entry)
+      entry.push(data, true)
+    },
+    finish: () => {
+      archive.end()
+      return blob
+    }
+  }
+}
 
 export const useImageExport = () => {
   const { t } = useI18n()
@@ -44,7 +67,9 @@ export const useImageExport = () => {
 
     exporting.value = true
     progress.value = 0
-    const files: Record<string, Uint8Array> = {}
+    const archive = createArchive()
+    const usedPrefixes = new Set<string>()
+    let generatedCount = 0
     const extension = outputExtension(format.value)
 
     try {
@@ -72,9 +97,16 @@ export const useImageExport = () => {
             format.value,
             quality.value
           )
-          const prefix = baseName(item.name)
-          files[`${prefix}_01.${extension}`] = new Uint8Array(await left.arrayBuffer())
-          files[`${prefix}_02.${extension}`] = new Uint8Array(await right.arrayBuffer())
+          const leftData = new Uint8Array(await left.arrayBuffer())
+          const rightData = new Uint8Array(await right.arrayBuffer())
+          // roll1.jpg and roll1.tif would share a prefix; case-folded for case-insensitive disks.
+          const base = baseName(item.name)
+          let prefix = base
+          for (let n = 2; usedPrefixes.has(prefix.toLowerCase()); n += 1) prefix = `${base}-${n}`
+          usedPrefixes.add(prefix.toLowerCase())
+          archive.add(`${prefix}_01.${extension}`, leftData)
+          archive.add(`${prefix}_02.${extension}`, rightData)
+          generatedCount += 2
           item.status = 'done'
           item.error = undefined
         } catch (error) {
@@ -89,16 +121,12 @@ export const useImageExport = () => {
       }
       // oxlint-enable no-await-in-loop
 
-      const generatedCount = Object.keys(files).length
       if (!generatedCount) throw new AppError('noImagesGenerated')
 
       progressState.value = { stage: 'packing' }
-      const archive = await makeZip(files)
+      const blob = await archive.finish()
       progress.value = 100
-      downloadBlob(
-        new Blob([archive as BlobPart], { type: 'application/zip' }),
-        `${archiveName}.zip`
-      )
+      downloadBlob(blob, `${archiveName}.zip`)
 
       return {
         generatedCount,
