@@ -209,11 +209,14 @@ The development server runs at `http://localhost:3000` by default.
 ```bash
 mise exec -- pnpm check
 mise exec -- pnpm test:pwa
+mise exec -- pnpm test:app
 mise exec -- pnpm test:mcp
 mise exec -- pnpm build
 ```
 
 `test:pwa` uses native Node regression tests to verify update activation conditions across idle, busy, unresponsive, and closed windows, scopes, retries, and concurrent messages.
+
+`test:app` runs native Node tests directly against the pure logic in `app/utils` (split rectangles, EXIF parsing, frame preset codes, composition size limits) without a browser; `test` runs `test:pwa` and then `test:app`.
 
 `test:mcp` first runs `pnpm generate` (which builds the MCP package), then `packages/mcp/tests/*.test.mjs`: it serves the generated `.output/public` on a local port and runs the tests through the proxy against it. This includes `install.test.mjs`, which runs the real `curl … | sh` one-liner against the generated site into a temp folder, checks the printed configuration, starts the installed server, and checks update-in-place and the refusal of foreign folders. When PowerShell is available (`FILM_X_PWSH` or `pwsh` on PATH), it also runs `install.ps1` with `irm … | iex`; otherwise that case is skipped (the npm install needs network access to the registry). It also uses the first image in the git-ignored `sample/` folder (or `FILM_X_SAMPLE`); it is skipped when no image is available. Setting `FILM_X_SITE_URL` makes the tests run against a deployed site instead.
 
