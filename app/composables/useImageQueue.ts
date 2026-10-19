@@ -2,12 +2,13 @@ import type { ImageQueueItem, SplitSettings } from '~/types/image'
 import { DEFAULT_SETTINGS, partitionSupportedImages } from '~/utils/image'
 
 export interface AddFilesResult {
-  addedCount: number
   rejectedCount: number
   addedItems: ImageQueueItem[]
 }
 
 const createSettings = (): SplitSettings => ({ ...DEFAULT_SETTINGS })
+// Same-named scans from different folders usually differ in lastModified.
+const fileKey = (file: File) => `${file.name}:${file.size}:${file.lastModified}`
 
 export const useImageQueue = () => {
   const queue = ref<ImageQueueItem[]>([])
@@ -20,8 +21,8 @@ export const useImageQueue = () => {
 
   const addFiles = (files: File[]): AddFilesResult => {
     const { supported, rejectedCount } = partitionSupportedImages(files)
-    const knownFiles = new Set(queue.value.map((item) => `${item.name}:${item.size}`))
-    const unique = supported.filter((file) => !knownFiles.has(`${file.name}:${file.size}`))
+    const knownFiles = new Set(queue.value.map((item) => fileKey(item.file)))
+    const unique = supported.filter((file) => !knownFiles.has(fileKey(file)))
 
     const addedItems: ImageQueueItem[] = unique.map((file) =>
       reactive({
@@ -38,7 +39,7 @@ export const useImageQueue = () => {
 
     if (!activeId.value && queue.value[0]) activeId.value = queue.value[0].id
 
-    return { addedCount: unique.length, rejectedCount, addedItems }
+    return { rejectedCount, addedItems }
   }
 
   const removeItem = (id: string) => {

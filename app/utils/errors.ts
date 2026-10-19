@@ -1,6 +1,8 @@
 export type AppErrorCode =
   | 'imageEncodeFailed'
   | 'tiffImageMissing'
+  | 'tiffCorrupt'
+  | 'tiffUnsupported'
   | 'canvasUnavailable'
   | 'exportCanvasUnavailable'
   | 'noImagesGenerated'
@@ -14,5 +16,6 @@ export class AppError extends Error {
   }
 }
 
+/** Only AppError messages are i18n keys; raw browser or library text is never shown. */
 export const errorMessageKey = (error: unknown, fallbackKey: string) =>
-  error instanceof Error ? error.message : fallbackKey
+  error instanceof AppError ? error.message : fallbackKey

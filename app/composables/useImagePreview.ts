@@ -59,5 +59,5 @@ export const useImagePreview = (
     decoded.value?.dispose()
   })
 
-  return { decoded, isLoading, reload: loadActiveImage }
+  return { decoded, isLoading }
 }
