@@ -1,13 +1,19 @@
+import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vite'
+
+const { dependencies } = JSON.parse(
+  readFileSync(new URL('package.json', import.meta.url), 'utf8')
+) as { dependencies: Record<string, string> }
+const dependencyNames = Object.keys(dependencies)
 
 // The package's own runtime dependencies stay external; everything imported from the app
 // (utif, fflate, …) belongs to the app, not to this package, so it is inlined.
 const external = [
   /^node:/,
-  /^@modelcontextprotocol\/sdk(\/|$)/,
-  /^playwright-core(\/|$)/,
-  /^zod(\/|$)/
+  ...dependencyNames.map(
+    (name) => new RegExp(`^${name.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&')}(/|$)`)
+  )
 ]
 
 export default defineConfig({
@@ -33,6 +39,6 @@ export default defineConfig({
   },
   ssr: {
     noExternal: true,
-    external: ['@modelcontextprotocol/sdk', 'playwright-core', 'zod']
+    external: dependencyNames
   }
 })

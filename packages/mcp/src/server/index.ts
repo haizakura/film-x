@@ -1,5 +1,6 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
+import { DEFAULT_SITE_URL } from './bridge'
 import { RendererHost } from './browser'
 import { formatAgentConfig } from './config'
 import { registerTools } from './tools'
@@ -17,7 +18,7 @@ Options:
   --version            Print the version
 
 Environment:
-  FILM_X_SITE_URL      Film X site that serves the renderer page (default https://filmx.nya.run/)
+  FILM_X_SITE_URL      Film X site that serves the renderer page (default ${DEFAULT_SITE_URL})
   FILM_X_IMAGE_DIR     Default folder for list_images
   FILM_X_BROWSER_PATH  Chromium-based browser to use instead of Chrome or Edge
 `
@@ -32,7 +33,7 @@ const main = async () => {
         'computer (chat attachments are not visible); outputs are written next to the inputs ' +
         'unless an output path or folder is given. Existing files are never overwritten unless ' +
         'overwrite is true. Film X code is loaded from ' +
-        (process.env.FILM_X_SITE_URL?.trim() || 'https://filmx.nya.run/') +
+        (process.env.FILM_X_SITE_URL?.trim() || DEFAULT_SITE_URL) +
         '; images are read and written only on this computer.'
     }
   )
