@@ -23,6 +23,7 @@ const {
   setFrameCount
 } = useCompositionSettings(images)
 const workspace = ref<{ download: () => Promise<void> }>()
+provideToolCardSpace()
 const hasImages = computed(() => activeImages.value.some(Boolean))
 
 const download = () => workspace.value?.download()
@@ -46,7 +47,7 @@ const moveImageBy = (index: number, offsetX: number, offsetY: number) => {
 
 <template>
   <main
-    class="grid w-full lg:h-full lg:min-h-0 lg:grid-cols-[minmax(0,1fr)_350px] lg:overflow-hidden lg:[contain:paint]"
+    class="grid h-full min-h-0 w-full grid-rows-[minmax(0,1fr)_auto] overflow-hidden [contain:paint] lg:grid-cols-[minmax(0,1fr)_350px] lg:grid-rows-1"
   >
     <FilmCompositionWorkspace
       ref="workspace"

@@ -7,7 +7,7 @@ import { canvasToBlob, downloadBlob, releaseCanvas } from '~/utils/download'
 import { AppError, errorMessageKey } from '~/utils/errors'
 import { isFrameFontReady, loadFrameFonts } from '~/utils/frameFonts'
 import { resolveFrameLogoAsset } from '~/utils/frameLogos'
-import { baseName } from '~/utils/image'
+import { baseName, outputExtension } from '~/utils/image'
 import {
   buildFrameCaption,
   drawFrame,
@@ -147,8 +147,7 @@ export const useFrameCanvas = (sources: FrameCanvasSources) => {
       if (!context) throw new AppError('exportCanvasUnavailable')
       drawFrame(context, scene, scale)
       const blob = await canvasToBlob(output, settings.outputFormat, settings.outputQuality)
-      const extension = settings.outputFormat === 'jpeg' ? 'jpg' : 'png'
-      downloadBlob(blob, `${baseName(photo.name)}-frame.${extension}`)
+      downloadBlob(blob, `${baseName(photo.name)}-frame.${outputExtension(settings.outputFormat)}`)
       toast.success(t('frame.toast.generated'))
     } catch (error) {
       toast.error(t('frame.toast.failed'), {

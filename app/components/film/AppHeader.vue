@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 
 const route = useRoute()
 const colorMode = useColorMode()
+const appConfig = useAppConfig()
 const { t } = useI18n()
 
 const tools = computed(() => [
@@ -56,7 +57,11 @@ const cycleTheme = () => {
     <div
       class="mx-auto flex max-w-420 flex-wrap items-center gap-x-5 px-4 sm:px-6 lg:flex-nowrap lg:px-8"
     >
-      <NuxtLink to="/" class="flex h-16 shrink-0 items-center gap-3" :aria-label="t('header.home')">
+      <NuxtLink
+        to="/"
+        class="flex h-14 shrink-0 items-center gap-3 lg:h-16"
+        :aria-label="t('header.home')"
+      >
         <div class="brand-mark" aria-hidden="true">
           <span />
           <span />
@@ -69,6 +74,11 @@ const cycleTheme = () => {
           </p>
           <h1 class="mt-1 text-[18px] leading-none font-semibold tracking-[-0.03em]">Film X</h1>
         </div>
+        <span
+          class="rounded-full bg-secondary px-2 py-0.5 font-mono text-[10px] font-medium text-secondary-foreground tabular-nums"
+        >
+          {{ appConfig.version }}
+        </span>
       </NuxtLink>
 
       <nav
@@ -98,7 +108,7 @@ const cycleTheme = () => {
         </NuxtLink>
       </nav>
 
-      <div class="ml-auto flex h-16 shrink-0 items-center gap-1.5">
+      <div class="ml-auto flex h-14 shrink-0 items-center gap-1.5 lg:h-16">
         <FilmLanguageMenu />
         <ClientOnly>
           <Button

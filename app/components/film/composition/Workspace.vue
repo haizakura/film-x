@@ -29,6 +29,9 @@ const { canvas, download } = useCompositionCanvas(
   () => props.geometry,
   () => props.settings
 )
+const stage = ref<HTMLElement>()
+const lifted = ref<HTMLElement>()
+const liftStyle = useToolCardLift(lifted, stage)
 const { isDragging, handleDragEnter, handleDragOver, handleDragLeave, handleDrop } = useImageDrop(
   (files) => emit('drop-files', files)
 )
@@ -105,20 +108,20 @@ defineExpose({ download })
 
 <template>
   <section
-    class="relative flex min-h-155 min-w-0 flex-col overflow-hidden bg-workbench lg:min-h-0"
+    class="relative flex min-h-0 min-w-0 flex-col overflow-hidden bg-workbench"
     @dragenter.prevent="handleDragEnter"
     @dragover.prevent="handleDragOver"
     @dragleave="handleDragLeave"
     @drop.prevent="handleDrop"
   >
     <div
-      class="flex min-h-14 flex-wrap items-center justify-between gap-3 border-b border-white/8 px-5 text-white/70"
+      class="flex min-h-11 flex-wrap items-center justify-between gap-3 border-b border-white/8 px-5 text-white/70 lg:min-h-14"
     >
       <div>
-        <p class="font-mono text-[9px] tracking-[0.18em] text-white/45 uppercase">
+        <p class="hidden font-mono text-[9px] tracking-[0.18em] text-white/45 uppercase lg:block">
           {{ t('composition.eyebrow') }}
         </p>
-        <h2 class="mt-1 text-sm font-semibold text-white">{{ t('composition.title') }}</h2>
+        <h2 class="text-sm font-semibold text-white lg:mt-1">{{ t('composition.title') }}</h2>
       </div>
       <div class="flex items-center gap-2">
         <button
@@ -140,11 +143,13 @@ defineExpose({ download })
     </div>
 
     <div
+      ref="stage"
       class="composition-stage flex min-h-0 flex-1 items-center justify-center overflow-hidden p-5 sm:p-8 lg:p-10"
     >
       <div
-        class="relative flex max-h-full max-w-full items-center justify-center"
-        :style="aspectStyle"
+        ref="lifted"
+        class="relative flex max-h-full max-w-full items-center justify-center transition-[translate] duration-200 ease-out"
+        :style="[aspectStyle, liftStyle]"
       >
         <canvas
           ref="canvas"

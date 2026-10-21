@@ -171,6 +171,17 @@ test('frames a photo and round-trips its preset code', { skip }, async () => {
   assert.ok(!preset.result.isError, preset.text)
   assert.equal(preset.json.settings.template, 'bar')
   assert.equal(preset.json.settings.logo.brand, 'leica')
+
+  // WebP must come from the site's encoder, not JPEG bytes under a .webp name.
+  const webp = join(workDir, 'framed.webp')
+  const framedWebp = await call('frame_photo', {
+    path: join(workDir, 'scan_01.jpg'),
+    outputLongSide: 1000,
+    output: webp
+  })
+  assert.ok(!framedWebp.result.isError, framedWebp.text)
+  assert.equal(framedWebp.json.format, 'webp')
+  assert.equal(readFileSync(webp).subarray(8, 12).toString('latin1'), 'WEBP')
 })
 
 test('reads EXIF and lists images', { skip }, async () => {

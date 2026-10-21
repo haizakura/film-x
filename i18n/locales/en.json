@@ -36,8 +36,15 @@
       "dark": "Dark"
     }
   },
-  "footer": {
-    "localOnly": "Images stay on this device"
+  "toolPanel": {
+    "label": "Tool categories",
+    "collapse": "Hide controls",
+    "canvas": "Canvas",
+    "layout": "Layout",
+    "style": "Style",
+    "brand": "Brand",
+    "text": "Text",
+    "export": "Export"
   },
   "emptyState": {
     "eyebrow": "Tool 01 · Splitter",
@@ -104,6 +111,7 @@
     "heading": "Output",
     "completed": "{completed}/{total} completed",
     "quality": "Output quality",
+    "qualityInput": "Enter output quality",
     "tiffNote": "TIF uses uncompressed RGBA pixels to avoid another lossy encode, so files will be large.",
     "pngNote": "PNG is lossless and will be noticeably larger than JPEG.",
     "splitAll": "Split all {count}",
@@ -450,7 +458,7 @@
       "placeholder": "Paste a preset code, or copy the current one",
       "copy": "Copy code",
       "apply": "Apply code",
-      "hint": "A preset code stores the layout, canvas ratio, logo, fonts, borders, spacing, shadows and export options, plus which details are shown and their sizes. It never includes the photo, a custom logo image, or the caption and tagline text.",
+      "hint": "A preset code stores the layout, canvas ratio, logo, fonts, borders, spacing, shadows and export options, plus which details are shown and their sizes. It never includes the photo, a custom logo image, the caption and tagline text, or the output quality.",
       "copied": "Preset code copied",
       "copyFailed": "Could not access the clipboard; the code is in the field above for you to copy.",
       "empty": "Paste a preset code first.",
@@ -490,6 +498,7 @@
   },
   "errors": {
     "imageEncodeFailed": "Image encoding failed",
+    "formatUnsupported": "This browser cannot export this format. Choose another format.",
     "tiffImageMissing": "The TIFF file does not contain a readable image",
     "tiffCorrupt": "The TIFF file is damaged or incomplete",
     "tiffUnsupported": "This TIFF format is not supported",

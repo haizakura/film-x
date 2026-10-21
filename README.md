@@ -30,7 +30,7 @@
 - 可选在两侧齿孔带外缘交错重复印制最多 48 个字符的边缘文字（左右放置时自下向上阅读），文字颜色可选琥珀色、白色、黑色预设或任意十六进制颜色。
 - 可选开启“胶片质感”（默认关闭）：为背景画布和齿孔带加入固定种子的确定性胶片颗粒（不作用于照片本身），并让齿孔边缘柔和、略不规则，带有细微明暗变化；PNG 的齿孔镂空仍保持透明。
 - PNG 导出会使齿孔内部镂空透明，并在工作预览中以棋盘格呈现；JPEG 中，跟随背景的齿孔带使用黑色镂空，黑色齿孔带使用白色镂空。
-- 支持导出 JPEG 或 PNG。
+- 支持导出 JPEG、PNG 或 WebP；JPEG 与 WebP 可调整输出质量（70–100%，默认 92%）。若浏览器无法编码所选格式（如 Safari 不支持 WebP），导出会提示错误，而不是保存格式不符的文件。
 
 ### 照片相框
 
@@ -42,8 +42,8 @@
 - 照片来源分为数码与胶片。识别到胶片扫描仪（如 Noritsu、Frontier、Coolscan、Flextight、Epson 等）写入的 EXIF 时会自动切换为胶片模式，不会把扫描仪当作相机填写；胶片模式以胶卷字段替代曝光参数，机型、镜头与胶卷填写一次即可沿用整卷。
 - 内置 40 个相机、胶片与手机品牌，可搜索选择，也可选择“自定义”输入任意文字。标志可使用内置图形（部分品牌提供多种）、文字标（经典斜体、罗马碑刻、几何细体、粗体、宽体、花体、等宽七种样式）、自定义图片（建议透明背景 PNG）或不显示；单色标志可保持原色、跟随文字颜色或自定义颜色。标语（例如 CREATE TO INSPIRE）可开关和编辑。
 - 内置 18 款 OFL 开源字体（Playfair Display、Bodoni Moda、Cormorant Garamond、DM Serif Display、Cinzel、Italiana、Jost、Josefin Sans、Montserrat、Syncopate、Michroma、Orbitron、Bebas Neue、IBM Plex Mono、Courier Prime、Great Vibes、Dancing Script、Caveat）的拉丁字符子集，随应用打包并可离线使用；另提供系统黑体、宋体与楷体用于中日文字。文字标与说明文字可分别设置字体、粗体、斜体、大写与字距，并可整体缩放文字和标志。
-- 导出 JPEG 或 PNG。输出尺寸可选原尺寸（照片按原始像素绘制，最长边不超过 8000 px）或自定义长边（手动输入 256–8000 px），不会放大原图。
-- 可将调整好的参数复制为预设码，或粘贴预设码直接套用。预设码保存版式、画布比例、品牌标志、字体、边框、间距、阴影与导出设置，以及拍摄信息的显示项与字号；不包含照片、自定义标志图片，以及拍摄信息与标语的文字内容。预设码为以 `FXF1.` 开头的字符串（JSON 经 DEFLATE 压缩后以 base64url 编码），可直接在聊天或网址中传递；导入时会逐项校验并限制在界面允许的范围内，无效的项目保持当前设置。
+- 导出 JPEG、PNG 或 WebP；JPEG 与 WebP 可调整输出质量（70–100%，默认 92%）。输出尺寸可选原尺寸（照片按原始像素绘制，最长边不超过 8000 px）或自定义长边（手动输入 256–8000 px），不会放大原图。
+- 可将调整好的参数复制为预设码，或粘贴预设码直接套用。预设码保存版式、画布比例、品牌标志、字体、边框、间距、阴影与导出设置，以及拍摄信息的显示项与字号；不包含照片、自定义标志图片，以及拍摄信息与标语的文字内容和输出质量（套用预设时保留当前质量）。预设码为以 `FXF1.` 开头的字符串（JSON 经 DEFLATE 压缩后以 base64url 编码），可直接在聊天或网址中传递；导入时会逐项校验并限制在界面允许的范围内，无效的项目保持当前设置。
 
 页面顶部的横向菜单用于在三项工具之间切换。工具页面会保留工作状态，切换后返回不会丢失已导入的图像。
 
@@ -69,7 +69,7 @@ Film X 提供一个本地 stdio MCP 服务（工作区包 `packages/mcp`，名�
 
 - 仅在本地运行：由 Agent 应用将其作为本地进程启动，图片从本地路径读取并写入本地路径，不会上传。渲染页面是 Film X 网站的一部分（路由 `/mcp-renderer`，随网站一同部署到 Cloudflare Pages）。服务通过仅监听回环地址（127.0.0.1，随机端口）的反向代理，在无头模式的 Google Chrome 或 Microsoft Edge（playwright-core）中加载该页面，因此输出与网页版由同一份 `app/utils` 代码绘制（字体、标志、齿孔、EXIF 方向均一致）。
 - 代码来自网站，图片只在本机读写：图片仅经由回环端口在服务与页面之间传递，不会发送到网站或其他任何地方。代理只转发对网站自身文件的 `GET` / `HEAD` 请求，且不带 Cookie；无头浏览器中会阻止网站的 Service Worker；带内容哈希的 `_nuxt` 资源在服务运行期间缓存在内存中。每次启动浏览器时都需要能访问该网站（首次任务以及空闲 5 分钟关闭后的下一次任务）。
-- 网站需运行 Film X 0.6.0 或更高版本（即提供 `/mcp-renderer`）；否则首个任务会失败，并提示部署 0.6.0 及以上版本或设置 `FILM_X_SITE_URL`。服务与页面共用渲染协议版本，版本不一致时错误信息会指明应更新哪一侧：重新部署网站，或重新构建 / 更新 MCP 服务。
+- 网站需运行 Film X 0.6.0 或更高版本（即提供 `/mcp-renderer`）；否则首个任务会失败，并提示部署 0.6.0 及以上版本或设置 `FILM_X_SITE_URL`。`compose_film` 与 `frame_photo` 输出 WebP 需网站为 0.7.0 或更高版本：渲染前服务会先检查，网站较旧时工具报错并提示改用 jpeg/png 或部署 0.7.0+，不会把 JPEG 数据写进 .webp 文件。服务与页面共用渲染协议版本，版本不一致时错误信息会指明应更新哪一侧：重新部署网站，或重新构建 / 更新 MCP 服务。
 - 渲染页面的代码可访问当前任务的图片，因此 `FILM_X_SITE_URL` 只应指向你信任的 Film X 部署，通常是你自己的部署。
 - 可通过 `FILM_X_BROWSER_PATH` 指定其他基于 Chromium 的浏览器可执行文件；浏览器空闲 5 分钟后自动关闭。
 - 任务逐个串行执行，与网页版一致，以控制大尺寸 TIFF 扫描图的内存占用。
@@ -92,7 +92,7 @@ irm https://filmx.nya.run/mcp/install.ps1 | iex
 网站构建时会在 `/mcp/` 下发布 `install.sh`、`install.ps1`、`server.mjs`、`package.json` 和 `SHA256SUMS`。仅当网站运行 0.6.0 或更高版本时才可用；在此之前下载会返回 404，脚本会提示网站需运行 Film X 0.6.0 或更高版本。两个脚本的步骤相同：
 
 - 检查环境：需要 Node.js 22 或更高版本（含 npm）以及 curl 或 wget。
-- 从 `<站点>/mcp/` 下载文件并校验 SHA-256。
+- 先下载 `SHA256SUMS`；若与已安装副本一致且已安装的服务仍能启动（`server.mjs --version`），则提示“已是最新版本”并跳过下载与 `npm install`（仍会打印配置，以便采用新的 Node.js 路径）。否则从 `<站点>/mcp/` 下载文件并校验 SHA-256（`SHA256SUMS` 也列出 `install.sh` 与 `install.ps1`）。
 - 运行 `npm install --omit=dev` 安装依赖（需要能访问 npm 仓库），再确认 `server.mjs --version` 可运行。
 - 原子化安装到 `~/.film-x-mcp`（Windows 为 `%LOCALAPPDATA%\film-x-mcp`；可用 `FILM_X_MCP_HOME` 修改）：新副本先在目标旁暂存再移入；仅当已有文件夹由之前的安装脚本创建（带标记文件）时才会替换，其他文件夹一律拒绝。
 - 若未找到 Google Chrome 或 Microsoft Edge，则给出警告（Windows 自带 Edge）。
@@ -100,7 +100,7 @@ irm https://filmx.nya.run/mcp/install.ps1 | iex
 
 脚本不会修改任何 Agent 配置，也不会上传任何内容。在 Windows 上，如需修改环境变量请先设置，例如 `$env:FILM_X_MCP_HOME = 'D:\film-x-mcp'`。出错时安装脚本会抛出错误而不是退出，因此 PowerShell 窗口不会被关闭。`FILM_X_SITE_URL` 指定安装来源及渲染所用的网站（默认 `https://filmx.nya.run/`；仅限 https，http 只允许 localhost）。
 
-- 更新：再次运行同一条命令。升级 Node.js 之后也请再运行一次，因为配置指向的是那一个 Node 可执行文件。
+- 更新：再次运行同一条命令。升级 Node.js 之后也请再运行一次，因为配置指向的是那一个 Node 可执行文件。每次安装都会保留 `install.sh` 与 `install.ps1` 的副本，以及记录安装来源网站的 `site-url` 文件；直接运行保留的副本即可从该网站更新同一文件夹，无需设置环境变量（设置了 `FILM_X_SITE_URL` / `FILM_X_MCP_HOME` 时仍以其为准）：macOS / Linux 运行 `sh ~/.film-x-mcp/install.sh`，Windows 运行 `powershell -NoProfile -ExecutionPolicy Bypass -File "%LOCALAPPDATA%\film-x-mcp\install.ps1"`。安装 / 更新结束时打印的配置末尾会附上该安装对应的更新命令。
 - 卸载：删除安装文件夹，并移除配置中的条目。
 - 之后需要重新生成配置时，可运行 `node server.mjs --print-config`；`server.mjs` 还支持 `--version` / `--help`。
 
@@ -166,8 +166,8 @@ env = { FILM_X_IMAGE_DIR = "/Users/you/Pictures/Scans", FILM_X_SITE_URL = "https
 - `list_images`：列出文件夹中受支持的图片（TIFF、JPEG、PNG、WebP），可递归。
 - `read_photo_exif`：读取 EXIF、识别品牌、数码或胶片来源及说明字段，与相框工具自动填写的结果一致。
 - `split_half_frame`：切分一张或多张半格扫描图，输出 `<name>_01` / `<name>_02`（JPEG、PNG、WebP 或 TIF）；未指定中心与间隙时自动识别中缝；两侧可分别旋转。
-- `compose_film`：将 1–2 张照片排成半格或全画幅拼图，支持方向、比例（如 `auto` 或 `4:5`）、外边距、画面间距、背景、底纹、填充方式、齿孔带与边缘文字、胶片质感；默认在第一张照片旁输出 `film-x-layout.jpg|png`。
-- `frame_photo`：为一张照片添加相框，可指定模板、品牌、部分设置和/或网页版的 `FXF1.` 预设码，默认开启 EXIF 自动填写，并可覆盖说明文字；输出 `<name>-frame.jpg|png`，并返回最终设置对应的预设码，可直接粘贴到网页版。
+- `compose_film`：将 1–2 张照片排成半格或全画幅拼图，支持方向、比例（如 `auto` 或 `4:5`）、外边距、画面间距、背景、底纹、填充方式、齿孔带与边缘文字、胶片质感；默认在第一张照片旁输出 `film-x-layout.jpg|png|webp`；格式可选 JPEG、PNG 或 WebP，`quality` 适用于 JPEG 与 WebP（0.7–1，更低的值按 0.7 处理）。
+- `frame_photo`：为一张照片添加相框，可指定模板、品牌、部分设置和/或网页版的 `FXF1.` 预设码，默认开启 EXIF 自动填写，并可覆盖说明文字；输出 `<name>-frame.jpg|png|webp`（格式可选 JPEG、PNG 或 WebP，也可用 `.webp` 结尾的输出路径；`quality` 适用于 JPEG 与 WebP，0.7–1），并返回最终设置对应的预设码，可直接粘贴到网页版。
 - `frame_preset`：只解析相框设置或预设码而不渲染（只读）。
 
 使用说明：

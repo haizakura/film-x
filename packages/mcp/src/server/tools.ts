@@ -23,7 +23,7 @@ import {
   MAX_COMPOSITION_SPROCKET_WIDTH,
   MIN_COMPOSITION_SPROCKET_WIDTH
 } from '~/types/composition'
-import type { CameraBrandId, FrameInfoField, FrameTemplate } from '~/types/frame'
+import type { CameraBrandId, FrameInfoField, FrameOutputFormat, FrameTemplate } from '~/types/frame'
 import {
   FRAME_INFO_FIELDS,
   FRAME_TEMPLATES,
@@ -62,6 +62,12 @@ const brandIds = CAMERA_BRANDS.map((brand) => brand.id) as CameraBrandId[]
 const frameFormats = Object.keys(COMPOSITION_FRAME_FORMATS) as Array<
   keyof typeof COMPOSITION_FRAME_FORMATS
 >
+
+// Formats the composer and frame encode on the site's canvas; TIFF is split-only.
+const LAYOUT_FORMATS = ['jpeg', 'png', 'webp'] as const satisfies readonly FrameOutputFormat[]
+const isLayoutFormat = (value: unknown): value is FrameOutputFormat =>
+  LAYOUT_FORMATS.some((format) => format === value)
+const LAYOUT_QUALITY = 'JPEG and WebP quality, 0.7 to 1; lower values use 0.7.'
 
 const rotationSchema = z.union([z.literal(0), z.literal(90), z.literal(180), z.literal(270)])
 const qualityFor = (fallback: number) =>
@@ -159,6 +165,19 @@ const render = async <M extends RendererMethod>(
     return response
   } finally {
     job.release()
+  }
+}
+
+/** Sites before Film X 0.7.0 sanitise a WebP request for the composer or frame into JPEG. */
+const requireWebpSite = async (ctx: ToolContext) => {
+  const { settings } = await render(ctx, 'framePreset', () => ({
+    settings: { outputFormat: 'webp' }
+  }))
+  if (settings.outputFormat !== 'webp') {
+    throw new UserError(
+      'The Film X site this server uses is older than 0.7.0 and cannot write WebP here. ' +
+        'Use jpeg or png, or deploy Film X 0.7.0 or later to that site.'
+    )
   }
 }
 
@@ -509,13 +528,15 @@ export const registerTools = (server: McpServer, ctx: ToolContext) => {
           .optional()
           .describe('Film sprocket band settings.'),
         filmTexture: z.boolean().optional().describe('Add film grain texture. Default false.'),
-        format: z.enum(['jpeg', 'png']).default('jpeg').describe('Output format. Default jpeg.'),
-        quality: qualityFor(0.92).describe('JPEG quality, 0 to 1. Default 0.92.'),
+        format: enumOf(LAYOUT_FORMATS)
+          .default('jpeg')
+          .describe('Output format: jpeg, png or webp. Default jpeg.'),
+        quality: qualityFor(0.92).describe(`${LAYOUT_QUALITY} Default 0.92.`),
         output: z
           .string()
           .optional()
           .describe(
-            'Output file path ending in .jpg/.jpeg or .png to match format. Default: film-x-layout.<jpg|png> next to the first photo.'
+            'Output file path ending in .jpg/.jpeg, .png or .webp to match format. Default: film-x-layout.<jpg|png|webp> next to the first photo.'
           ),
         overwrite: overwriteSchema,
         preview: previewSchema
@@ -532,6 +553,7 @@ export const registerTools = (server: McpServer, ctx: ToolContext) => {
           throw new UserError('The same photo was given twice; give two different files.')
         }
         const format = args.format
+        if (format === 'webp') await requireWebpSite(ctx)
         const target = args.output
           ? resolveExplicitOutput(args.output, format)
           : path.join(
@@ -631,7 +653,7 @@ export const registerTools = (server: McpServer, ctx: ToolContext) => {
         'a preset code copied from the Film X web app, a template and brand, and/or partial ' +
         'settings; call frame_preset first to preview the resolved settings. By default the ' +
         "output keeps the photo's original size (long side capped at " +
-        `${MAX_FRAME_CANVAS_SIDE} px) and is written as <name>-frame.<jpg|png> next to the ` +
+        `${MAX_FRAME_CANVAS_SIDE} px) and is written as <name>-frame.<jpg|png|webp> next to the ` +
         'photo. Returns the output path, pixel size, resolved settings summary, caption fields ' +
         'and the preset code for the web app.',
       inputSchema: {
@@ -664,11 +686,10 @@ export const registerTools = (server: McpServer, ctx: ToolContext) => {
           .string()
           .optional()
           .describe('Absolute path of an image to use as the logo (with brand "custom").'),
-        format: z
-          .enum(['jpeg', 'png'])
+        format: enumOf(LAYOUT_FORMATS)
           .optional()
-          .describe('Output format. Default: from the preset, else jpeg.'),
-        quality: z.number().min(0).max(1).optional().describe('JPEG quality, 0 to 1.'),
+          .describe('Output format: jpeg, png or webp. Default: from the preset, else jpeg.'),
+        quality: z.number().min(0).max(1).optional().describe(LAYOUT_QUALITY),
         outputLongSide: z
           .number()
           .int()
@@ -682,7 +703,7 @@ export const registerTools = (server: McpServer, ctx: ToolContext) => {
           .string()
           .optional()
           .describe(
-            'Output file path (.jpg/.jpeg/.png). Default: <name>-frame.<jpg|png> next to the photo.'
+            'Output file path (.jpg/.jpeg/.png/.webp). Default: <name>-frame.<jpg|png|webp> next to the photo.'
           ),
         overwrite: overwriteSchema,
         preview: previewSchema
@@ -702,19 +723,19 @@ export const registerTools = (server: McpServer, ctx: ToolContext) => {
           settings.outputLongSide = args.outputLongSide
         }
 
-        let format = args.format
+        let format: FrameOutputFormat | undefined = args.format
         if (!format && args.output) {
           const fromExtension = formatFromExtension(args.output)
-          if (fromExtension !== 'jpeg' && fromExtension !== 'png') {
+          if (!isLayoutFormat(fromExtension)) {
             throw new UserError(
-              `The output path "${args.output}" must end in .jpg, .jpeg or .png for a framed photo.`
+              `The output path "${args.output}" must end in .jpg, .jpeg, .png or .webp for a framed photo.`
             )
           }
           format = fromExtension
         }
-        if (!format && (settings.outputFormat === 'jpeg' || settings.outputFormat === 'png')) {
-          format = settings.outputFormat
-        }
+        if (!format && isLayoutFormat(settings.outputFormat)) format = settings.outputFormat
+        if (format === 'webp') await requireWebpSite(ctx)
+        // A format the site resolves from the preset is one it can encode.
         if (!format) {
           const resolved = await render(ctx, 'framePreset', () => ({
             preset: args.preset,

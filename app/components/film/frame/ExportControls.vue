@@ -3,6 +3,7 @@ import { Download, LoaderCircle } from '@lucide/vue'
 import { Button } from '@/components/ui/button'
 import { MAX_FRAME_CANVAS_SIDE, MIN_FRAME_OUTPUT_SIDE } from '~/types/frame'
 import type { FrameOutputFormat, FrameOutputSizeMode, FrameSettings } from '~/types/frame'
+import { MAX_EXPORT_QUALITY, MIN_EXPORT_QUALITY } from '~/types/image'
 import type { ExportFormat } from '~/types/image'
 import { clampFrameOutputSide } from '~/utils/photoFrame'
 
@@ -14,7 +15,7 @@ defineProps<{
 const settings = defineModel<FrameSettings>({ required: true })
 const emit = defineEmits<{ download: [] }>()
 const { t } = useI18n()
-const formats: ExportFormat[] = ['jpeg', 'png']
+const formats: ExportFormat[] = ['jpeg', 'png', 'webp']
 
 const sizeOptions = computed<Array<{ value: FrameOutputSizeMode; label: string }>>(() => [
   { value: 'original', label: t('frame.export.original') },
@@ -80,6 +81,14 @@ const updateFormat = (format: ExportFormat) => {
       :model-value="settings.outputFormat"
       :formats="formats"
       @update:model-value="updateFormat"
+    />
+    <FilmRangeField
+      v-if="settings.outputFormat !== 'png'"
+      v-model="settings.outputQuality"
+      :label="t('export.quality')"
+      :input-label="t('export.qualityInput')"
+      :min="MIN_EXPORT_QUALITY * 100"
+      :max="MAX_EXPORT_QUALITY * 100"
     />
     <Button
       class="w-full"
