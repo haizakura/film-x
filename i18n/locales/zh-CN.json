@@ -36,6 +36,9 @@
       "dark": "深色"
     }
   },
+  "footer": {
+    "localOnly": "图像仅在本地处理"
+  },
   "toolPanel": {
     "label": "工具分类",
     "collapse": "收起控件",

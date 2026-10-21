@@ -36,6 +36,9 @@
       "dark": "ダーク"
     }
   },
+  "footer": {
+    "localOnly": "画像はこの端末内でのみ処理されます"
+  },
   "toolPanel": {
     "label": "ツールの分類",
     "collapse": "コントロールを閉じる",
