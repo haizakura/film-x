@@ -1,5 +1,6 @@
 export type AppErrorCode =
   | 'imageEncodeFailed'
+  | 'formatUnsupported'
   | 'tiffImageMissing'
   | 'tiffCorrupt'
   | 'tiffUnsupported'

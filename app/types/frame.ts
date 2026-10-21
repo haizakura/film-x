@@ -44,7 +44,7 @@ export type FrameShadowPreset =
   | 'deep'
   | 'directional'
   | 'hard'
-export type FrameOutputFormat = 'jpeg' | 'png'
+export type FrameOutputFormat = 'jpeg' | 'png' | 'webp'
 export type FrameOutputSizeMode = 'original' | 'custom'
 export type FrameSourceType = 'digital' | 'film'
 export type FrameLogoStyle = 'mark' | 'wordmark' | 'custom' | 'none'

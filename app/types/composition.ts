@@ -13,7 +13,7 @@ export const COMPOSITION_PREVIEW_SIDE = 2000
 
 export type CompositionPattern = 'none' | 'grid' | 'dots'
 export type CompositionFitMode = 'cover' | 'contain'
-export type CompositionOutputFormat = 'jpeg' | 'png'
+export type CompositionOutputFormat = 'jpeg' | 'png' | 'webp'
 export type CompositionRatioMode = CanvasRatioMode
 export type CompositionLayoutDirection = 'horizontal' | 'vertical'
 export type CompositionFrameFormat = 'half' | 'full'

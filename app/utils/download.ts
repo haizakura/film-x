@@ -7,7 +7,12 @@ export const canvasToBlob = (
 ) =>
   new Promise<Blob>((resolve, reject) => {
     canvas.toBlob(
-      (blob) => (blob ? resolve(blob) : reject(new AppError('imageEncodeFailed'))),
+      (blob) => {
+        if (!blob) reject(new AppError('imageEncodeFailed'))
+        // Browsers without an encoder for the type (Safari for WebP) silently return PNG.
+        else if (blob.type !== `image/${format}`) reject(new AppError('formatUnsupported'))
+        else resolve(blob)
+      },
       `image/${format}`,
       format === 'png' ? undefined : quality
     )

@@ -7,7 +7,11 @@ export type Raw = Record<string, unknown>
 export const options = <T extends string>(members: Record<T, true>) => Object.keys(members) as T[]
 
 export const RATIO_MODES = options<CanvasRatioMode>({ preset: true, custom: true, auto: true })
-export const OUTPUT_FORMATS = options<'jpeg' | 'png'>({ jpeg: true, png: true })
+export const OUTPUT_FORMATS = options<'jpeg' | 'png' | 'webp'>({
+  jpeg: true,
+  png: true,
+  webp: true
+})
 
 export const isRecord = (value: unknown): value is Raw =>
   typeof value === 'object' && value !== null && !Array.isArray(value)

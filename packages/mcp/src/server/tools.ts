@@ -23,7 +23,7 @@ import {
   MAX_COMPOSITION_SPROCKET_WIDTH,
   MIN_COMPOSITION_SPROCKET_WIDTH
 } from '~/types/composition'
-import type { CameraBrandId, FrameInfoField, FrameTemplate } from '~/types/frame'
+import type { CameraBrandId, FrameInfoField, FrameOutputFormat, FrameTemplate } from '~/types/frame'
 import {
   FRAME_INFO_FIELDS,
   FRAME_TEMPLATES,
@@ -702,7 +702,7 @@ export const registerTools = (server: McpServer, ctx: ToolContext) => {
           settings.outputLongSide = args.outputLongSide
         }
 
-        let format = args.format
+        let format: FrameOutputFormat | undefined = args.format
         if (!format && args.output) {
           const fromExtension = formatFromExtension(args.output)
           if (fromExtension !== 'jpeg' && fromExtension !== 'png') {

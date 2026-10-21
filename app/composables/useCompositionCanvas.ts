@@ -11,6 +11,7 @@ import { drawComposition, hasSupportedCanvasDimensions } from '~/utils/compositi
 import { canvasToBlob, downloadBlob, releaseCanvas } from '~/utils/download'
 import { AppError, errorMessageKey } from '~/utils/errors'
 import { createFilmGrainTiles, releaseFilmGrainTiles } from '~/utils/filmTexture'
+import { outputExtension } from '~/utils/image'
 import type { FilmGrainTiles } from '~/utils/filmTexture'
 
 export const useCompositionCanvas = (
@@ -104,8 +105,7 @@ export const useCompositionCanvas = (
         currentSettings.outputFormat,
         currentSettings.outputQuality
       )
-      const extension = currentSettings.outputFormat === 'jpeg' ? 'jpg' : 'png'
-      downloadBlob(blob, `film-x-layout.${extension}`)
+      downloadBlob(blob, `film-x-layout.${outputExtension(currentSettings.outputFormat)}`)
       toast.success(t('toast.compositionGenerated'))
     } catch (error) {
       toast.error(t('toast.compositionFailed'), {
