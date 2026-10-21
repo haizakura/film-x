@@ -88,7 +88,7 @@ mise.toml                         Node.js 版本
 
 ## 4. 全局壳、路由、语言与主题
 
-根组件 app/app.vue 渲染页头（含版本徽标）、可选的 PWA 更新提示、保活页面和 Toast，不再有页脚。应用壳固定为视口高度（h-dvh、overflow hidden），页面本身不纵向滚动，各面板在内部滚动。NuxtPage 使用 max 为 4 的 keepalive 配置，使三个工具页面在站内切换后维持当前内存状态。
+根组件 app/app.vue 渲染页头（含版本徽标）、可选的 PWA 更新提示、保活页面、页脚和 Toast。页脚高度等于底部安全区（env(safe-area-inset-bottom)），只在 iOS 主屏幕 PWA 等有底部安全区的环境中显示“图像仅在本地处理”，桌面浏览器中高度为 0。应用壳固定为视口高度（h-dvh、overflow hidden），页面本身不纵向滚动，各面板在内部滚动。NuxtPage 使用 max 为 4 的 keepalive 配置，使三个工具页面在站内切换后维持当前内存状态。
 
 路由采用无语言前缀策略：
 
