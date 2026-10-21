@@ -21,7 +21,9 @@ useSeoMeta({ description: () => t('meta.siteDescription') })
 
 <template>
   <VitePwaManifest />
-  <div class="film-grain flex h-dvh flex-col overflow-hidden">
+  <div
+    class="film-grain flex h-dvh flex-col overflow-hidden pr-[env(safe-area-inset-right)] pl-[env(safe-area-inset-left)]"
+  >
     <FilmAppHeader />
     <div
       v-if="updateReady"
