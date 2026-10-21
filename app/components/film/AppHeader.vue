@@ -53,9 +53,7 @@ const cycleTheme = () => {
 </script>
 
 <template>
-  <header
-    class="app-header shrink-0 border-b border-border bg-card/88 pt-[env(safe-area-inset-top)] backdrop-blur-xl"
-  >
+  <header class="app-header shrink-0 border-b border-border bg-card/88 backdrop-blur-xl">
     <div
       class="mx-auto flex max-w-420 flex-wrap items-center gap-x-5 px-4 sm:px-6 lg:flex-nowrap lg:px-8"
     >

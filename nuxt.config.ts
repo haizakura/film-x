@@ -106,10 +106,7 @@ export default defineNuxtConfig({
   app: {
     head: {
       titleTemplate: '%s · Film X',
-      // Full-bleed on iOS: the header and tool tabs pad themselves by the safe-area insets.
-      viewport: 'width=device-width, initial-scale=1, viewport-fit=cover',
       meta: [
-        { name: 'apple-mobile-web-app-status-bar-style', content: 'black-translucent' },
         { name: 'theme-color', media: '(prefers-color-scheme: light)', content: '#FFFFFF' },
         { name: 'theme-color', media: '(prefers-color-scheme: dark)', content: '#0A0A0A' }
       ]
