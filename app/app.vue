@@ -21,7 +21,9 @@ useSeoMeta({ description: () => t('meta.siteDescription') })
 
 <template>
   <VitePwaManifest />
-  <div class="film-grain flex h-dvh flex-col overflow-hidden">
+  <div
+    class="film-grain flex h-dvh flex-col overflow-hidden pr-[env(safe-area-inset-right)] pl-[env(safe-area-inset-left)]"
+  >
     <FilmAppHeader />
     <div
       v-if="updateReady"
@@ -31,9 +33,14 @@ useSeoMeta({ description: () => t('meta.siteDescription') })
       {{ t('pwa.updateReady') }}
     </div>
     <NuxtPage :keepalive="{ max: 4 }" class="min-h-0 flex-1" />
+    <FilmAppFooter />
     <Toaster
       position="top-right"
       close-button
+      :offset="{
+        top: 'calc(24px + env(safe-area-inset-top))',
+        right: 'calc(24px + env(safe-area-inset-right))'
+      }"
       :container-aria-label="t('notifications.label')"
       :toast-options="{
         closeButtonAriaLabel: t('notifications.close'),
