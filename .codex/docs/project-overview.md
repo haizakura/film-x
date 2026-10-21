@@ -55,7 +55,7 @@ app/
     frame.vue                     路由 /frame：照片相框入口
     mcp-renderer.vue              路由 /mcp-renderer：仅供本地 MCP 服务使用的渲染页（noindex）
   components/
-    film/                         产品领域 UI：上传、队列、预览、控制、导航
+    film/                         产品领域 UI：上传、队列、预览、控制、导航；ToolPanel.vue 为各工具右侧控制区的共用标签页容器（桌面在右栏顶部；移动端标签栏固定在屏幕底部，点选后控件以 67% 不透明的卡片悬浮于工作区底部，工作区高度不变，仅画布保持尺寸平滑上移以尽量避开卡片（最高到预览区内边距处，仍被遮挡的部分不处理），收起后复原；卡片高度由页面经 provideToolCardSpace 共享，画布位移由 useToolCardLift 计算，再次点选同一标签或点卡片顶部把手收起；未激活标签保持挂载）
     film/composition/             拼图编辑器、工作区和分项控制面板
     film/frame/                   相框编辑器、工作区和分项控制面板
     ui/                           Button、Switch、Dialog、Progress、Sonner 等基础原语
@@ -88,7 +88,7 @@ mise.toml                         Node.js 版本
 
 ## 4. 全局壳、路由、语言与主题
 
-根组件 app/app.vue 渲染页头、保活页面、页脚和 Toast。NuxtPage 使用 max 为 4 的 keepalive 配置，使三个工具页面在站内切换后维持当前内存状态。
+根组件 app/app.vue 渲染页头（含版本徽标）、可选的 PWA 更新提示、保活页面和 Toast，不再有页脚。应用壳固定为视口高度（h-dvh、overflow hidden），页面本身不纵向滚动，各面板在内部滚动。NuxtPage 使用 max 为 4 的 keepalive 配置，使三个工具页面在站内切换后维持当前内存状态。
 
 路由采用无语言前缀策略：
 
@@ -148,7 +148,7 @@ TIFF 输入在浏览器中转为 8 位 RGBA。导出 TIFF 时走像素裁切和 
 - 可选上下或左右胶片齿孔带，宽度限制为 24 至 240 px 且不计入画布尺寸；齿孔采用圆角并按 135 胶片比例密排，偏向带内侧，外侧留出边缘文字空位。
 - 可选边缘文字（最多 48 个字符），沿两侧齿孔带外缘交错重复印制，左右放置时自下向上阅读；颜色可选琥珀、白、黑预设或任意十六进制颜色。
 - 可选“胶片质感”开关（默认关闭）：为背景画布和齿孔带加入确定性胶片颗粒（不作用于照片本身），齿孔边缘柔和且略不规则，带细微明暗变化；PNG 齿孔镂空保持透明。
-- 输出 JPEG 或 PNG；PNG 齿孔内部保持透明。
+- 输出 JPEG、PNG 或 WebP（JPEG 与 WebP 可调输出质量 70–100%，默认 92%）；PNG 齿孔内部保持透明。
 
 ### 6.2 数据流与约束
 
@@ -177,8 +177,8 @@ CompositionSettings（含 frameFormat 与 frameCount）是拼图设置的单一�
 - 导入时本地读取 EXIF 自动填写机型、镜头、曝光参数和日期，并按厂商匹配品牌；字段均可手动修改。各信息行与标语有独立字号倍率（lineScales / taglineScale），说明文字以 FrameCaptionRun 携带倍率，同一行多个项目按基线对齐。
 - 照片来源分为数码与胶片；识别到扫描仪 EXIF 时自动切换为胶片模式且不填写扫描仪信息。
 - 品牌目录、内置 logo 图形、七种文字标样式、自定义 logo 图片；单色标志可重新着色。
-- 18 款随应用打包的 OFL 字体（仅拉丁子集）与三种系统中文字体；输出 JPEG 或 PNG，可选原尺寸或自定义长边（256–8000 px，不放大原图）。
-- 预设码：app/utils/framePreset.ts 将 FramePreset（FrameSettings 去掉标语文字与无控件的输出质量）序列化为 `FXF<版本>.` + base64url(DEFLATE(JSON))，使用已有依赖 fflate；解码前限制长度（MAX_FRAME_PRESET_LENGTH），逐字段校验枚举、颜色与数值范围，缺失或无效的字段沿用当前设置。导入由 useFrameSettings.importPreset 应用，视为手动选择品牌与来源类型；剪贴板与提示在 useFramePreset 中处理，剪贴板不可用时预设码保留在输入框供手动复制。
+- 18 款随应用打包的 OFL 字体（仅拉丁子集）与三种系统中文字体；输出 JPEG、PNG 或 WebP（JPEG 与 WebP 可调输出质量 70–100%，默认 92%），可选原尺寸或自定义长边（256–8000 px，不放大原图）。
+- 预设码：app/utils/framePreset.ts 将 FramePreset（FrameSettings 去掉标语文字与输出质量，套用预设时保留当前质量）序列化为 `FXF<版本>.` + base64url(DEFLATE(JSON))，使用已有依赖 fflate；解码前限制长度（MAX_FRAME_PRESET_LENGTH），逐字段校验枚举、颜色与数值范围，缺失或无效的字段沿用当前设置。导入由 useFrameSettings.importPreset 应用，视为手动选择品牌与来源类型；剪贴板与提示在 useFramePreset 中处理，剪贴板不可用时预设码保留在输入框供手动复制。
 
 ### 7.2 数据流与约束
 
