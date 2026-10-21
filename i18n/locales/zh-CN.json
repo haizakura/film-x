@@ -36,9 +36,6 @@
       "dark": "深色"
     }
   },
-  "footer": {
-    "localOnly": "图像仅在本地处理"
-  },
   "emptyState": {
     "eyebrow": "工具 01 · 切分",
     "headlineFirst": "一张扫描，",

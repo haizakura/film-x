@@ -36,9 +36,6 @@
       "dark": "ダーク"
     }
   },
-  "footer": {
-    "localOnly": "画像はこの端末内でのみ処理されます"
-  },
   "emptyState": {
     "eyebrow": "ツール 01 · 分割",
     "headlineFirst": "一枚のスキャンから、",

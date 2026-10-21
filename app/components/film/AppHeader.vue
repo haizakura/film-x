@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 
 const route = useRoute()
 const colorMode = useColorMode()
+const appConfig = useAppConfig()
 const { t } = useI18n()
 
 const tools = computed(() => [
@@ -69,6 +70,11 @@ const cycleTheme = () => {
           </p>
           <h1 class="mt-1 text-[18px] leading-none font-semibold tracking-[-0.03em]">Film X</h1>
         </div>
+        <span
+          class="rounded-full bg-secondary px-2 py-0.5 font-mono text-[10px] font-medium text-secondary-foreground tabular-nums"
+        >
+          {{ appConfig.version }}
+        </span>
       </NuxtLink>
 
       <nav

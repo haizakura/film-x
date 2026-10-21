@@ -36,9 +36,6 @@
       "dark": "Dark"
     }
   },
-  "footer": {
-    "localOnly": "Images stay on this device"
-  },
   "emptyState": {
     "eyebrow": "Tool 01 · Splitter",
     "headlineFirst": "One scan,",
