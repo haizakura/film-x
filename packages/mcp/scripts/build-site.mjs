@@ -1,6 +1,6 @@
 // Assembles what the website publishes under /mcp/ for the one-click installer: the server
 // bundle, a package.json pinning the exact runtime dependencies it was built and tested with,
-// the install script and SHA-256 checksums of the downloaded files.
+// the install scripts and SHA-256 checksums of every file the installers download.
 import { createHash } from 'node:crypto'
 import { copyFile, mkdir, readFile, rm, writeFile } from 'node:fs/promises'
 
@@ -41,7 +41,7 @@ await Promise.all(
 )
 
 const sums = await Promise.all(
-  ['server.mjs', 'package.json'].map(async (file) => {
+  ['server.mjs', 'package.json', 'install.sh', 'install.ps1'].map(async (file) => {
     const hash = createHash('sha256')
       .update(await readFile(new URL(file, site)))
       .digest('hex')

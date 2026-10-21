@@ -5,18 +5,35 @@
 #
 # Downloads the local MCP server that this Film X site publishes under /mcp/, installs its
 # runtime dependencies with npm, and prints the configuration for Claude Desktop and ChatGPT
-# Desktop. It changes no agent configuration and uploads nothing. Run it again to update.
+# Desktop. It changes no agent configuration and uploads nothing. Run it again to update; an
+# install also keeps a copy of this script, which updates that folder from the same site:
 #
-#   FILM_X_SITE_URL  Film X site to install from and render with (default https://filmx.nya.run/)
-#   FILM_X_MCP_HOME  Install folder (default ~/.film-x-mcp)
+#   sh ~/.film-x-mcp/install.sh
+#
+#   FILM_X_SITE_URL  Film X site to install from and render with (default: the site the installed
+#                    copy recorded, else https://filmx.nya.run/)
+#   FILM_X_MCP_HOME  Install folder (default: the installed copy's folder, else ~/.film-x-mcp)
 set -eu
 
 DEFAULT_SITE_URL='https://filmx.nya.run/'
-SITE_URL="${FILM_X_SITE_URL:-$DEFAULT_SITE_URL}"
-INSTALL_DIR="${FILM_X_MCP_HOME:-$HOME/.film-x-mcp}"
-INSTALL_DIR="${INSTALL_DIR%/}"
 MIN_NODE_MAJOR=22
 MARKER='.film-x-mcp-install'
+SITE_FILE='site-url'
+
+# Run from an install folder (sh <folder>/install.sh): update that folder from its recorded site.
+SELF_DIR=''
+case "${0##*/}" in
+install.sh) if [ -f "$0" ]; then SELF_DIR=$(cd "$(dirname "$0")" && pwd); fi ;;
+esac
+if [ -n "$SELF_DIR" ] && [ ! -f "$SELF_DIR/$MARKER" ]; then SELF_DIR=''; fi
+RECORDED_SITE=''
+if [ -n "$SELF_DIR" ] && [ -f "$SELF_DIR/$SITE_FILE" ]; then
+  RECORDED_SITE=$(cat "$SELF_DIR/$SITE_FILE")
+fi
+
+SITE_URL="${FILM_X_SITE_URL:-${RECORDED_SITE:-$DEFAULT_SITE_URL}}"
+INSTALL_DIR="${FILM_X_MCP_HOME:-${SELF_DIR:-$HOME/.film-x-mcp}}"
+INSTALL_DIR="${INSTALL_DIR%/}"
 
 say() { printf '%s\n' "$*"; }
 fail() {
@@ -36,6 +53,19 @@ browser_found() {
     done
   fi
   return 1
+}
+
+# Warns about a missing browser and prints the configuration, which also names the update command.
+finish() {
+  if ! browser_found; then
+    say ''
+    say 'Warning: Google Chrome or Microsoft Edge was not found. Install one of them, or set'
+    say 'FILM_X_BROWSER_PATH in the agent configuration to another Chromium-based browser.'
+  fi
+
+  say ''
+  # The server prints the configuration, so paths are escaped right for JSON and TOML.
+  FILM_X_SITE_URL="$SITE_URL" "$NODE_BIN" "$INSTALL_DIR/server.mjs" --print-config </dev/null
 }
 
 # Everything runs from main, so a download cut short by `curl | sh` executes nothing.
@@ -85,10 +115,33 @@ main() {
   trap 'rm -rf "$STAGE"' EXIT
   trap 'exit 130' INT TERM
 
-  say "Downloading the Film X MCP server from ${SITE_URL}mcp/"
-  for file in server.mjs package.json SHA256SUMS; do
-    fetch "${SITE_URL}mcp/$file" "$STAGE/$file" ||
-      fail "Could not download ${SITE_URL}mcp/$file. The site must run Film X 0.6.0 or later."
+  download() {
+    fetch "${SITE_URL}mcp/$1" "$STAGE/$1" ||
+      fail "Could not download ${SITE_URL}mcp/$1. The site must run Film X 0.6.0 or later."
+  }
+
+  # The checksums identify a release, so an install that matches them and still starts is current.
+  download SHA256SUMS
+  CURRENT=''
+  if [ -f "$INSTALL_DIR/$MARKER" ]; then
+    CURRENT=$("$NODE_BIN" "$INSTALL_DIR/server.mjs" --version </dev/null 2>/dev/null) || CURRENT=''
+  fi
+  if [ -n "$CURRENT" ] && command -v cmp >/dev/null 2>&1 &&
+    cmp -s "$STAGE/SHA256SUMS" "$INSTALL_DIR/SHA256SUMS" </dev/null; then
+    printf '%s\n' "$SITE_URL" >"$INSTALL_DIR/$SITE_FILE"
+    say "Film X MCP $CURRENT in $INSTALL_DIR is already up to date."
+    finish
+    return
+  fi
+
+  if [ -n "$CURRENT" ]; then
+    say "Updating Film X MCP $CURRENT from ${SITE_URL}mcp/"
+  else
+    say "Downloading the Film X MCP server from ${SITE_URL}mcp/"
+  fi
+  # The installers stay in the install folder so it can update itself later.
+  for file in server.mjs package.json install.sh install.ps1; do
+    download "$file"
   done
 
   if command -v shasum >/dev/null 2>&1; then
@@ -106,6 +159,7 @@ main() {
   VERSION=$("$NODE_BIN" "$STAGE/server.mjs" --version </dev/null) ||
     fail 'The downloaded server does not start with this Node.js.'
   : >"$STAGE/$MARKER"
+  printf '%s\n' "$SITE_URL" >"$STAGE/$SITE_FILE"
 
   if [ -e "$INSTALL_DIR" ]; then
     OLD="$INSTALL_DIR.old.$$"
@@ -117,16 +171,12 @@ main() {
   fi
 
   say ''
-  say "Film X MCP $VERSION is installed in $INSTALL_DIR"
-  if ! browser_found; then
-    say ''
-    say 'Warning: Google Chrome or Microsoft Edge was not found. Install one of them, or set'
-    say 'FILM_X_BROWSER_PATH in the agent configuration to another Chromium-based browser.'
+  if [ -n "$CURRENT" ]; then
+    say "Film X MCP is updated from $CURRENT to $VERSION in $INSTALL_DIR"
+  else
+    say "Film X MCP $VERSION is installed in $INSTALL_DIR"
   fi
-
-  say ''
-  # The server prints the configuration, so paths are escaped right for JSON and TOML.
-  FILM_X_SITE_URL="$SITE_URL" "$NODE_BIN" "$INSTALL_DIR/server.mjs" --print-config </dev/null
+  finish
 }
 
 main "$@"
