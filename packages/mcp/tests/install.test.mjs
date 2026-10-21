@@ -1,6 +1,14 @@
 import assert from 'node:assert/strict'
 import { execFile, execFileSync } from 'node:child_process'
-import { existsSync, mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  realpathSync,
+  rmSync,
+  writeFileSync
+} from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { after, before, test } from 'node:test'
@@ -89,17 +97,36 @@ test('installs with one command and prints a working configuration', { skip }, a
   }
 })
 
-test('updates in place but leaves foreign folders alone', { skip }, async () => {
-  const installDir = join(home, 'film-x-mcp')
-  await install(installDir)
-  assert.ok(isFile(join(installDir, 'server.mjs')))
+test(
+  'updates in place, also from its own copy, but leaves foreign folders alone',
+  { skip },
+  async () => {
+    const installDir = join(home, 'film-x-mcp')
+    await install(installDir)
+    assert.match((await install(installDir)).stdout, /is already up to date/)
 
-  const foreign = join(home, 'documents')
-  mkdirSync(foreign)
-  writeFileSync(join(foreign, 'keep.txt'), 'keep')
-  await assert.rejects(install(foreign), /was not created by this installer/)
-  assert.ok(isFile(join(foreign, 'keep.txt')))
-})
+    // Different checksums stand for another release, which is downloaded and swapped in.
+    writeFileSync(join(installDir, 'SHA256SUMS'), 'outdated\n')
+    const updated = await install(installDir)
+    assert.match(updated.stdout, /updated from \S+ to \S+/)
+    assert.ok(isFile(join(installDir, 'server.mjs')))
+    assert.equal(readFileSync(join(installDir, 'site-url'), 'utf8').trim(), siteUrl)
+
+    // The kept installer updates its own folder from the recorded site, with no variables set.
+    const { FILM_X_SITE_URL: _site, FILM_X_MCP_HOME: _home, ...env } = process.env
+    const script = join(installDir, 'install.sh')
+    const local = await run('sh', [script], { env, timeout: INSTALL_TIMEOUT })
+    assert.match(local.stdout, /is already up to date/)
+    assert.ok(local.stdout.includes(`"FILM_X_SITE_URL": ${JSON.stringify(siteUrl)}`))
+    assert.ok(local.stdout.includes(`sh '${realpathSync(script)}'`))
+
+    const foreign = join(home, 'documents')
+    mkdirSync(foreign)
+    writeFileSync(join(foreign, 'keep.txt'), 'keep')
+    await assert.rejects(install(foreign), /was not created by this installer/)
+    assert.ok(isFile(join(foreign, 'keep.txt')))
+  }
+)
 
 test(
   'installs on Windows with irm | iex',
