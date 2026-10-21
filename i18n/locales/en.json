@@ -36,6 +36,16 @@
       "dark": "Dark"
     }
   },
+  "toolPanel": {
+    "label": "Tool categories",
+    "collapse": "Hide controls",
+    "canvas": "Canvas",
+    "layout": "Layout",
+    "style": "Style",
+    "brand": "Brand",
+    "text": "Text",
+    "export": "Export"
+  },
   "emptyState": {
     "eyebrow": "Tool 01 · Splitter",
     "headlineFirst": "One scan,",

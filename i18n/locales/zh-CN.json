@@ -36,6 +36,16 @@
       "dark": "深色"
     }
   },
+  "toolPanel": {
+    "label": "工具分类",
+    "collapse": "收起控件",
+    "canvas": "画布",
+    "layout": "布局",
+    "style": "样式",
+    "brand": "品牌",
+    "text": "文字",
+    "export": "导出"
+  },
   "emptyState": {
     "eyebrow": "工具 01 · 切分",
     "headlineFirst": "一张扫描，",

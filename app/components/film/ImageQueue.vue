@@ -113,14 +113,14 @@ const selectAdjacent = (direction: -1 | 1) => {
 
 <template>
   <aside
-    class="queue-panel w-full min-w-0 overflow-hidden border-b border-border bg-background/45 lg:flex lg:h-full lg:min-h-0 lg:flex-col lg:border-r lg:border-b-0"
+    class="w-full min-w-0 overflow-hidden border-b border-border bg-background/45 lg:flex lg:h-full lg:min-h-0 lg:flex-col lg:border-r lg:border-b-0"
   >
     <div
-      class="sticky top-0 z-10 flex shrink-0 items-center justify-between border-b border-border bg-background/90 px-4 py-4 backdrop-blur"
+      class="sticky top-0 z-10 flex shrink-0 items-center justify-between border-b border-border bg-background/90 px-4 py-1 backdrop-blur lg:py-4"
     >
       <div>
-        <p class="text-sm font-semibold">{{ t('queue.title') }}</p>
-        <p class="mt-0.5 font-mono text-[10px] text-muted-foreground">
+        <p class="hidden text-sm font-semibold lg:block">{{ t('queue.title') }}</p>
+        <p class="font-mono text-[10px] text-muted-foreground lg:mt-0.5">
           {{ t('queue.summary', { count: items.length, size: formatBytes(totalSize) }) }}
         </p>
       </div>
@@ -148,7 +148,7 @@ const selectAdjacent = (direction: -1 | 1) => {
     </div>
 
     <div
-      class="queue-list flex w-full min-w-0 max-w-full gap-2 overflow-x-auto p-3 lg:block lg:min-h-0 lg:flex-1 lg:overflow-x-hidden lg:overflow-y-auto lg:overscroll-contain"
+      class="queue-list flex w-full min-w-0 max-w-full gap-2 overflow-x-auto p-2 lg:block lg:p-3 lg:min-h-0 lg:flex-1 lg:overflow-x-hidden lg:overflow-y-auto lg:overscroll-contain"
       tabindex="0"
       :aria-label="t('queue.listLabel')"
       @keydown.up.prevent="selectAdjacent(-1)"
@@ -158,7 +158,7 @@ const selectAdjacent = (direction: -1 | 1) => {
         v-for="(item, index) in items"
         :id="`queue-item-${item.id}`"
         :key="item.id"
-        class="queue-item group mb-0 flex w-52 shrink-0 items-stretch rounded-lg border transition lg:mb-2 lg:w-full lg:min-w-0"
+        class="queue-item group relative mb-0 flex w-52 shrink-0 items-stretch rounded-lg border transition lg:mb-2 lg:w-full lg:min-w-0"
         :class="
           activeId === item.id
             ? 'border-primary bg-accent/55 shadow-sm'
@@ -167,19 +167,22 @@ const selectAdjacent = (direction: -1 | 1) => {
       >
         <button
           type="button"
-          class="flex min-w-0 flex-1 items-start gap-3 p-3 text-left"
+          class="flex min-w-0 flex-1 items-center gap-2 px-3 py-2 text-left lg:items-start lg:gap-3 lg:p-3"
           @click="emit('select', item.id)"
         >
-          <span class="mt-0.5 font-mono text-[10px] text-muted-foreground/70">{{
+          <span class="mt-0.5 font-mono text-[10px] text-muted-foreground/70 max-lg:hidden">{{
             String(index + 1).padStart(2, '0')
           }}</span>
-          <span class="min-w-0 flex-1">
-            <span class="block truncate text-xs font-medium">{{ item.name }}</span>
+          <!-- Mobile flattens this into one row: status dot · name · size. -->
+          <span class="min-w-0 flex-1 max-lg:contents">
+            <span class="block min-w-0 truncate text-xs font-medium max-lg:flex-1">{{
+              item.name
+            }}</span>
             <span
-              class="mt-1 flex items-center gap-1.5 font-mono text-[9px] tracking-wide text-muted-foreground uppercase"
+              class="mt-1 flex items-center gap-1.5 font-mono text-[9px] tracking-wide text-muted-foreground uppercase max-lg:contents"
             >
               <span
-                class="size-1.5 rounded-full"
+                class="size-1.5 shrink-0 rounded-full max-lg:order-first"
                 :class="{
                   'bg-muted-foreground/40':
                     item.status === 'ready' &&
@@ -192,8 +195,14 @@ const selectAdjacent = (direction: -1 | 1) => {
                   'bg-destructive': item.status === 'error'
                 }"
               />
-              {{ statusText(item) }}
+              <span class="max-lg:sr-only">{{ statusText(item) }}</span>
             </span>
+          </span>
+          <span
+            class="shrink-0 font-mono text-[9px] text-muted-foreground lg:hidden"
+            aria-hidden="true"
+          >
+            {{ formatBytes(item.size) }}
           </span>
         </button>
         <Button
@@ -238,13 +247,3 @@ const selectAdjacent = (direction: -1 | 1) => {
     </AlertDialog>
   </aside>
 </template>
-
-<style scoped>
-@media (max-width: 1023px) {
-  .queue-panel {
-    position: sticky;
-    z-index: 20;
-    top: 0;
-  }
-}
-</style>

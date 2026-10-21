@@ -24,6 +24,9 @@ const { canvas, aspectRatio, exporting, download } = useFrameCanvas({
   settings: () => props.settings,
   fields: () => props.fields
 })
+const stage = ref<HTMLElement>()
+const lifted = ref<HTMLElement>()
+const liftStyle = useToolCardLift(lifted, stage)
 const { isDragging, handleDragEnter, handleDragOver, handleDragLeave, handleDrop } = useImageDrop(
   (files) => emit('files', files)
 )
@@ -42,7 +45,7 @@ defineExpose({ download, exporting })
 
 <template>
   <section
-    class="relative flex min-h-155 min-w-0 flex-col overflow-hidden bg-workbench lg:min-h-0"
+    class="relative flex min-h-0 min-w-0 flex-col overflow-hidden bg-workbench"
     @dragenter.prevent="handleDragEnter"
     @dragover.prevent="handleDragOver"
     @dragleave="handleDragLeave"
@@ -50,13 +53,13 @@ defineExpose({ download, exporting })
   >
     <FilmImageFileInput :id="inputId" input-class="hidden" @files="emit('files', $event)" />
     <div
-      class="flex min-h-14 flex-wrap items-center justify-between gap-3 border-b border-white/8 px-5 text-white/70"
+      class="flex min-h-11 flex-wrap items-center justify-between gap-3 border-b border-white/8 px-5 text-white/70 lg:min-h-14"
     >
       <div>
-        <p class="font-mono text-[9px] tracking-[0.18em] text-white/45 uppercase">
+        <p class="hidden font-mono text-[9px] tracking-[0.18em] text-white/45 uppercase lg:block">
           {{ t('frame.eyebrow') }}
         </p>
-        <h2 class="mt-1 text-sm font-semibold text-white">{{ t('frame.title') }}</h2>
+        <h2 class="text-sm font-semibold text-white lg:mt-1">{{ t('frame.title') }}</h2>
       </div>
       <p v-if="photo" class="font-mono text-[10px] text-white/45">
         {{ t('frame.photoSize', { width: photo.decoded.width, height: photo.decoded.height }) }}
@@ -64,11 +67,13 @@ defineExpose({ download, exporting })
     </div>
 
     <div
+      ref="stage"
       class="frame-stage flex min-h-0 flex-1 items-center justify-center overflow-hidden p-5 sm:p-8 lg:p-10"
     >
       <div
-        class="relative flex max-h-full max-w-full items-center justify-center"
-        :style="{ aspectRatio }"
+        ref="lifted"
+        class="relative flex max-h-full max-w-full items-center justify-center transition-[translate] duration-200 ease-out"
+        :style="[{ aspectRatio }, liftStyle]"
       >
         <canvas ref="canvas" class="block max-h-full max-w-full shadow-2xl shadow-black/50" />
         <label

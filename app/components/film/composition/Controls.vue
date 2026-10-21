@@ -24,11 +24,19 @@ const emit = defineEmits<{
   'image-scale': [index: number, value: number]
   'reset-image': [index: number]
 }>()
+const { t } = useI18n()
+
+const tabs = computed(() => [
+  { value: 'canvas', label: t('toolPanel.canvas') },
+  { value: 'layout', label: t('toolPanel.layout') },
+  { value: 'style', label: t('toolPanel.style') },
+  { value: 'export', label: t('toolPanel.export') }
+])
 </script>
 
 <template>
-  <aside class="panel-surface min-h-0 overflow-hidden lg:flex lg:flex-col">
-    <div class="controls-scroll min-h-0 lg:flex-1 lg:overflow-y-auto lg:overscroll-contain">
+  <FilmToolPanel class="panel-surface" :tabs="tabs">
+    <template #canvas>
       <FilmCompositionFrameControls
         :format="settings.frameFormat"
         :count="settings.frameCount"
@@ -49,16 +57,22 @@ const emit = defineEmits<{
         @scale="emit('image-scale', $event.index, $event.value)"
         @reset="emit('reset-image', $event)"
       />
+    </template>
+    <template #layout>
       <FilmCompositionLayoutControls v-if="settings.frameCount > 1" v-model="settings" />
+      <FilmCompositionSpacingControls v-model="settings" />
+    </template>
+    <template #style>
       <FilmCompositionBackgroundControls v-model="settings" />
       <FilmCompositionSprocketControls v-model="settings" />
       <FilmCompositionTextureControls v-model="settings" />
-      <FilmCompositionSpacingControls v-model="settings" />
+    </template>
+    <template #export>
       <FilmCompositionExportControls
         v-model="settings"
         :has-images="hasImages"
         @download="emit('download')"
       />
-    </div>
-  </aside>
+    </template>
+  </FilmToolPanel>
 </template>

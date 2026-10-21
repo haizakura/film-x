@@ -57,7 +57,11 @@ const cycleTheme = () => {
     <div
       class="mx-auto flex max-w-420 flex-wrap items-center gap-x-5 px-4 sm:px-6 lg:flex-nowrap lg:px-8"
     >
-      <NuxtLink to="/" class="flex h-16 shrink-0 items-center gap-3" :aria-label="t('header.home')">
+      <NuxtLink
+        to="/"
+        class="flex h-14 shrink-0 items-center gap-3 lg:h-16"
+        :aria-label="t('header.home')"
+      >
         <div class="brand-mark" aria-hidden="true">
           <span />
           <span />
@@ -104,7 +108,7 @@ const cycleTheme = () => {
         </NuxtLink>
       </nav>
 
-      <div class="ml-auto flex h-16 shrink-0 items-center gap-1.5">
+      <div class="ml-auto flex h-14 shrink-0 items-center gap-1.5 lg:h-16">
         <FilmLanguageMenu />
         <ClientOnly>
           <Button

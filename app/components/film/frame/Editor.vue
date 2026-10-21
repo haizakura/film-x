@@ -24,6 +24,7 @@ const { fields, exif, setField, applyExif, fillFromExif } = useFrameMetadata(fra
 const preset = useFramePreset(frame)
 const presetCode = preset.code
 const workspace = ref<{ download: () => Promise<void>; exporting: boolean }>()
+provideToolCardSpace()
 
 watch(photo, (entry) => applyExif(entry?.exif))
 
@@ -42,7 +43,7 @@ const chooseCustomLogo = async (files: File[]) => {
 
 <template>
   <main
-    class="grid w-full lg:h-full lg:min-h-0 lg:grid-cols-[minmax(0,1fr)_360px] lg:overflow-hidden lg:[contain:paint]"
+    class="grid h-full min-h-0 w-full grid-rows-[minmax(0,1fr)_auto] overflow-hidden [contain:paint] lg:grid-cols-[minmax(0,1fr)_360px] lg:grid-rows-1"
   >
     <FilmFrameWorkspace
       ref="workspace"

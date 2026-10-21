@@ -36,6 +36,16 @@
       "dark": "ダーク"
     }
   },
+  "toolPanel": {
+    "label": "ツールの分類",
+    "collapse": "コントロールを閉じる",
+    "canvas": "キャンバス",
+    "layout": "レイアウト",
+    "style": "スタイル",
+    "brand": "ブランド",
+    "text": "テキスト",
+    "export": "書き出し"
+  },
   "emptyState": {
     "eyebrow": "ツール 01 · 分割",
     "headlineFirst": "一枚のスキャンから、",

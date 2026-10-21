@@ -37,16 +37,27 @@ const emit = defineEmits<{
   'apply-preset': []
   download: []
 }>()
+const { t } = useI18n()
+
+const tabs = computed(() => [
+  { value: 'layout', label: t('toolPanel.layout') },
+  { value: 'brand', label: t('toolPanel.brand') },
+  { value: 'text', label: t('toolPanel.text') },
+  { value: 'style', label: t('toolPanel.style') },
+  { value: 'export', label: t('toolPanel.export') }
+])
 </script>
 
 <template>
-  <aside class="panel-surface min-h-0 overflow-hidden lg:flex lg:flex-col">
-    <div class="min-h-0 lg:flex-1 lg:overflow-y-auto lg:overscroll-contain">
+  <FilmToolPanel class="panel-surface" :tabs="tabs">
+    <template #layout>
       <FilmFrameTemplateControls
         :model-value="settings.template"
         @update:model-value="emit('template', $event)"
       />
       <FilmFrameRatioControls v-model="settings" />
+    </template>
+    <template #brand>
       <FilmFrameBrandControls
         v-model="settings"
         :brand="brand"
@@ -56,6 +67,8 @@ const emit = defineEmits<{
         @custom-logo="emit('custom-logo', $event)"
         @remove-custom-logo="emit('remove-custom-logo')"
       />
+    </template>
+    <template #text>
       <FilmFrameInfoControls
         v-model="settings"
         :fields="fields"
@@ -67,8 +80,12 @@ const emit = defineEmits<{
         @fill-exif="emit('fill-exif')"
       />
       <FilmFrameTypographyControls v-model="settings" />
+    </template>
+    <template #style>
       <FilmFrameStyleControls v-model="settings" />
       <FilmFrameShadowControls v-model="settings" />
+    </template>
+    <template #export>
       <FilmFramePresetControls
         v-model="presetCode"
         @copy="emit('copy-preset')"
@@ -81,6 +98,6 @@ const emit = defineEmits<{
         :exporting="exporting"
         @download="emit('download')"
       />
-    </div>
-  </aside>
+    </template>
+  </FilmToolPanel>
 </template>

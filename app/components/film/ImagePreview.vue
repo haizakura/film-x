@@ -4,7 +4,6 @@ import { MAX_SPLIT_CENTER, MIN_SPLIT_CENTER } from '~/types/image'
 import type { DecodedImage, SplitSettings } from '~/types/image'
 
 const props = defineProps<{
-  name?: string
   error?: string
   settings?: SplitSettings
   decoded?: DecodedImage
@@ -15,6 +14,9 @@ const translateError = useTranslatedError()
 
 const emit = defineEmits<{ 'update:center': [value: number] }>()
 const canvas = ref<HTMLCanvasElement>()
+const stage = ref<HTMLElement>()
+const lifted = ref<HTMLElement>()
+const liftStyle = useToolCardLift(lifted, stage)
 
 const drawPreview = () => {
   if (!canvas.value || !props.decoded) return
@@ -40,16 +42,10 @@ const updateCenter = (event: Event) => {
 </script>
 
 <template>
-  <section class="flex min-h-140 min-w-0 flex-col bg-workbench dark:bg-[#141414] lg:min-h-0">
-    <div class="flex h-13 items-center justify-between border-b border-white/8 px-5 text-white/70">
-      <p class="min-w-0 truncate text-xs font-medium text-white/90">{{ name }}</p>
-      <div v-if="decoded" class="font-mono text-[10px] tracking-wide text-white/45">
-        {{ decoded.width }} × {{ decoded.height }} PX
-      </div>
-    </div>
-
+  <section class="flex min-h-0 min-w-0 flex-col bg-workbench dark:bg-[#141414]">
     <div
-      class="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden p-5 sm:p-8"
+      ref="stage"
+      class="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden p-5 [container-type:size] sm:p-8"
     >
       <div v-if="loading" class="flex flex-col items-center gap-3 text-white/50">
         <LoaderCircle class="size-6 animate-spin" />
@@ -60,9 +56,11 @@ const updateCenter = (event: Event) => {
 
       <div
         v-else-if="decoded && settings"
-        class="relative max-h-full max-w-full overflow-hidden shadow-2xl shadow-black/50"
+        ref="lifted"
+        class="relative max-h-full max-w-full overflow-hidden shadow-2xl shadow-black/50 transition-[translate] duration-200 ease-out"
+        :style="liftStyle"
       >
-        <canvas ref="canvas" class="block max-h-[calc(100vh-180px)] max-w-full object-contain" />
+        <canvas ref="canvas" class="block max-h-[100cqh] max-w-[100cqw] object-contain" />
         <div
           class="pointer-events-none absolute inset-y-0 bg-amber-500/15 ring-1 ring-amber-500/70"
           :style="{

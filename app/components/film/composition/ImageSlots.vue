@@ -17,7 +17,7 @@ const pickFile = (index: number) => document.getElementById(inputId(index))?.cli
 <template>
   <div
     class="grid gap-2 border-t border-white/8 bg-black/20 p-3"
-    :class="{ 'sm:grid-cols-2': images.length > 1 }"
+    :class="{ 'grid-cols-2': images.length > 1 }"
   >
     <div
       v-for="(_, index) in images"
@@ -52,7 +52,7 @@ const pickFile = (index: number) => document.getElementById(inputId(index))?.cli
         <span class="block truncate text-xs font-medium text-white/85">
           {{ images[index]?.name || t('composition.selectFrame', { number: `0${index + 1}` }) }}
         </span>
-        <span class="mt-0.5 block font-mono text-[9px] text-white/35">
+        <span class="mt-0.5 block truncate font-mono text-[9px] text-white/35">
           {{ images[index] ? t('composition.replaceHint') : 'TIFF · JPEG · PNG · WEBP' }}
         </span>
       </label>

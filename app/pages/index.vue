@@ -8,6 +8,7 @@ const FILE_INPUT_ID = 'scan-file-input'
 const { t } = useI18n()
 const translateError = useTranslatedError()
 const pendingExports = ref(0)
+provideToolCardSpace()
 usePwaUpdateBlocker('splitter-pending-export', () => pendingExports.value > 0)
 
 useSeoMeta({
@@ -143,7 +144,7 @@ const detectActiveImage = () => {
 
 <template>
   <div
-    class="flex flex-col lg:h-full lg:min-h-0 lg:overflow-hidden"
+    class="flex h-full min-h-0 flex-col overflow-hidden"
     @dragenter.prevent="handleDragEnter"
     @dragover.prevent="handleDragOver"
     @dragleave="handleDragLeave"
@@ -153,7 +154,7 @@ const detectActiveImage = () => {
 
     <FilmUploadEmptyState
       v-if="!queue.length"
-      class="w-full flex-1"
+      class="min-h-0 w-full flex-1 overflow-y-auto"
       :file-input-id="FILE_INPUT_ID"
       :is-dragging="isDragging"
       @pick="pickFiles"
@@ -161,7 +162,7 @@ const detectActiveImage = () => {
 
     <main
       v-else
-      class="mx-auto grid w-full min-w-0 max-w-420 grid-cols-[minmax(0,1fr)] flex-1 lg:min-h-0 lg:grid-cols-[260px_minmax(0,1fr)_300px] lg:overflow-hidden"
+      class="mx-auto grid min-h-0 w-full max-w-420 min-w-0 flex-1 grid-cols-[minmax(0,1fr)] grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden lg:grid-cols-[260px_minmax(0,1fr)_300px] lg:grid-rows-1"
     >
       <FilmImageQueue
         :items="queue"
@@ -174,7 +175,6 @@ const detectActiveImage = () => {
       />
 
       <FilmImagePreview
-        :name="activeItem?.name"
         :error="activeItem?.error"
         :settings="activeItem?.settings"
         :decoded="decoded"
