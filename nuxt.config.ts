@@ -106,6 +106,8 @@ export default defineNuxtConfig({
   app: {
     head: {
       titleTemplate: '%s · Film X',
+      // Full-bleed on iOS so env(safe-area-inset-*) is non-zero; the status bar stays opaque.
+      viewport: 'width=device-width, initial-scale=1, viewport-fit=cover',
       meta: [
         { name: 'theme-color', media: '(prefers-color-scheme: light)', content: '#FFFFFF' },
         { name: 'theme-color', media: '(prefers-color-scheme: dark)', content: '#0A0A0A' }

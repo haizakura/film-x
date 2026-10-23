@@ -165,7 +165,8 @@ const tapHandle = (event: MouseEvent) => {
 @media (max-width: 1023px) {
   .tool-tabs {
     gap: 0.25rem;
-    padding: 0.5rem;
+    /* Keep the pills above the iOS home indicator while the bar fills to the screen edge. */
+    padding: 0.5rem 0.5rem calc(0.5rem + env(safe-area-inset-bottom));
     border-top: 1px solid var(--border);
     background: var(--card);
   }
