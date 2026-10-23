@@ -36,9 +36,6 @@
       "dark": "Dark"
     }
   },
-  "footer": {
-    "localOnly": "Images stay on this device"
-  },
   "toolPanel": {
     "label": "Tool categories",
     "collapse": "Hide controls",
