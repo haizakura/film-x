@@ -33,7 +33,6 @@ useSeoMeta({ description: () => t('meta.siteDescription') })
       {{ t('pwa.updateReady') }}
     </div>
     <NuxtPage :keepalive="{ max: 4 }" class="min-h-0 flex-1" />
-    <FilmAppFooter />
     <Toaster
       position="top-right"
       close-button
